@@ -8,7 +8,7 @@ Gebruik YAML frontmatter om regels te beperken tot bepaalde paden:
 ```yaml
 ---
 paths:
-  - "lumenear-calculator/**"
+  - "app/**"
 ---
 ```
 

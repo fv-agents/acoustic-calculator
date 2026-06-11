@@ -15,6 +15,8 @@ Gebruik:
   python build_lumenear_calculator_v4.py
   python build_lumenear_calculator_v4.py --csv /pad/naar/lumenear_2026_acoustic_data.csv
   python build_lumenear_calculator_v4.py --output /pad/naar/output.xlsx
+  python build_lumenear_calculator_v4.py --web    # print JS PP-array voor app/index.html
+                                                  # (controleer daarna met tools/check_sync.py)
 
 CSV moet semicolon-separated zijn met kolommen:
   Product_Family;Product_Variant;Diameter_mm;Acoustic_Surface_m2;
@@ -124,6 +126,7 @@ FLOORS = [
 ]
 
 WALLS = [
+    ("Weet ik niet",                       .01,  .01,  .02,  .02,  .02,  .03),
     ("Beton / steen",                      .01,  .01,  .02,  .02,  .02,  .03),
     ("Tegels / natuursteen",               .01,  .01,  .01,  .01,  .02,  .02),
     ("Stucwerk",                           .02,  .02,  .03,  .04,  .04,  .04),
@@ -175,8 +178,8 @@ OTHER_AC = [
     ("8. Gordijnen + tapijten",     .07),
     ("9. Schermen + gordijnen",     .09),
     ("10. Schermen + panelen",      .11),
-    ("11. Roomdividers",            .14),
-    ("12. Compleet pakket",         .18),
+    ("11. Roomdividers + schermen", .14),
+    ("12. Compleet pakket",         .20),
 ]
 
 PRESETS = [
@@ -263,10 +266,17 @@ def load_products(csv_path):
     """Load and process product data from CSV."""
     cat = pd.read_csv(csv_path, sep=";", encoding="utf-8-sig")
 
-    # Calculate areas
+    # Calculate areas — hard falen bij producten zonder berekenbaar oppervlak,
+    # anders belanden er stilletjes lege Aeq-rijen in de Excel.
     cat["area_calculated"] = False
     for idx, row in cat.iterrows():
         area, calc = calc_area(row)
+        if area is None:
+            sys.exit(
+                f"FOUT: geen oppervlak bepaalbaar voor "
+                f"'{row['Product_Family']} {row['Product_Variant']}'. "
+                f"Vul Acoustic_Surface_m2 in de CSV of breid calc_area() uit."
+            )
         cat.at[idx, "Acoustic_Surface_m2"] = area
         cat.at[idx, "area_calculated"] = calc
 
@@ -511,8 +521,6 @@ def build_calculator(wb, refs, p_hr, p_end):
         ws.cell(row=r, column=1).border = bdr
 
         default = "Weet ik niet" if r <= 16 else "1. Niks extra"
-        if r == 14:
-            default = "Stucwerk"  # wanden has no "Weet ik niet"
 
         c = ws.cell(row=r, column=2, value=default)
         c.font = inp_f; c.fill = inp_fill; c.border = bdr
@@ -557,7 +565,6 @@ def build_calculator(wb, refs, p_hr, p_end):
         ws.cell(row=r, column=2).border = bdr
 
         # Lookups
-        pr = f"Productdata!${{}}${p_hr + 1}:${{}}${p_end}"
         ws.cell(row=r, column=3, value=f'=IF(A{r}="","",INDEX(Productdata!$D${p_hr+1}:$D${p_end},MATCH(A{r},Productdata!$A${p_hr+1}:$A${p_end},0)))')
         ws.cell(row=r, column=3).font = df_; ws.cell(row=r, column=3).border = bdr; ws.cell(row=r, column=3).number_format = "0.00"
         ws.cell(row=r, column=4, value=f'=IF(A{r}="","",INDEX(Productdata!$C${p_hr+1}:$C${p_end},MATCH(A{r},Productdata!$A${p_hr+1}:$A${p_end},0)))')
@@ -595,14 +602,16 @@ def build_calculator(wb, refs, p_hr, p_end):
     # RT60
     ws.cell(row=32, column=1, value="Nagalmtijd ZONDER Lumenear").font = Font(bold=True, size=13, color="DC2626", name="Calibri")
     ws.cell(row=32, column=1).border = bdr2
-    ws.cell(row=32, column=2, value='=IF(B29<=0,"n.v.t.",MIN(0.161*E5/B29,6))')
+    # Geen 6s-cap in de berekening (zelfde keuze als de web-app): anders klopt
+    # de Verbetering-formule niet in extreem galmende ruimtes.
+    ws.cell(row=32, column=2, value='=IF(B29<=0,"n.v.t.",0.161*E5/B29)')
     ws.cell(row=32, column=2).font = Font(bold=True, size=20, color="DC2626", name="Calibri")
     ws.cell(row=32, column=2).border = bdr2; ws.cell(row=32, column=2).number_format = "0.0"
     ws.cell(row=32, column=3, value="sec").font = lf
 
     ws.cell(row=33, column=1, value="Nagalmtijd MET Lumenear").font = Font(bold=True, size=13, color="059669", name="Calibri")
     ws.cell(row=33, column=1).fill = grn_fill; ws.cell(row=33, column=1).border = bdr2
-    ws.cell(row=33, column=2, value='=IF((B29+B30)<=0,"n.v.t.",MIN(0.161*E5/(B29+B30),6))')
+    ws.cell(row=33, column=2, value='=IF((B29+B30)<=0,"n.v.t.",0.161*E5/(B29+B30))')
     ws.cell(row=33, column=2).font = Font(bold=True, size=20, color="059669", name="Calibri")
     ws.cell(row=33, column=2).fill = grn_fill; ws.cell(row=33, column=2).border = bdr2
     ws.cell(row=33, column=2).number_format = "0.0"
@@ -687,7 +696,6 @@ def build_calculator(wb, refs, p_hr, p_end):
     chart.dataLabels.numFmt = '0.0"s"'
     ws.add_chart(chart, "D37")
 
-    ws.cell(row=38, column=1, value="Richtwaarden:").font = Font(bold=True, size=9, color="6B7280", name="Calibri")
     ws.cell(row=39, column=1, value="⚠ Indicatieve berekening.  Pendant producten incl. +12% randdiffractie-bonus.")
     ws["A39"].font = Font(size=9, italic=True, color="DC2626", name="Calibri")
 
@@ -755,52 +763,70 @@ def build_peutz(wb):
 # MAIN BUILD
 # ══════════════════════════════════════════════════════════════
 
+def generate_web_data(cat):
+    """Print het JS PP-array-blok voor app/index.html (sync met de webversie).
+
+    Gebruik: python build_lumenear_calculator_v4.py --web
+    Plak de output over het bestaande 'const PP=[...]' blok in app/index.html
+    en draai daarna tools/check_sync.py ter controle.
+    """
+    def js_num(v):
+        s = f"{v:.2f}".rstrip("0").rstrip(".")
+        return s.lstrip("0") if s.startswith("0.") else s
+
+    lines = []
+    for _, row in cat.iterrows():
+        lines.append(
+        # zelfde compacte vorm als in app/index.html (en als wat check_sync.py parsed)
+            '{n:"%s",f:"%s",aw:%s,a:%s,eq:%s}'
+            % (
+                row["Display_Name"], row["Product_Family"],
+                js_num(row["aw_ISO11654"]), js_num(row["Acoustic_Surface_m2"]),
+                js_num(row["Aeq_unit"]),
+            )
+        )
+    print("const PP=[")
+    print(",\n".join("  " + l for l in lines))
+    print("];")
+
+
 def build(csv_path, output_path):
     """Build the complete calculator."""
-    print(f"📂 CSV: {csv_path}")
-    print(f"📁 Output: {output_path}")
-
-    # Validate dropdown lengths
-    for name, items in [("Vloer", FLOORS), ("Wanden", WALLS), ("Plafond", CEILINGS),
-                        ("Inrichting", FURNITURE), ("Overige", OTHER_AC)]:
-        length = len(",".join([i[0] for i in items]))
-        status = "✓" if length < 255 else "🔴 OVER 255!"
-        print(f"  Dropdown {name}: {length} tekens {status}")
-        if length >= 255:
-            print(f"  WAARSCHUWING: {name} dropdown te lang voor Excel validatie!")
+    print(f"[CSV] {csv_path}")
+    print(f"[OUT] {output_path}")
 
     # Load products
-    print(f"\n📊 Laden productdata...")
+    print("\nLaden productdata...")
     cat = load_products(csv_path)
     print(f"  {len(cat)} producten geladen")
-    print(f"  {cat['area_calculated'].sum()} oppervlaktes berekend (★)")
+    print(f"  {cat['area_calculated'].sum()} oppervlaktes berekend (*)")
     print(f"  {(cat['Diff_Factor'] > 1).sum()} pendant producten (+12% diffractie)")
 
     # Build workbook
     wb = Workbook()
 
-    print(f"\n🔨 Bouwen Materiaaldata...")
+    print("\nBouwen Materiaaldata...")
     refs = build_materiaaldata(wb)
     print(f"  Rijen: vloer={refs['fl']} wanden={refs['wa']} plafond={refs['pl']}")
     print(f"         inrichting={refs['in']} overige={refs['ov']} presets={refs['pr']}")
 
-    print(f"🔨 Bouwen Productdata...")
+    print("Bouwen Productdata...")
     p_hr, p_end = build_productdata(wb, cat)
     print(f"  Producten: rij {p_hr+1} t/m {p_end}")
 
-    print(f"🔨 Bouwen Calculator...")
+    print("Bouwen Calculator...")
     build_calculator(wb, refs, p_hr, p_end)
 
-    print(f"🔨 Bouwen Peutz Testdata...")
+    print("Bouwen Peutz Testdata...")
     build_peutz(wb)
 
     # Save
     wb.save(output_path)
     size_kb = os.path.getsize(output_path) / 1024
-    print(f"\n✅ Opgeslagen: {output_path} ({size_kb:.0f} KB)")
-    print(f"   4 sheets: Calculator | Materiaaldata | Productdata | Peutz Testdata")
-    print(f"   89 producten | 12 wand-opties | 12 overige akoestiek | 9 presets")
-    print(f"   6-level rating met conditional formatting")
+    print(f"\nOK Opgeslagen: {output_path} ({size_kb:.0f} KB)")
+    print("   4 sheets: Calculator | Materiaaldata | Productdata | Peutz Testdata")
+    print(f"   {len(cat)} producten | {len(WALLS)} wand-opties | {len(OTHER_AC)} overige akoestiek | {len(PRESETS)} presets")
+    print("   6-level rating met conditional formatting")
 
 
 def main():
@@ -809,12 +835,18 @@ def main():
                         help="Pad naar product CSV (default: lumenear_2026_acoustic_data.csv)")
     parser.add_argument("--output", default="lumenear_acoustic_calculator_v4.xlsx",
                         help="Output pad (default: lumenear_acoustic_calculator_v4.xlsx)")
+    parser.add_argument("--web", action="store_true",
+                        help="Print het JS PP-array-blok voor app/index.html i.p.v. Excel te bouwen")
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):
         print(f"FOUT: CSV niet gevonden: {args.csv}")
-        print(f"Zorg dat lumenear_2026_acoustic_data.csv in dezelfde map staat.")
+        print("Zorg dat lumenear_2026_acoustic_data.csv in dezelfde map staat.")
         sys.exit(1)
+
+    if args.web:
+        generate_web_data(load_products(args.csv))
+        return
 
     build(args.csv, args.output)
 

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumenear — Akoestische Calculator</title>
+<meta name="description" content="Bereken de nagalmtijd (RT60) van een ruimte en het akoestische effect van Lumenear armaturen. Inclusief adviesrapport.">
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="vendor/htm.min.js"></script>
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var.woff2') format('woff2')}
+:root {
+  --bg:#fafafa;--white:#fff;--black:#0a0a0a;
+  --g50:#f8f9fa;--g100:#f1f3f5;--g200:#e9ecef;--g300:#dee2e6;--g400:#ced4da;--g500:#868e96;--g600:#495057;--g700:#343a40;--g800:#212529;
+  --t50:#f0fdfa;--t100:#ccfbf1;--t200:#99f6e4;--t400:#2dd4bf;--t500:#14b8a6;--t600:#0d9488;--t700:#0f766e;
+  --amber:#f59e0b;--green:#16a34a;--green7:#15803d;--orange:#f97316;--red:#ef4444;--red9:#7f1d1d;
+  --r:8px;--rx:6px;
+  --sh:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shm:0 4px 6px rgba(0,0,0,0.04),0 2px 4px rgba(0,0,0,0.03);
+  --tr:all .2s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--g800);-webkit-font-smoothing:antialiased}
+
+/* HEADER */
+.hdr{background:var(--black);color:#fff;padding:0 28px;height:52px;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hdr-l{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.logo{font-size:17px;font-weight:700;letter-spacing:-.5px}
+.logo-s{font-size:11px;font-weight:400;color:var(--g400);letter-spacing:.5px;text-transform:uppercase}
+.pinp{background:0 0;border:none;border-bottom:1px solid var(--g600);color:#fff;font-size:13px;font-weight:500;padding:4px 0;width:180px;text-align:center;font-family:inherit}
+.pinp:focus{outline:0;border-color:var(--t400)}
+.pinp::placeholder{color:var(--g500)}
+.hdr-r{display:flex;gap:6px;flex-shrink:0}
+.btn{padding:6px 14px;border-radius:var(--rx);font-size:11px;font-weight:600;cursor:pointer;border:none;transition:var(--tr);font-family:inherit}
+.btn:focus-visible{outline:2px solid var(--t400);outline-offset:2px}
+.btn-t{background:var(--t600);color:#fff}.btn-t:hover{background:var(--t700)}
+.btn-g{background:0 0;color:var(--g400);border:1px solid var(--g600)}.btn-g:hover{background:var(--g700);color:#fff}
+
+/* TOP STATUS BAR */
+.topbar{background:var(--white);border-bottom:1px solid var(--g200);padding:10px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.room-box{width:160px;height:110px;flex-shrink:0;background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stats-row{display:flex;gap:24px;align-items:center;flex:1;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-v{font-size:22px;font-weight:800;line-height:1.1}
+.stat-l{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g600);margin-top:2px}
+.stat-sub{font-size:8px;color:var(--g500);margin-top:1px}
+.stat-teal .stat-v{color:var(--t700)}
+.stat-green .stat-v{color:var(--green7)}
+.rpill{display:inline-flex;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;margin-left:auto}
+.rpill-excellent{background:var(--green)}.rpill-good{background:#34d399}
+.rpill-fair{background:var(--amber);color:var(--g800)}.rpill-poor{background:var(--orange)}
+.rpill-bad{background:var(--red)}.rpill-terrible{background:var(--red9)}
+
+/* 3-COL LAYOUT — flex i.p.v. magic-number calc() zodat de hoogte altijd klopt */
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:25fr 45fr 30fr;overflow:hidden}
+
+/* SIDEBAR */
+.side{background:var(--white);border-right:1px solid var(--g200);padding:16px;overflow-y:auto}
+.stitle{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g500);margin-bottom:8px}
+.fld{margin-bottom:8px}
+.fld label{display:block;font-size:10px;font-weight:600;color:var(--g600);margin-bottom:2px}
+.fld select,.fld input{width:100%;padding:6px 8px;border:1px solid var(--g300);border-radius:var(--rx);font-size:12px;font-family:inherit;background:var(--white);color:var(--g800);transition:var(--tr)}
+.fld select:focus,.fld input:focus{outline:0;border-color:var(--t500);box-shadow:0 0 0 2px rgba(13,148,136,.1)}
+.dimgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.rinfo{font-size:10px;color:var(--g500);margin-top:5px;line-height:1.5}
+.dvd{height:1px;background:var(--g200);margin:12px 0}
+
+/* CENTER PRODUCTS */
+.center{padding:16px 20px;overflow-y:auto;background:var(--g50)}
+.c-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.c-title{font-size:14px;font-weight:700;color:var(--g800)}
+.c-count{font-size:11px;color:var(--g500)}
+.psearch{flex:1;min-width:140px;max-width:240px;padding:6px 10px;border:1px solid var(--g300);border-radius:var(--rx);font-size:11px;font-family:inherit}
+.psearch:focus{outline:0;border-color:var(--t500);box-shadow:0 0 0 2px rgba(13,148,136,.1)}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.ftab{padding:4px 10px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--g300);background:var(--white);color:var(--g600);transition:var(--tr);font-family:inherit}
+.ftab:hover{border-color:var(--t400);color:var(--t700)}
+.ftab:focus-visible{outline:2px solid var(--t400);outline-offset:1px}
+.ftab.on{background:var(--t600);color:#fff;border-color:var(--t600)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pc{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:12px;transition:var(--tr)}
+.pc:hover{border-color:var(--g300);box-shadow:var(--shm)}
+.pc.sel{border-color:var(--t400);background:var(--t50)}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.pc-name{font-size:12px;font-weight:600;color:var(--g800);line-height:1.3}
+.pc-fam{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g500);background:var(--g100);padding:2px 5px;border-radius:3px}
+.pc-specs{display:flex;gap:10px;font-size:10px;color:var(--g500);margin-bottom:8px}
+.pc-specs span{cursor:help}
+.pc-aeq{font-weight:700;color:var(--t700)}
+.qc{display:flex;align-items:center}
+.qb{width:30px;height:28px;border:1px solid var(--g300);background:var(--white);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);color:var(--g600);font-family:inherit}
+.qb:first-child{border-radius:var(--rx) 0 0 var(--rx)}
+.qb:last-child{border-radius:0 var(--rx) var(--rx) 0}
+.qb:hover{background:var(--g100)}
+.qb:focus-visible{outline:2px solid var(--t400);outline-offset:1px}
+.qb-p{border-color:var(--t500);color:var(--t600)}.qb-p:hover{background:var(--t50)}
+.qi{width:36px;height:28px;border-top:1px solid var(--g300);border-bottom:1px solid var(--g300);border-left:0;border-right:0;text-align:center;font-size:12px;font-weight:700;font-family:inherit;color:var(--g800);background:var(--white)}
+.qi:focus{outline:0;box-shadow:inset 0 0 0 2px rgba(13,148,136,.25)}
+
+/* RIGHT RESULTS */
+.rp{background:var(--white);border-left:1px solid var(--g200);padding:16px;overflow-y:auto}
+.rsec{margin-bottom:16px}
+.rtitle{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g500);margin-bottom:8px}
+.rsel{background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);padding:10px}
+.rsel-i{display:flex;align-items:center;gap:4px;font-size:10px;padding:4px 0;border-bottom:1px solid var(--g100)}
+.rsel-i:last-child{border:0}
+.rsel-t{display:flex;justify-content:space-between;font-size:11px;font-weight:700;padding:6px 0 0;border-top:1px solid var(--g300);margin-top:4px;color:var(--t700)}
+.mini-b{width:18px;height:18px;border:1px solid var(--g300);background:var(--white);border-radius:3px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--g600);padding:0;font-family:inherit}
+.mini-b:focus-visible{outline:2px solid var(--t400)}
+.mini-b.plus{border-color:var(--t400);background:var(--t50);color:var(--t700)}
+.mini-b.del{border-color:var(--g200);background:var(--g100);color:var(--g500);font-size:10px;margin-left:1px}
+
+/* BARS */
+.bars{display:flex;align-items:flex-end;gap:6px;height:100px;padding:0 2px}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bv{font-size:9px;font-weight:700;margin-bottom:2px}
+.bf{width:100%;border-radius:3px 3px 0 0;transition:height .4s ease;min-height:2px}
+.bl{font-size:8px;font-weight:600;color:var(--g500);text-align:center;margin-top:4px;text-transform:uppercase;letter-spacing:.3px}
+
+/* PIE */
+.pw{display:flex;align-items:center;gap:12px}
+.pleg{display:flex;flex-direction:column;gap:2px}
+.pli{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--g600)}
+.pld{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.plv{font-weight:600}
+.fnote{font-size:9px;color:var(--g500);line-height:1.5;padding-top:10px;border-top:1px solid var(--g200)}
+input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type="number"]{-moz-appearance:textfield}
+
+/* TOAST */
+.toast{position:fixed;top:62px;right:16px;z-index:50;background:var(--g800);color:#fff;font-size:11px;line-height:1.5;padding:10px 14px;border-radius:var(--r);box-shadow:var(--shm);max-width:320px;display:flex;gap:10px;align-items:flex-start}
+.toast button{background:0 0;border:0;color:var(--g400);cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+
+/* RESPONSIVE — tablet / smalle iframe */
+@media (max-width:1100px){
+  .app{height:auto;overflow:visible}
+  .layout{display:block;overflow:visible}
+  .side,.center,.rp{border:0;border-bottom:1px solid var(--g200)}
+  .topbar{position:sticky;top:0;z-index:10}
+}
+
+/* ══════════ RAPPORT (alleen print) ══════════ */
+#report{display:none}
+@media print {
+  @page{size:A4;margin:13mm}
+  body{background:#fff}
+  .app,.toast{display:none!important}
+  #report{display:block;color:#1a1a1a;font-size:10pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #report .rep-head{background:var(--black)!important;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--t600)}
+  #report .rep-logo{font-size:18pt;font-weight:700;letter-spacing:-.5px}
+  #report .rep-logo span{display:block;font-size:8pt;font-weight:400;color:#ced4da;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+  #report .rep-meta{text-align:right;font-size:8pt;color:#dee2e6;line-height:1.6}
+  #report .rep-meta b{color:#fff;font-size:10pt}
+  #report section{margin:14px 0;page-break-inside:avoid}
+  #report h2{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t700);margin-bottom:6px;border-bottom:1px solid #e9ecef;padding-bottom:3px}
+  #report .rep-intro{display:flex;gap:20px;align-items:flex-start}
+  #report .rep-intro table{flex:1}
+  #report table{width:100%;border-collapse:collapse;font-size:9pt}
+  #report td,#report th{padding:4px 8px;border-bottom:1px solid #f1f3f5;text-align:left;vertical-align:top}
+  #report th{background:var(--t600)!important;color:#fff;font-size:8pt;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+  #report .rep-key{color:#868e96;width:38%;font-weight:500}
+  #report .rep-conclusie{background:var(--t50)!important;border-left:4px solid var(--t600);padding:14px 16px;border-radius:4px}
+  #report .rep-conclusie p{font-size:11.5pt;line-height:1.55}
+  #report .rep-conclusie b{color:var(--t700)}
+  #report .rep-pill{display:inline-block;margin-top:8px;padding:4px 14px;border-radius:14px;font-size:9pt;font-weight:700;color:#fff}
+  #report .rep-cards{display:flex;gap:10px;margin-top:10px}
+  #report .rep-card{flex:1;border:1px solid #e9ecef;border-radius:6px;padding:10px;text-align:center}
+  #report .rep-card .v{font-size:16pt;font-weight:800}
+  #report .rep-card .k{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#868e96;margin-top:2px}
+  #report .bars{height:150px}
+  #report .bv{font-size:9pt}
+  #report .bl{font-size:7pt}
+  #report .rep-totaal td{font-weight:700;color:var(--t700);border-top:2px solid var(--t600);border-bottom:0}
+  #report .rep-page2{page-break-before:always}
+  #report .rep-params{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  #report .rep-param{border:1px solid #e9ecef;border-radius:6px;padding:8px 10px}
+  #report .rep-param .v{font-size:12pt;font-weight:800}
+  #report .rep-param .k{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#868e96}
+  #report .rep-param .e{font-size:7.5pt;color:#868e96;margin-top:2px;line-height:1.4}
+  #report .rep-stibar{background:#f1f3f5!important;border-radius:4px;height:9px;overflow:hidden;margin:6px 0}
+  #report .rep-stibar div{height:100%}
+  #report .rep-method{font-size:7.5pt;color:#868e96;line-height:1.6}
+  #report .rep-foot{background:var(--black)!important;color:#fff;padding:13px 20px;margin-top:18px;display:flex;justify-content:space-between;align-items:center;border-radius:4px}
+  #report .rep-foot .cta{font-size:9.5pt;font-weight:600}
+  #report .rep-foot .contact{font-size:8pt;color:#ced4da;text-align:right;line-height:1.6}
+}
+</style>
+</head>
+<body>
+<noscript><div style="padding:40px;font-family:system-ui;text-align:center">Deze calculator heeft JavaScript nodig. Zet JavaScript aan in je browser.</div></noscript>
+<div id="root"></div>
+<script>
+if(!window.React||!window.ReactDOM||!window.htm){
+  document.getElementById('root').innerHTML='<div style="padding:40px;font-family:system-ui;text-align:center">Kon de calculator-bestanden niet laden.<br>Open de app via de map met de bijbehorende <b>vendor/</b> en <b>fonts/</b> mappen, of via <a href="https://lumenear-acoustic-calculator.netlify.app">lumenear-acoustic-calculator.netlify.app</a>.</div>';
+}
+</script>
+<script>
+(function(){
+if(!window.React||!window.ReactDOM||!window.htm)return;
+const{useState,useMemo,useEffect}=React;
+const html=htm.bind(React.createElement);
+
+/* ══════════ DATA — sync met excel/lumenear_2026_acoustic_data.csv (zie tools/check_sync.py) ══════════ */
+const FLOOR={"Weet ik niet":.02,"Harde vloer (beton/tegels)":.02,"Linoleum / vinyl / PVC":.04,"Parquet / laminaat":.06,"Dun tapijt":.37,"Dik tapijt (+ ondervloer)":.66};
+const WALL={"Weet ik niet":.02,"Beton / steen":.02,"Tegels / natuursteen":.01,"Stucwerk":.04,"Gipsplaat (standaard)":.05,"Gipsplaat + isolatie":.07,"Houten panelen":.08,"Gips + weinig glas (~25%)":.05,"Gips + veel glas (~50%)":.05,"Overwegend glas (~75%)":.03,"Glazen systeemwand":.03,"Zachte wandbekleding":.3,"Akoestische wandpanelen":.45};
+const CEIL={"Weet ik niet":.02,"Betonplafond":.02,"Gipsplafond (dicht)":.05,"Houten plafond":.08,"Metalen plafond (dicht)":.06,"Metalen plafond (geperforeerd)":.48,"Open plafond (installaties)":.06,"Systeemplafond (oud/dun)":.42,"Systeemplafond (standaard)":.65,"Systeemplafond (hoog absorberend)":.92};
+const FURN={"Weet ik niet":.005,"Leeg / weinig meubels":.005,"Kantoor - bureaus+stoelen":.08,"Kantoor - volledig ingericht":.1,"Vergaderruimte":.06,"Restaurant / horeca":.05,"Lounge / gestoffeerd":.12,"Retail / winkel":.03,"Onderwijs / school":.06,"Zorg / medisch":.04};
+const EX={"1. Niks extra":0,"2. Alleen planten":.01,"3. Dunne gordijnen":.02,"4. Losse tapijten":.03,"5. Raamdecoratie":.04,"6. Zware gordijnen":.05,"7. Bureauschermen":.06,"8. Gordijnen + tapijten":.07,"9. Schermen + gordijnen":.09,"10. Schermen + panelen":.11,"11. Roomdividers + schermen":.14,"12. Compleet pakket":.2};
+const PR={
+  "(zelf invullen)":{fl:"",wl:"",cl:"",fu:"",ex:"",t:.8},
+  "Kantoor (open plan)":{fl:"Linoleum / vinyl / PVC",wl:"Gipsplaat + isolatie",cl:"Systeemplafond (standaard)",fu:"Kantoor - bureaus+stoelen",ex:"7. Bureauschermen",t:.6},
+  "Kantoor (celkantoor)":{fl:"Dun tapijt",wl:"Gipsplaat + isolatie",cl:"Systeemplafond (standaard)",fu:"Kantoor - bureaus+stoelen",ex:"2. Alleen planten",t:.8},
+  "Vergaderruimte":{fl:"Dun tapijt",wl:"Gipsplaat + isolatie",cl:"Gipsplafond (dicht)",fu:"Vergaderruimte",ex:"4. Losse tapijten",t:.6},
+  "Restaurant / cafe":{fl:"Harde vloer (beton/tegels)",wl:"Stucwerk",cl:"Open plafond (installaties)",fu:"Restaurant / horeca",ex:"1. Niks extra",t:1},
+  "Lobby / receptie":{fl:"Harde vloer (beton/tegels)",wl:"Overwegend glas (~75%)",cl:"Betonplafond",fu:"Lounge / gestoffeerd",ex:"2. Alleen planten",t:1},
+  "Klaslokaal":{fl:"Linoleum / vinyl / PVC",wl:"Gipsplaat (standaard)",cl:"Systeemplafond (oud/dun)",fu:"Onderwijs / school",ex:"1. Niks extra",t:.8},
+  "Zorginstelling":{fl:"Linoleum / vinyl / PVC",wl:"Gipsplaat + isolatie",cl:"Systeemplafond (standaard)",fu:"Zorg / medisch",ex:"3. Dunne gordijnen",t:.8},
+  "Retail / winkel":{fl:"Harde vloer (beton/tegels)",wl:"Glazen systeemwand",cl:"Open plafond (installaties)",fu:"Retail / winkel",ex:"1. Niks extra",t:1}
+};
+const PP=[
+  {n:"Nova light 1200",f:"Nova",aw:.45,a:2.15,eq:1.18},{n:"Nova light 1800",f:"Nova",aw:.45,a:3.95,eq:2.17},{n:"Nova light 2800",f:"Nova",aw:.45,a:14.4,eq:7.9},
+  {n:"Nova acoustic 1200",f:"Nova",aw:.45,a:2.15,eq:1.18},{n:"Nova acoustic 1800",f:"Nova",aw:.45,a:3.95,eq:2.17},{n:"Nova acoustic 2800",f:"Nova",aw:.45,a:14.4,eq:7.9},
+  {n:"Toad 750",f:"Toad",aw:.45,a:1.98,eq:1.09},{n:"Toad 1000",f:"Toad",aw:.45,a:3.27,eq:1.79},{n:"Toad 1500",f:"Toad",aw:.45,a:8.84,eq:4.85},{n:"Toad Oval 1750",f:"Toad",aw:.45,a:1.98,eq:1.09},
+  {n:"Float downlight 800",f:"Float",aw:.55,a:1.01,eq:.89},{n:"Float downlight 1200",f:"Float",aw:.55,a:2.26,eq:2},{n:"Float ringlight 800",f:"Float",aw:.55,a:1.01,eq:.89},{n:"Float ringlight 1200",f:"Float",aw:.55,a:2.26,eq:2},
+  {n:"Float Oval downlight 1200",f:"Float",aw:.55,a:1.51,eq:1.34},{n:"Float Oval downlight 2000",f:"Float",aw:.55,a:3.14,eq:2.78},
+  {n:"Float Rectangle downlight 1200x1200",f:"Float",aw:.55,a:2.88,eq:2.55},{n:"Float Rectangle light 1200x2400",f:"Float",aw:.55,a:5.76,eq:5.1},{n:"Float Rectangle light 600x2400",f:"Float",aw:.55,a:2.88,eq:2.55},
+  {n:"Float acoustic round 800",f:"Float",aw:.9,a:.98,eq:1.08},{n:"Float acoustic round 1200",f:"Float",aw:.9,a:2.19,eq:2.4},
+  {n:"Float acoustic Oval 1200",f:"Float",aw:.9,a:1.51,eq:1.66},{n:"Float acoustic Oval 2000",f:"Float",aw:.9,a:3.14,eq:3.45},
+  {n:"Float acoustic Rectangle 1200x1200",f:"Float",aw:.9,a:2.88,eq:3.16},{n:"Float acoustic Rectangle 1200x2400",f:"Float",aw:.9,a:5.76,eq:6.32},{n:"Float acoustic Rectangle 600x2400",f:"Float",aw:.9,a:2.88,eq:3.16},
+  {n:"Blaze 550",f:"Blaze",aw:.45,a:1.98,eq:1.09},{n:"Blaze 800",f:"Blaze",aw:.45,a:3.27,eq:1.79},{n:"Blaze 1200",f:"Blaze",aw:.45,a:8.84,eq:4.85},
+  {n:"Halo light 700",f:"Halo",aw:.45,a:1.64,eq:.9},{n:"Halo light 1000",f:"Halo",aw:.45,a:3.3,eq:1.81},{n:"Halo light 1400",f:"Halo",aw:.45,a:6.28,eq:3.45},
+  {n:"Halo acoustic 700",f:"Halo",aw:.45,a:1.64,eq:.9},{n:"Halo acoustic 1000",f:"Halo",aw:.45,a:3.3,eq:1.81},{n:"Halo acoustic 1400",f:"Halo",aw:.45,a:6.28,eq:3.45},
+  {n:"Line light 1290",f:"Line",aw:1,a:.39,eq:.43},{n:"Line light 2520",f:"Line",aw:1,a:.76,eq:.84},{n:"Line acoustic 1290",f:"Line",aw:1,a:.39,eq:.43},{n:"Line acoustic 2520",f:"Line",aw:1,a:.76,eq:.84},
+  {n:"Breeze 800",f:"Breeze",aw:.45,a:1.75,eq:.96},{n:"Breeze 1000",f:"Breeze",aw:.45,a:3.45,eq:1.89},
+  {n:"Orbit 800",f:"Orbit",aw:.45,a:1.07,eq:.59},{n:"Orbit 1200",f:"Orbit",aw:.45,a:2.35,eq:1.29},
+  {n:"Column light 1600",f:"Column",aw:.45,a:1.57,eq:.86},{n:"Column light 2000",f:"Column",aw:.45,a:1.86,eq:1.02},{n:"Column Wall light 1600",f:"Column",aw:.45,a:1.57,eq:.77},
+  {n:"Column acoustic 1600",f:"Column",aw:.45,a:1.57,eq:.86},{n:"Column acoustic 2000",f:"Column",aw:.45,a:1.86,eq:1.02},
+  {n:"Wing light",f:"Wing",aw:.45,a:1.37,eq:.75},
+  {n:"Cloud light round 1200",f:"Cloud",aw:.45,a:2.54,eq:1.39},{n:"Cloud light oval 2400x1200",f:"Cloud",aw:.45,a:4.94,eq:2.71},{n:"Cloud light round XL 2400",f:"Cloud",aw:.45,a:10.85,eq:5.95},
+  {n:"Cloud acoustic round 1200",f:"Cloud",aw:.45,a:2.54,eq:1.39},{n:"Cloud acoustic oval 2400x1200",f:"Cloud",aw:.45,a:4.94,eq:2.71},{n:"Cloud acoustic round XL 2400",f:"Cloud",aw:.45,a:10.85,eq:5.95},
+  {n:"Cone 750",f:"Cone",aw:.65,a:.6,eq:.5},{n:"Cone 1000",f:"Cone",aw:.65,a:.93,eq:.78},
+  {n:"Sliced 800",f:"Sliced",aw:.45,a:.85,eq:.47},
+  {n:"Bold acoustic 1200x1200",f:"Bold",aw:1,a:2.88,eq:2.85},
+  {n:"Twist low",f:"Twist",aw:.45,a:.42,eq:.23},{n:"Twist mid",f:"Twist",aw:.45,a:.42,eq:.23},{n:"Twist high",f:"Twist",aw:.45,a:.42,eq:.23},
+  {n:"Twist XL low",f:"Twist",aw:.45,a:1.2,eq:.66},{n:"Twist XL mid",f:"Twist",aw:.45,a:1.2,eq:.66},{n:"Twist XL high",f:"Twist",aw:.45,a:1.2,eq:.66},
+  {n:"Twist Floor light",f:"Twist",aw:.45,a:5.54,eq:2.71},
+  {n:"Macaron light pendant 450",f:"Macaron",aw:.85,a:.38,eq:.38},{n:"Macaron light pendant 600",f:"Macaron",aw:.85,a:.68,eq:.69},{n:"Macaron light pendant 800",f:"Macaron",aw:.85,a:1.21,eq:1.22},
+  {n:"Macaron acoustic pendant 450",f:"Macaron",aw:.85,a:.38,eq:.38},{n:"Macaron acoustic pendant 600",f:"Macaron",aw:.85,a:.68,eq:.69},{n:"Macaron acoustic pendant 800",f:"Macaron",aw:.85,a:1.21,eq:1.22},
+  {n:"Macaron light wall 450",f:"Macaron",aw:.6,a:.16,eq:.14},{n:"Macaron light wall 600",f:"Macaron",aw:.6,a:.28,eq:.25},{n:"Macaron light wall 800",f:"Macaron",aw:.6,a:.5,eq:.45},
+  {n:"Macaron acoustic wall 450",f:"Macaron",aw:.6,a:.16,eq:.14},{n:"Macaron acoustic wall 600",f:"Macaron",aw:.6,a:.28,eq:.25},{n:"Macaron acoustic wall 800",f:"Macaron",aw:.6,a:.5,eq:.45},
+  {n:"Blooom standard",f:"Blooom",aw:.45,a:1.2,eq:.66},
+  {n:"Edge acoustic",f:"Edge",aw:.85,a:.64,eq:.65},{n:"Edge XL acoustic",f:"Edge",aw:.85,a:1.44,eq:1.45},
+  {n:"JoJo 600",f:"JoJo",aw:1,a:.29,eq:.32},{n:"JoJo 800",f:"JoJo",aw:1,a:.5,eq:.55},
+  {n:"Drop standard",f:"Drop",aw:.45,a:.88,eq:.48},{n:"Cage oval",f:"Cage",aw:.45,a:1.09,eq:.6},
+  {n:"Podge standard",f:"Podge",aw:.45,a:.87,eq:.48},
+  {n:"Spott standard",f:"Spott",aw:.45,a:.48,eq:.26},{n:"Spott XL",f:"Spott",aw:.45,a:1.14,eq:.63},
+  {n:"Pyknic floor",f:"Pyknic",aw:.45,a:5.67,eq:2.78}
+];
+const FAMS=["Alle",...[...new Set(PP.map(x=>x.f))].sort()];
+const PC=["#0f766e","#14b8a6","#2dd4bf","#67e8f9","#a78bfa","#f59e0b"];
+const TIP={
+  aw:"αw = gewogen geluidsabsorptiecoëfficiënt (0–1), conform ISO 11654",
+  aeq:"Aeq = equivalent absorptieoppervlak per armatuur in m², bepaald via laboratoriumtest conform EN-ISO 354",
+  norm:"Indicatieve richtwaarde per ruimtetype — geen formele NEN 18041-toetsing",
+  sti:"STI = Speech Transmission Index, geschat op basis van de nagalmtijd (indicatief)",
+  decay:"Snelheid waarmee geluidsenergie uitsterft: 60 dB / T₆₀",
+  alpha:"Gemiddelde absorptiecoëfficiënt over alle oppervlakken",
+  va:"Volume per m² absorptie — hogere waarde = galmgevoeliger ruimte"
+};
+
+/* ══════════ HELPERS ══════════ */
+const nl=(v,d=2)=>v.toFixed(d).replace('.',',');
+const rtDisp=v=>v>6?'≥6,0':nl(Math.max(v,0));
+const today=()=>new Date().toISOString().slice(0,10);
+const parseDim=v=>parseFloat(String(v).replace(',','.'))||0;
+const clampDim=v=>{const n=parseDim(v);return n>0?Math.min(n,100):1;};
+const STORE_KEY='lumenear_calc_state_v1';
+
+const DEFAULTS={pn:"Mijn Project",client:"",author:"",l:8,w:6,h:2.8,rt:"Vergaderruimte",fm:"Dun tapijt",wm:"Gipsplaat + isolatie",cm:"Gipsplafond (dicht)",fu:"Vergaderruimte",ex:"4. Losse tapijten",qty:{}};
+
+/* Valideer een (geïmporteerd of opgeslagen) data-object tegen de bekende lijsten.
+   Geeft {state, issues[]} terug; onbekende waarden behouden de huidige/default. */
+function sanitize(d,base){
+  const s={...base},issues=[];
+  if(!d||typeof d!=='object')return{state:s,issues};
+  if(typeof d.projectName==='string')s.pn=d.projectName.slice(0,80);
+  if(typeof d.client==='string')s.client=d.client.slice(0,80);
+  if(typeof d.author==='string')s.author=d.author.slice(0,80);
+  if(d.room){
+    for(const[k,key]of[['length','l'],['width','w'],['height','h']]){
+      const v=parseFloat(d.room[k]);
+      if(v>0&&v<=100)s[key]=v;else if(d.room[k]!=null)issues.push(`Afmeting ${k} ongeldig, behouden: ${base[key]} m`);
+    }
+    if(d.room.roomType!=null){
+      if(PR[d.room.roomType])s.rt=d.room.roomType;
+      else issues.push(`Ruimtetype "${d.room.roomType}" niet herkend`);
+    }
+  }
+  if(d.materials){
+    for(const[k,list,lbl]of[['fm',FLOOR,'vloer'],['wm',WALL,'wand'],['cm',CEIL,'plafond'],['fu',FURN,'meubilering'],['ex',EX,'extra akoestiek']]){
+      const v=d.materials[k];
+      if(v==null)continue;
+      if(list[v]!==undefined)s[k]=v;
+      else issues.push(`Materiaal ${lbl} "${v}" niet herkend`);
+    }
+  }
+  if(Array.isArray(d.products)){
+    const q={};let skipped=0;
+    d.products.forEach(p=>{
+      const name=p&&p.name,n=Math.max(0,Math.floor(parseInt(p&&p.qty,10)||0));
+      if(name&&PP.some(x=>x.n===name)&&n>0)q[name]=n;
+      else if(name)skipped++;
+    });
+    s.qty=q;
+    if(skipped)issues.push(`${skipped} product(en) niet herkend en overgeslagen`);
+  }else if(d.qty&&typeof d.qty==='object'){
+    const q={};
+    Object.entries(d.qty).forEach(([name,v])=>{
+      const n=Math.max(0,Math.floor(parseInt(v,10)||0));
+      if(PP.some(x=>x.n===name)&&n>0)q[name]=n;
+    });
+    s.qty=q;
+  }
+  return{state:s,issues};
+}
+
+function loadSaved(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(!raw)return DEFAULTS;
+    return sanitize(JSON.parse(raw),DEFAULTS).state;
+  }catch(e){return DEFAULTS;}
+}
+
+/* ══════════ COMPONENTEN ══════════ */
+function IsoRoom({l,w,h,size}){
+  const mx=Math.max(l,w,h,1);
+  const s=Math.min(size*.35/mx,size*.08);
+  const cx=size/2,cy=size*.55;
+  const cos30=Math.cos(Math.PI/6),sin30=0.5;
+  const proj=(px,py,pz)=>[cx+(px-py)*cos30*s,cy-(px+py)*sin30*s-pz*s];
+  const pts={
+    fbl:proj(0,0,0),fbr:proj(l,0,0),ftr:proj(l,w,0),ftl:proj(0,w,0),
+    cbl:proj(0,0,h),cbr:proj(l,0,h),ctr:proj(l,w,h),ctl:proj(0,w,h)
+  };
+  const poly=arr=>arr.map(p=>p.join(',')).join(' ');
+  return html`
+    <svg viewBox=${`0 0 ${size} ${size}`} style=${{width:size,height:size}} role="img" aria-label=${`Ruimte ${l} bij ${w} bij ${h} meter`}>
+      <polygon points=${poly([pts.fbl,pts.fbr,pts.ftr,pts.ftl])} fill="#e0f2fe" stroke="#0f766e" strokeWidth="1" opacity=".75"/>
+      <polygon points=${poly([pts.ftl,pts.ftr,pts.ctr,pts.ctl])} fill="#bae6fd" stroke="#0f766e" strokeWidth="1" opacity=".5"/>
+      <polygon points=${poly([pts.ftr,pts.fbr,pts.cbr,pts.ctr])} fill="#7dd3fc" stroke="#0f766e" strokeWidth="1" opacity=".6"/>
+      <polyline points=${poly([pts.ctl,pts.ctr,pts.cbr])} fill="none" stroke="#0f766e" strokeWidth=".7" opacity=".3" strokeDasharray="3,2"/>
+      <text x=${(pts.fbl[0]+pts.fbr[0])/2} y=${pts.fbl[1]+14} textAnchor="middle" fontSize="10" fontWeight="700" fill="#0f766e">${nl(l,l%1?1:0)}m</text>
+      <text x=${(pts.fbr[0]+pts.ftr[0])/2+10} y=${(pts.fbr[1]+pts.ftr[1])/2+4} textAnchor="start" fontSize="10" fontWeight="700" fill="#0f766e">${nl(w,w%1?1:0)}m</text>
+      <text x=${pts.fbr[0]+8} y=${(pts.fbr[1]+pts.cbr[1])/2+3} textAnchor="start" fontSize="10" fontWeight="700" fill="#0f766e">${nl(h,h%1?1:0)}m</text>
+    </svg>`;
+}
+
+function Bars({d,hmax=70}){
+  const mx=Math.max(...d.map(x=>x.v),.1);
+  return html`<div className="bars">${d.map((x,i)=>html`
+    <div key=${i} className="bc">
+      <div className="bv" style=${{color:x.c}}>${x.lab!==undefined?x.lab:nl(x.v)}s</div>
+      <div className="bf" style=${{height:Math.max(x.v/mx*hmax,2),background:x.c}}/>
+      <div className="bl">${x.l}</div>
+    </div>`)}</div>`;
+}
+
+function Pie({d}){
+  const tot=d.reduce((s,x)=>s+x.v,0);if(!tot)return null;
+  let cum=0;const cx=40,cy=40,r=36;
+  return html`
+    <div className="pw">
+      <svg viewBox="0 0 80 80" style=${{width:80,height:80,flexShrink:0}} role="img" aria-label="Absorptieverdeling">
+        ${d.map((x,i)=>{
+          const ang=(x.v/tot)*360,sa=cum;cum+=ang;
+          const sr=(sa-90)*Math.PI/180,er=(sa+ang-90)*Math.PI/180;
+          if(ang<.5)return null;
+          const path=ang>=359.9?`M${cx-r},${cy}A${r},${r} 0 1 1 ${cx+r},${cy}A${r},${r} 0 1 1 ${cx-r},${cy}`
+            :`M${cx},${cy}L${cx+r*Math.cos(sr)},${cy+r*Math.sin(sr)}A${r},${r} 0 ${ang>180?1:0} 1 ${cx+r*Math.cos(er)},${cy+r*Math.sin(er)}Z`;
+          return html`<path key=${i} d=${path} fill=${PC[i%PC.length]} stroke="#fff" strokeWidth="1"/>`;
+        })}
+      </svg>
+      <div className="pleg">${d.map((x,i)=>html`<div key=${i} className="pli"><div className="pld" style=${{background:PC[i%PC.length]}}/><span>${x.n}</span><span className="plv">${nl(x.v,1)}</span></div>`)}</div>
+    </div>`;
+}
+
+/* Het printbare adviesrapport — zelfde state, statisch gerenderd. */
+function Report({pn,client,author,l,w,h,rt,fm,wm,cm,fu,ex,c,sp,rat,sti,parts}){
+  const hasP=sp.length>0;
+  const normTxt=rt==="(zelf invullen)"?"de gehanteerde richtwaarde":`de richtwaarde voor ${rt.toLowerCase()}`;
+  const ratColor={ "rpill-excellent":"#16a34a","rpill-good":"#34d399","rpill-fair":"#f59e0b","rpill-poor":"#f97316","rpill-bad":"#ef4444","rpill-terrible":"#7f1d1d"}[rat.c];
+  return html`
+    <div id="report">
+      <div className="rep-head">
+        <div className="rep-logo">Lumenear<span>Akoestisch adviesrapport</span></div>
+        <div className="rep-meta"><b>${pn||"Project"}</b><br/>${client?client+" · ":""}${today()}${author?" · "+author:""}</div>
+      </div>
+
+      <section>
+        <h2>Projectgegevens</h2>
+        <div className="rep-intro">
+          <table><tbody>
+            <tr><td className="rep-key">Project</td><td>${pn||"—"}</td></tr>
+            ${client?html`<tr><td className="rep-key">Klant / organisatie</td><td>${client}</td></tr>`:null}
+            <tr><td className="rep-key">Ruimtetype</td><td>${rt}</td></tr>
+            <tr><td className="rep-key">Afmetingen (L × B × H)</td><td>${nl(l,1)} × ${nl(w,1)} × ${nl(h,1)} m</td></tr>
+            <tr><td className="rep-key">Volume</td><td>${nl(c.vol,0)} m³</td></tr>
+            <tr><td className="rep-key">Vloeroppervlak</td><td>${nl(c.fA,0)} m²</td></tr>
+            <tr><td className="rep-key">Datum</td><td>${today()}</td></tr>
+            ${author?html`<tr><td className="rep-key">Opgesteld door</td><td>${author}</td></tr>`:null}
+          </tbody></table>
+          <${IsoRoom} l=${l} w=${w} h=${h} size=${170}/>
+        </div>
+      </section>
+
+      <section>
+        <h2>Conclusie</h2>
+        <div className="rep-conclusie">
+          ${hasP?html`<p>Met de voorgestelde Lumenear armaturen daalt de nagalmtijd van <b>${rtDisp(c.r0)} s</b> naar <b>${rtDisp(c.r1)} s</b> (${Math.round(c.imp)}% verbetering). De ruimte ${c.r1<=c.tgt?"voldoet daarmee aan":"blijft daarmee boven"} ${normTxt} van ${nl(c.tgt,1)} s.</p>`
+          :html`<p>In de huidige situatie bedraagt de berekende nagalmtijd <b>${rtDisp(c.r0)} s</b>; ${normTxt} is ${nl(c.tgt,1)} s. Er zijn nog geen Lumenear armaturen geselecteerd.</p>`}
+          <span className="rep-pill" style=${{background:ratColor,color:rat.c==="rpill-fair"?"#212529":"#fff"}}>${hasP?"Met Lumenear":"Huidige situatie"}: ${rat.t}</span>
+        </div>
+        <div className="rep-cards">
+          <div className="rep-card"><div className="v" style=${{color:"#868e96"}}>${rtDisp(c.r0)} s</div><div className="k">RT60 zonder</div></div>
+          <div className="rep-card"><div className="v" style=${{color:"#0f766e"}}>${rtDisp(c.r1)} s</div><div className="k">RT60 met Lumenear</div></div>
+          <div className="rep-card"><div className="v" style=${{color:"#15803d"}}>${hasP?Math.round(c.imp)+"%":"—"}</div><div className="k">Verbetering</div></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Resultaat</h2>
+        <${Bars} hmax=${110} d=${[{l:"Zonder",v:Math.min(c.r0,6),lab:rtDisp(c.r0),c:"#94a3b8"},{l:"Met Lumenear",v:Math.min(c.r1,6),lab:rtDisp(c.r1),c:"#0d9488"},{l:"Richtwaarde",v:c.tgt,lab:nl(c.tgt,1),c:"#f59e0b"}]}/>
+      </section>
+
+      <section>
+        <h2>Uitgangssituatie</h2>
+        <table>
+          <thead><tr><th>Onderdeel</th><th>Materiaal / inrichting</th><th style=${{textAlign:"right"}}>Absorptie</th></tr></thead>
+          <tbody>
+            ${[["Vloer",fm,parts.fAb],["Wanden",wm,parts.wAb],["Plafond",cm,parts.cAb],["Meubilering",fu,parts.fuAb],["Extra maatregelen",ex,parts.exAb]].map((r,i)=>html`
+              <tr key=${i}><td className="rep-key">${r[0]}</td><td>${r[1]}</td><td style=${{textAlign:"right"}}>${nl(r[2],1)} m²</td></tr>`)}
+            <tr className="rep-totaal"><td>Ruimteabsorptie totaal</td><td></td><td style=${{textAlign:"right"}}>${nl(c.rAb,1)} m² Aeq</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div className="rep-page2">
+        ${hasP?html`<section>
+          <h2>Productadvies Lumenear</h2>
+          <table>
+            <thead><tr><th>Product</th><th>Familie</th><th style=${{textAlign:"right"}}>Aantal</th><th style=${{textAlign:"right"}}>Aeq per stuk</th><th style=${{textAlign:"right"}}>Totaal Aeq</th></tr></thead>
+            <tbody>
+              ${sp.map(p=>html`<tr key=${p.n}><td>${p.n}</td><td>${p.f}</td><td style=${{textAlign:"right"}}>${p.q}</td><td style=${{textAlign:"right"}}>${nl(p.eq)} m²</td><td style=${{textAlign:"right"}}>${nl(p.q*p.eq)} m²</td></tr>`)}
+              <tr className="rep-totaal"><td>Totaal Lumenear absorptie</td><td></td><td style=${{textAlign:"right"}}>${sp.reduce((s,p)=>s+p.q,0)}</td><td></td><td style=${{textAlign:"right"}}>${nl(c.lAb)} m² Aeq</td></tr>
+            </tbody>
+          </table>
+        </section>`:null}
+
+        <section>
+          <h2>Absorptieverdeling &amp; technische parameters</h2>
+          <${Pie} d=${c.bd}/>
+          <div className="rep-params">
+            <div className="rep-param"><div className="k">Totale absorptie</div><div className="v">${nl(c.rAb+c.lAb,1)} m² Aeq</div><div className="e">Som van alle equivalente geluidsabsorptie in de ruimte.</div></div>
+            <div className="rep-param"><div className="k">Geluidsverval</div><div className="v">${(60/Math.max(c.r1,.01)).toFixed(0)} dB/s</div><div className="e">Snelheid waarmee geluidsenergie uitsterft (60 dB / T₆₀).</div></div>
+            <div className="rep-param"><div className="k">Gem. absorptiecoëfficiënt</div><div className="v">${nl((c.rAb+c.lAb)/Math.max(2*c.fA+c.wA,1),3)}</div><div className="e">Gemiddelde α over alle oppervlakken in de ruimte.</div></div>
+            <div className="rep-param"><div className="k">V/A verhouding</div><div className="v">${nl(c.vol/Math.max(c.rAb+c.lAb,.01))} m</div><div className="e">Volume per m² absorptie; hogere waarde = galmgevoeliger.</div></div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Spraakverstaanbaarheid (STI, indicatief)</h2>
+          <div className="rep-stibar"><div style=${{width:sti.v+"%",background:sti.c}}/></div>
+          <div style=${{fontSize:"9.5pt",fontWeight:700,color:sti.c}}>${sti.t} <span style=${{color:"#868e96",fontWeight:400,fontSize:"8pt"}}>(${sti.s})</span></div>
+          <div style=${{fontSize:"7.5pt",color:"#868e96",marginTop:4}}>Richtwaarden ISO 3382-3: open kantoor T₆₀ ≤ 0,4 s · vergaderruimte ≤ 0,6 s · onderwijs ≤ 0,5 s.</div>
+        </section>
+
+        <section>
+          <h2>Methodiek &amp; disclaimer</h2>
+          <p className="rep-method">
+            Berekening volgens de Sabine-formule (T₆₀ = 0,161 × V / A), spraakgemiddelde 500–2000 Hz.
+            Equivalente absorptieoppervlakken (Aeq) per armatuur zijn bepaald via onafhankelijke laboratoriummetingen conform EN-ISO 354; pendant-armaturen inclusief randdiffractie-effect.
+            De resultaten zijn een indicatieve modelberekening op basis van de opgegeven ruimtegegevens en vervangen geen akoestisch onderzoek ter plaatse.
+            De gehanteerde richtwaarden zijn indicatief per ruimtetype en betreffen geen formele normtoetsing (NEN 18041). Aan deze berekening kunnen geen rechten worden ontleend.
+          </p>
+        </section>
+
+        <div className="rep-foot">
+          <div className="cta">Dit advies vertalen naar een offerte of een proefopstelling zien?</div>
+          <div className="contact">lumenear.com<br/>info@lumenear.com</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ══════════ APP ══════════ */
+const SAVED=loadSaved();
+
+function App(){
+  const[pn,sPn]=useState(SAVED.pn);
+  const[client,sClient]=useState(SAVED.client);
+  const[author,sAuthor]=useState(SAVED.author);
+  const[l,sL]=useState(SAVED.l),[w,sW]=useState(SAVED.w),[h,sH]=useState(SAVED.h);
+  const[ls,setLs]=useState(String(SAVED.l).replace('.',',')),[ws,setWs]=useState(String(SAVED.w).replace('.',',')),[hs,setHs]=useState(String(SAVED.h).replace('.',','));
+  const[rt,sRt]=useState(SAVED.rt);
+  const[fm,sFm]=useState(SAVED.fm);
+  const[wm,sWm]=useState(SAVED.wm);
+  const[cm,sCm]=useState(SAVED.cm);
+  const[fu,sFu]=useState(SAVED.fu);
+  const[ex,sEx]=useState(SAVED.ex);
+  const[qty,sQty]=useState(SAVED.qty);
+  const[fam,sFam]=useState("Alle");
+  const[search,sSearch]=useState("");
+  const[note,sNote]=useState(null);
+
+  // Autosave naar localStorage zodat F5 tijdens een demo niets wist.
+  useEffect(()=>{
+    try{localStorage.setItem(STORE_KEY,JSON.stringify({projectName:pn,client,author,room:{length:l,width:w,height:h,roomType:rt},materials:{fm,wm,cm,fu,ex},qty}));}catch(e){}
+  },[pn,client,author,l,w,h,rt,fm,wm,cm,fu,ex,qty]);
+
+  useEffect(()=>{
+    if(!note)return;
+    const t=setTimeout(()=>sNote(null),8000);
+    return()=>clearTimeout(t);
+  },[note]);
+
+  const preset=k=>{sRt(k);const c=PR[k];if(!c)return;if(c.fl)sFm(c.fl);if(c.wl)sWm(c.wl);if(c.cl)sCm(c.cl);if(c.fu)sFu(c.fu);if(c.ex)sEx(c.ex);};
+  const setQ=(n,q)=>{
+    const v=Math.max(0,Math.floor(Number(q)||0));
+    sQty(prev=>{
+      if(v<=0){const{[n]:_,...r}=prev;return r;}
+      return{...prev,[n]:Math.min(v,999)};
+    });
+  };
+  const dimField=(val,setStr,setNum)=>({
+    value:val,
+    onChange:e=>{setStr(e.target.value);const p=parseDim(e.target.value);if(p>0&&p<=100)setNum(p);},
+    onBlur:e=>{const v=clampDim(e.target.value);setNum(v);setStr(String(v).replace('.',','));}
+  });
+
+  const c=useMemo(()=>{
+    const vol=l*w*h,fA=l*w,wA=2*(l*h)+2*(w*h),cA=l*w;
+    const fAb=(FLOOR[fm]||.02)*fA,wAb=(WALL[wm]||.02)*wA,cAb=(CEIL[cm]||.02)*cA,fuAb=(FURN[fu]||.005)*fA,exAb=(EX[ex]||0)*fA;
+    const rAb=fAb+wAb+cAb+fuAb+exAb;
+    let lAb=0;Object.entries(qty).forEach(([n,q])=>{const p=PP.find(x=>x.n===n);if(p)lAb+=q*p.eq;});
+    // RT60 ongeclampt berekenen; alleen de wéérgave wordt op 6 s afgetopt (rtDisp),
+    // zodat de verbetering ook in extreme ruimtes klopt.
+    const r0=.161*vol/Math.max(rAb,.01);
+    const r1=.161*vol/Math.max(rAb+lAb,.01);
+    const imp=r0>0?(1-r1/r0)*100:0;
+    const tgt=(PR[rt]||{}).t||.8;
+    return{vol,fA,wA,cA,rAb,lAb,r0,r1,imp,tgt,
+      parts:{fAb,wAb,cAb,fuAb,exAb},
+      bd:[{n:"Vloer",v:fAb},{n:"Wanden",v:wAb},{n:"Plafond",v:cAb},{n:"Meubels",v:fuAb},{n:"Extra",v:exAb},{n:"Lumenear",v:lAb}].filter(d=>d.v>0)};
+  },[l,w,h,fm,wm,cm,fu,ex,qty,rt]);
+
+  const q=search.trim().toLowerCase();
+  const fp=PP.filter(x=>(fam==="Alle"||x.f===fam)&&(!q||x.n.toLowerCase().includes(q)));
+  const sp=PP.filter(x=>qty[x.n]>0).map(x=>({...x,q:qty[x.n]}));
+  const hasP=sp.length>0;
+
+  const rat=(()=>{
+    const r=c.r1/c.tgt;
+    if(r<=1)return{t:"Uitstekend",c:"rpill-excellent"};
+    if(r<=1.15)return{t:"Prima",c:"rpill-good"};
+    if(r<=1.3)return{t:"Redelijk",c:"rpill-fair"};
+    if(r<=1.6)return{t:"Matig",c:"rpill-poor"};
+    if(r<=2)return{t:"Onvoldoende",c:"rpill-bad"};
+    return{t:"Zeer slecht",c:"rpill-terrible"};
+  })();
+  const sti=(()=>{
+    const r=c.r1;
+    if(r<=0.4)return{t:"Uitstekend",v:91,c:"#16a34a",s:"STI > 0.75"};
+    if(r<=0.6)return{t:"Goed",v:71,c:"#34d399",s:"STI 0.60–0.75"};
+    if(r<=0.8)return{t:"Redelijk",v:50,c:"#f59e0b",s:"STI 0.45–0.60"};
+    if(r<=1.2)return{t:"Matig",v:30,c:"#f97316",s:"STI 0.30–0.45"};
+    return{t:"Slecht",v:12,c:"#ef4444",s:"STI < 0.30"};
+  })();
+
+  const doExport=()=>{
+    const d={version:2,projectName:pn,client,author,room:{length:l,width:w,height:h,roomType:rt},materials:{fm,wm,cm,fu,ex},products:sp.map(x=>({name:x.n,qty:x.q,aeq:x.eq})),results:{rt60Without:+c.r0.toFixed(2),rt60With:+c.r1.toFixed(2),improvement:+c.imp.toFixed(1),target:c.tgt}};
+    const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(b);
+    const a=document.createElement('a');
+    a.href=url;a.download=((pn||'project').trim().replace(/\s+/g,'_')||'project')+'_acoustic.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),0);
+  };
+  const doImport=()=>{
+    const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+    inp.onchange=e=>{
+      const f=e.target.files[0];if(!f)return;
+      const r=new FileReader();
+      r.onload=ev=>{
+        try{
+          const d=JSON.parse(ev.target.result);
+          const cur={pn,client,author,l,w,h,rt,fm,wm,cm,fu,ex,qty};
+          const{state:s,issues}=sanitize(d,cur);
+          sPn(s.pn);sClient(s.client);sAuthor(s.author);
+          sL(s.l);sW(s.w);sH(s.h);
+          setLs(String(s.l).replace('.',','));setWs(String(s.w).replace('.',','));setHs(String(s.h).replace('.',','));
+          sRt(s.rt);sFm(s.fm);sWm(s.wm);sCm(s.cm);sFu(s.fu);sEx(s.ex);sQty(s.qty);
+          sNote(issues.length?`Project geladen met ${issues.length} waarschuwing(en): ${issues.join(' · ')}`:`Project "${s.pn}" geladen.`);
+        }catch(err){sNote("Importfout: bestand is geen geldig projectbestand ("+err.message+")");}
+      };
+      r.readAsText(f);
+    };
+    inp.click();
+  };
+  const doReset=()=>{
+    try{localStorage.removeItem(STORE_KEY);}catch(e){}
+    sPn(DEFAULTS.pn);sClient("");sAuthor(author);
+    sL(DEFAULTS.l);sW(DEFAULTS.w);sH(DEFAULTS.h);
+    setLs("8");setWs("6");setHs("2,8");
+    sRt(DEFAULTS.rt);sFm(DEFAULTS.fm);sWm(DEFAULTS.wm);sCm(DEFAULTS.cm);sFu(DEFAULTS.fu);sEx(DEFAULTS.ex);
+    sQty({});sFam("Alle");sSearch("");
+    sNote("Nieuw project gestart.");
+  };
+  const doReport=()=>window.print();
+
+  return html`
+    <div>
+    <div className="app">
+      <div className="hdr">
+        <div className="hdr-l"><span className="logo">Lumenear</span><span className="logo-s">Acoustic Calculator</span></div>
+        <input className="pinp" value=${pn} onChange=${e=>sPn(e.target.value)} placeholder="Projectnaam" aria-label="Projectnaam"/>
+        <div className="hdr-r">
+          <button className="btn btn-t" onClick=${doReport}>Rapport (PDF)</button>
+          <button className="btn btn-g" onClick=${doExport}>Opslaan (.json)</button>
+          <button className="btn btn-g" onClick=${doImport}>Openen</button>
+          <button className="btn btn-g" onClick=${doReset} title="Alles terug naar standaardwaarden">Nieuw</button>
+        </div>
+      </div>
+
+      <div className="topbar">
+        <div className="room-box"><${IsoRoom} l=${l} w=${w} h=${h} size=${140}/></div>
+        <div className="stats-row">
+          <div className="stat"><div className="stat-v">${rtDisp(c.r0)}s</div><div className="stat-l">RT60 zonder</div></div>
+          <div className="stat stat-teal"><div className="stat-v">${rtDisp(c.r1)}s</div><div className="stat-l">RT60 met Lumenear</div></div>
+          <div className="stat stat-green"><div className="stat-v">${hasP&&c.imp>0.5?Math.round(c.imp)+'%':'—'}</div><div className="stat-l">Verbetering</div></div>
+          <div className="stat" title=${TIP.norm}><div className="stat-v">${nl(c.tgt,1)}s</div><div className="stat-l">Richtwaarde (${rt.length>20?rt.slice(0,18)+'…':rt})</div><div className="stat-sub">indicatief, geen NEN-toetsing</div></div>
+        </div>
+        <div className=${`rpill ${rat.c}`}>${hasP?"Met Lumenear":"Huidige situatie"}: ${rat.t}</div>
+      </div>
+
+      <div className="layout">
+        <div className="side">
+          <div className="stitle">Project</div>
+          <div className="fld"><label htmlFor="f-client">Klant / organisatie</label><input id="f-client" value=${client} onChange=${e=>sClient(e.target.value)} placeholder="Optioneel, komt in rapport"/></div>
+          <div className="fld"><label htmlFor="f-author">Opgesteld door</label><input id="f-author" value=${author} onChange=${e=>sAuthor(e.target.value)} placeholder="Naam adviseur"/></div>
+          <div className="dvd"/>
+          <div className="stitle">Ruimte</div>
+          <div className="fld"><label htmlFor="f-type">Type</label><select id="f-type" value=${rt} onChange=${e=>preset(e.target.value)}>${Object.keys(PR).map(k=>html`<option key=${k}>${k}</option>`)}</select></div>
+          <div className="dimgrid">
+            <div className="fld"><label htmlFor="f-l">L (m)</label><input id="f-l" type="text" inputMode="decimal" ...${dimField(ls,setLs,sL)}/></div>
+            <div className="fld"><label htmlFor="f-w">B (m)</label><input id="f-w" type="text" inputMode="decimal" ...${dimField(ws,setWs,sW)}/></div>
+            <div className="fld"><label htmlFor="f-h">H (m)</label><input id="f-h" type="text" inputMode="decimal" ...${dimField(hs,setHs,sH)}/></div>
+          </div>
+          <div className="rinfo">${nl(c.vol,0)} m³ · vloer ${nl(c.fA,0)} m² · wanden ${nl(c.wA,0)} m²</div>
+          <div className="dvd"/>
+          <div className="stitle">Materialen</div>
+          <div className="fld"><label htmlFor="f-fm">Vloer</label><select id="f-fm" value=${fm} onChange=${e=>sFm(e.target.value)}>${Object.keys(FLOOR).map(k=>html`<option key=${k}>${k}</option>`)}</select></div>
+          <div className="fld"><label htmlFor="f-wm">Wanden</label><select id="f-wm" value=${wm} onChange=${e=>sWm(e.target.value)}>${Object.keys(WALL).map(k=>html`<option key=${k}>${k}</option>`)}</select></div>
+          <div className="fld"><label htmlFor="f-cm">Plafond</label><select id="f-cm" value=${cm} onChange=${e=>sCm(e.target.value)}>${Object.keys(CEIL).map(k=>html`<option key=${k}>${k}</option>`)}</select></div>
+          <div className="dvd"/>
+          <div className="stitle">Inrichting</div>
+          <div className="fld"><label htmlFor="f-fu">Meubilering</label><select id="f-fu" value=${fu} onChange=${e=>sFu(e.target.value)}>${Object.keys(FURN).map(k=>html`<option key=${k}>${k}</option>`)}</select></div>
+          <div className="fld"><label htmlFor="f-ex">Extra akoestiek</label><select id="f-ex" value=${ex} onChange=${e=>sEx(e.target.value)}>${Object.keys(EX).map(k=>html`<option key=${k}>${k}</option>`)}</select></div>
+        </div>
+
+        <div className="center">
+          <div className="c-head">
+            <div className="c-title">Producten selecteren</div>
+            <input className="psearch" type="search" placeholder="Zoek product…" value=${search} onChange=${e=>sSearch(e.target.value)} aria-label="Zoek product"/>
+            <div className="c-count">${fp.length}/${PP.length} · ${sp.length} geselecteerd</div>
+          </div>
+          <div className="ftabs" role="tablist">${FAMS.map(f=>html`<button key=${f} role="tab" aria-selected=${fam===f} className=${`ftab ${fam===f?'on':''}`} onClick=${()=>sFam(f)}>${f}</button>`)}</div>
+          <div className="pgrid">
+            ${fp.map(p=>html`<div key=${p.n} className=${`pc ${qty[p.n]>0?'sel':''}`}>
+              <div className="pc-top"><div className="pc-name">${p.n}</div><div className="pc-fam">${p.f}</div></div>
+              <div className="pc-specs"><span title=${TIP.aw}>αw ${p.aw}</span><span title="Akoestisch oppervlak">${p.a} m²</span><span className="pc-aeq" title=${TIP.aeq}>Aeq ${p.eq}</span></div>
+              <div className="qc">
+                <button className="qb" aria-label=${"Minder "+p.n} onClick=${()=>setQ(p.n,(qty[p.n]||0)-1)}>−</button>
+                <input className="qi" type="number" min="0" value=${qty[p.n]||0} aria-label=${"Aantal "+p.n} onFocus=${e=>e.target.select()} onChange=${e=>setQ(p.n,e.target.value)}/>
+                <button className="qb qb-p" aria-label=${"Meer "+p.n} onClick=${()=>setQ(p.n,(qty[p.n]||0)+1)}>+</button>
+              </div>
+            </div>`)}
+          </div>
+          ${fp.length===0?html`<div style=${{textAlign:'center',padding:'24px',color:'var(--g500)',fontSize:12}}>Geen producten gevonden voor "${search}"${fam!=="Alle"?` in familie ${fam}`:""}.</div>`:null}
+        </div>
+
+        <div className="rp">
+          ${hasP?html`<div className="rsec">
+            <div className="rtitle">Geselecteerde producten</div>
+            <div className="rsel">
+              ${sp.map(p=>html`<div key=${p.n} className="rsel-i">
+                <span style=${{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:9,color:'var(--g700)'}}>${p.n}</span>
+                <span style=${{fontSize:9,color:'var(--t700)',fontWeight:600,flexShrink:0,marginRight:2}}>${nl(p.q*p.eq)}m²</span>
+                <div style=${{display:'flex',alignItems:'center',gap:2,flexShrink:0}}>
+                  <button className="mini-b" aria-label=${"Minder "+p.n} onClick=${()=>setQ(p.n,p.q-1)}>−</button>
+                  <span style=${{minWidth:18,textAlign:'center',fontWeight:700,fontSize:10,color:'var(--g800)'}}>${p.q}</span>
+                  <button className="mini-b plus" aria-label=${"Meer "+p.n} onClick=${()=>setQ(p.n,p.q+1)}>+</button>
+                  <button className="mini-b del" aria-label=${"Verwijder "+p.n} title="Verwijderen" onClick=${()=>setQ(p.n,0)}>×</button>
+                </div>
+              </div>`)}
+              <div className="rsel-t"><span>Totaal absorptie</span><span>${nl(c.lAb)} m² Aeq</span></div>
+            </div>
+          </div>`:html`<div className="rsec" style=${{textAlign:'center',padding:'24px 16px',color:'var(--g500)'}}>
+            <div style=${{fontSize:28,marginBottom:6,opacity:.35}}>◇</div>
+            <div style=${{fontSize:12,lineHeight:1.6}}>Kies links de ruimte en materialen, selecteer in het midden armaturen met <b>+</b>.<br/>Het effect verschijnt direct bovenin en hier.</div>
+          </div>`}
+
+          <div className="rsec">
+            <div className="rtitle">RT60 vergelijking</div>
+            <${Bars} d=${[{l:"Zonder",v:Math.min(c.r0,6),lab:rtDisp(c.r0),c:"#94a3b8"},{l:"Met Lumenear",v:Math.min(c.r1,6),lab:rtDisp(c.r1),c:"#0d9488"},{l:"Richtwaarde",v:c.tgt,lab:nl(c.tgt,1),c:"#f59e0b"}]}/>
+          </div>
+
+          <div className="rsec">
+            <div className="rtitle">Absorptie verdeling</div>
+            <${Pie} d=${c.bd}/>
+            <div style=${{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginTop:10}}>
+              ${[
+                {l:"Totale absorptie",v:nl(c.rAb+c.lAb,1)+" m² Aeq",t:"Som van ruimte- en Lumenear-absorptie"},
+                {l:"Geluidsverval",v:(60/Math.max(c.r1,.01)).toFixed(0)+" dB/s",t:TIP.decay},
+                {l:"Gem. absorptiecoëff.",v:nl((c.rAb+c.lAb)/Math.max(2*c.fA+c.wA,1),3),t:TIP.alpha},
+                {l:"V/A verhouding",v:nl(c.vol/Math.max(c.rAb+c.lAb,.01))+" m",t:TIP.va},
+              ].map((p,i)=>html`
+                <div key=${i} title=${p.t} style=${{background:'var(--g50)',border:'1px solid var(--g200)',borderRadius:5,padding:'6px 8px',cursor:'help'}}>
+                  <div style=${{fontSize:8,textTransform:'uppercase',letterSpacing:.5,color:'var(--g500)',fontWeight:700,marginBottom:3}}>${p.l}</div>
+                  <div style=${{fontSize:14,fontWeight:800,color:'var(--g800)',lineHeight:1}}>${p.v}</div>
+                </div>`)}
+            </div>
+          </div>
+
+          <div className="rsec">
+            <div className="rtitle" title=${TIP.sti}>Spraakverstaanbaarheid (STI)</div>
+            <div style=${{background:'var(--g100)',borderRadius:4,height:7,overflow:'hidden',marginBottom:5}}>
+              <div style=${{height:'100%',width:sti.v+'%',background:sti.c,borderRadius:4,transition:'width .5s ease'}}/>
+            </div>
+            <div style=${{display:'flex',justifyContent:'space-between',fontSize:8,color:'var(--g500)',marginBottom:5}}>
+              <span>Slecht</span><span>Matig</span><span>Redelijk</span><span>Goed</span><span>Uitst.</span>
+            </div>
+            <div style=${{fontSize:11,fontWeight:700,color:sti.c}}>${sti.t} <span style=${{color:'var(--g500)',fontWeight:400,fontSize:9}}>(${sti.s})</span></div>
+            <div style=${{fontSize:9,color:'var(--g500)',marginTop:4,lineHeight:1.5}}>
+              Op basis van nagalmtijd en Sabine-model (ISO 3382-3). Richtwaarde open kantoor: T₆₀ ≤ 0,4s · Vergaderruimte: ≤ 0,6s · Onderwijs: ≤ 0,5s.
+            </div>
+          </div>
+
+          <div className="fnote">
+            Sabine: T₆₀ = 0,161 × V / A. Octaafbanden 500–2000 Hz (spraakgemiddelde). Aeq per armatuur bepaald via laboratoriumtest (EN-ISO 354). Pendant producten incl. randdiffractie-effect. Indicatieve berekening — geen vervanging van akoestisch advies ter plaatse.
+          </div>
+        </div>
+      </div>
+
+      ${note?html`<div className="toast" role="status">${note}<button aria-label="Sluiten" onClick=${()=>sNote(null)}>×</button></div>`:null}
+    </div>
+
+    <${Report} pn=${pn} client=${client} author=${author} l=${l} w=${w} h=${h} rt=${rt} fm=${fm} wm=${wm} cm=${cm} fu=${fu} ex=${ex} c=${c} sp=${sp} rat=${rat} sti=${sti} parts=${c.parts}/>
+    </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+})();
+</script>
+</body>
+</html>
