@@ -1,7 +1,7 @@
 # Lumenear Akoestische Calculator — Documentatie
 
-> Versie: 5.0 (dashboard, self-contained)
-> Bijgewerkt: 2026-06-11
+> Versie: 5.1 (materialenherziening + bezetting)
+> Bijgewerkt: 2026-06-12
 > Doel: verkooptool voor akoestisch advies — architecten, projectinrichters en het Lumenear salesteam
 
 ---
@@ -36,7 +36,8 @@ De app draait volledig zelfstandig: React, htm en het Inter-font zijn lokaal gev
 ## 3. Berekening
 
 - **Sabine**: `T₆₀ = 0.161 × V / A` — spraakgemiddelde 500–2000 Hz
-- Ruimteabsorptie: `α_vloer×S_vloer + α_wand×S_wanden + α_plafond×S_plafond + (factor_meubels + factor_extra)×S_vloer`
+- Ruimteabsorptie: `α_vloer×S_vloer + α_wand×S_wanden + α_plafond×S_plafond + (factor_meubels + Σfactor_extra)×S_vloer + personen×0,46`
+- Bezetting: ±0,46 m² Sabine per zittende persoon (klassieke tabelwaarde); 0 personen = onbezet (worst-case)
 - Lumenear: `Σ (aantal × Aeq)` per product; Aeq uit ISO 354-labdata, pendant +12% randdiffractie
 - RT60 wordt **ongeclampt** berekend; alleen de weergave topt af op "≥6,0 s" zodat de verbetering ook in extreme ruimtes klopt
 - Rating (t.o.v. richtwaarde): ≤1.0 Uitstekend · ≤1.15 Prima · ≤1.3 Redelijk · ≤1.6 Matig · ≤2.0 Onvoldoende · >2.0 Zeer slecht
@@ -46,17 +47,20 @@ Volledig rekenvoorbeeld: `BEREKENING-VOORBEELD.md`.
 
 ## 4. Data
 
-**Bron van waarheid: `excel/lumenear_2026_acoustic_data.csv`** (89 producten, octaafband-α's, ISO 354).
+**Bron van waarheid: `data/lumenear_2026_acoustic_data.csv`** (89 producten, octaafband-α's, ISO 354).
 
 De `const PP=[...]` array in `app/index.html` is daarvan afgeleid. Regenereren:
 
 ```bash
-cd excel
-python build_lumenear_calculator_v4.py --web   # print het JS-blok
-python ../tools/check_sync.py                  # verifieert de sync (draait ook in CI)
+python tools/check_sync.py --emit   # print het JS-blok → plak in app/index.html
+python tools/check_sync.py          # verifieert de sync (draait ook in CI)
 ```
 
-Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan in `app/index.html` én `excel/build_lumenear_calculator_v4.py` — handmatig synchroon houden.
+Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan alléén in `app/index.html`. Bronnen: Sengpiel/Harris-absorptietabellen, Peutz A 3432-1-RA (PET-vilt wandopties), fabrikantdata tapijttegels (αw 0,15–0,20).
+
+**Nog te verifiëren met datasheet** (gemarkeerd als aanname in de code): Tapijttegels 0,15 · Houten lamellenwand op vilt 0,55 · Houten lamellenplafond op vilt 0,55 · Akoestisch spuitpleister 0,70.
+
+De Excel-versie is per 2026-06-12 uitgefaseerd; het buildscript staat in `backup/build_lumenear_calculator_v4.py`.
 
 ### Harde dataregels (niet wijzigen zonder bron)
 
@@ -66,9 +70,10 @@ Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan in `app/index.html` én
 4. **Float acoustic = Peutz V5** (9mm vilt + 40mm wol), α 500/1000/2000 = 0.99/0.99/0.97.
 5. **Float light = αw 0.55** (9mm vilt + 60mm luchtspouw).
 6. **"Weet ik niet" defaults op worst-case** (laagste absorptie).
-7. **Overige akoestiek mag niet overlappen met Inrichting** (geen "stoelen"/"meubels").
+7. **Extra akoestiek mag niet overlappen met Meubilering of vloerkeuze** (daarom geen "losse tapijten" meer).
 8. **Berekende Aeq is leidend** — de CSV-kolom Equivalent_Absorption_Aeq_m2 wordt bewust genegeerd (besluit 2026-06-11).
-9. **Web en Excel gebruiken dezelfde waarden** — CI bewaakt de productdata via `tools/check_sync.py`.
+9. **Productdata komt uit de CSV** — CI bewaakt de sync via `tools/check_sync.py`; regenereren met `--emit`.
+10. **De norm heet DIN 18041** (Duits) — nooit "NEN 18041" schrijven; richtwaarden blijven "indicatief, geen formele toetsing".
 
 ## 5. Functies
 
@@ -79,7 +84,9 @@ Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan in `app/index.html` én
 | Autosave | Huidige staat wordt in localStorage bewaard — F5 wist niets |
 | Nieuw | Reset naar standaardwaarden (opsteller blijft staan) |
 | Zoeken | Tekstfilter over de 89 producten, combineerbaar met familietabs |
-| Tooltips | Hover over αw, Aeq, STI, V/A, geluidsverval voor uitleg |
+| Bezetting | Aantal personen telt mee als absorptie; zichtbaar in verdeling en rapport |
+| Extra akoestiek | Checkboxes (additief): planten, gordijnen licht/zwaar, bureauschermen, roomdividers |
+| Tooltips | Hover over αw, Aeq, STI, V/A, geluidsverval, personen voor uitleg |
 
 ## 6. Stack
 
@@ -98,4 +105,4 @@ Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan in `app/index.html` én
 2. Eén spraakgemiddelde, geen frequentiebandsplitsing.
 3. Positie/clustering van armaturen telt niet mee (geen diffusieberekening).
 4. STI is een schatting op basis van nagalmtijd alleen.
-5. De richtwaarden per ruimtetype zijn indicatief — geen formele NEN 18041-toetsing.
+5. De richtwaarden per ruimtetype zijn indicatief — geen formele DIN 18041-toetsing.

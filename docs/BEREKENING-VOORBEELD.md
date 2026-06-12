@@ -1,71 +1,65 @@
 # Rekenvoorbeeld — Stap voor Stap
 
-Ter illustratie: een concrete berekening doorlopen zoals de calculator dat doet.
+_Bijgewerkt: 2026-06-12 (materialenset v5.1)_
+
+Ter illustratie: een concrete berekening zoals de calculator die uitvoert.
 
 ---
 
-## Situatie: Vergaderruimte 8×6×2.8m
+## Situatie: Vergaderruimte 8 × 6 × 2,8 m
 
-**Ruimteparameters:**
-- Lengte: 8m
-- Breedte: 6m
-- Hoogte: 2.8m
-
-**Stap 1: Oppervlakken berekenen**
+**Stap 1: Oppervlakken**
 ```
-Vloer  = 8 × 6 = 48 m²
-Wanden = 2×(8×2.8) + 2×(6×2.8) = 44.8 + 33.6 = 78.4 m²
-Plafond = 8 × 6 = 48 m²
-Volume = 8 × 6 × 2.8 = 134.4 m³
+Vloer   = 8 × 6 = 48 m²
+Wanden  = 2×(8×2,8) + 2×(6×2,8) = 44,8 + 33,6 = 78,4 m²
+Plafond = 48 m²
+Volume  = 134,4 m³
 ```
 
-**Stap 2: Absorptie per component berekenen**
+**Stap 2: Absorptie per component** (preset "Vergaderruimte")
 
-Met preset "Vergaderruimte":
-- Vloer: Dun tapijt (αw = 0.37)
-- Wanden: Gipsplaat + isolatie (αw = 0.07)
-- Plafond: Gipsplafond dicht (αw = 0.05)
-- Meubels: Vergaderruimte (factor = 0.06)
-- Extra: Losse tapijten (factor = 0.03)
-
-```
-A_vloer   = 0.37 × 48  = 17.76 m²
-A_wanden  = 0.07 × 78.4 = 5.49 m²
-A_plafond = 0.05 × 48  = 2.40 m²
-A_meubels = 0.06 × 48  = 2.88 m²
-A_extra   = 0.03 × 48  = 1.44 m²
-
-A_ruimte  = 17.76 + 5.49 + 2.40 + 2.88 + 1.44 = 29.97 m²
-```
-
-**Stap 3: T60 zonder Lumenear**
-```
-T60 = 0.161 × 134.4 / 29.97 = 21.64 / 29.97 = 0.72 seconden
-```
-
-**Stap 4: Lumenear producten toevoegen**
-
-Stel: 4× Float acoustic Rectangle 1200×2400 (Aeq = 6.32 m²/stuk)
+- Vloer: Tapijttegels (kantoor), α = 0,15
+- Wanden: Gipsplaat + isolatie, α = 0,07
+- Plafond: Gipsplafond (dicht), α = 0,05
+- Meubilering: Normaal gemeubileerd met stoffering, factor = 0,08
+- Extra akoestiek: geen
 
 ```
-A_lumenear = 4 × 6.32 = 25.28 m²
-A_totaal   = 29.97 + 25.28 = 55.25 m²
+A_vloer   = 0,15 × 48   = 7,20 m²
+A_wanden  = 0,07 × 78,4 = 5,49 m²
+A_plafond = 0,05 × 48   = 2,40 m²
+A_meubels = 0,08 × 48   = 3,84 m²
+A_ruimte  = 18,93 m²  (onbezet)
 ```
 
-**Stap 5: T60 met Lumenear**
+**Stap 3: T60 zonder Lumenear (onbezet)**
 ```
-T60_met = 0.161 × 134.4 / 55.25 = 21.64 / 55.25 = 0.39 seconden
+T60 = 0,161 × 134,4 / 18,93 = 1,14 s
+```
+
+**Stap 4: Bezetting meenemen (optioneel)**
+
+6 personen × 0,46 m² Sabine = 2,76 m² extra:
+```
+T60_bezet = 0,161 × 134,4 / 21,69 = 1,00 s
+```
+De calculator rekent met het opgegeven aantal personen; 0 = onbezet (worst-case).
+
+**Stap 5: Lumenear toevoegen** — 4× Float acoustic Rectangle 1200×2400 (Aeq = 6,32 m²/stuk)
+```
+A_lumenear = 4 × 6,32 = 25,28 m²
+A_totaal   = 18,93 + 25,28 = 44,21 m²   (onbezet)
+T60_met    = 0,161 × 134,4 / 44,21 = 0,49 s
 ```
 
 **Stap 6: Verbetering**
 ```
-Verbetering = (1 - 0.39/0.72) × 100 = 45.8%
+(1 − 0,49 / 1,14) × 100 = 57%
 ```
 
-**Stap 7: Normtoetsing (doelwaarde vergaderruimte = 0.6s)**
+**Stap 7: Normtoetsing** (richtwaarde vergaderruimte = 0,6 s, indicatief)
 ```
-Ratio = 0.39 / 0.60 = 0.65 → ≤ 1.0 → Rating: UITSTEKEND ✓
+0,49 / 0,60 = 0,82 → ≤ 1,0 → Rating: UITSTEKEND ✓
 ```
 
-**Conclusie:**
-Met 4 Float acoustic Rectangle armaturen daalt de nagalmtijd van 0.72s naar 0.39s — ruim onder de norm van 0.6s voor vergaderruimten. Verbetering: 46%.
+**Conclusie:** met 4 Float acoustic Rectangle armaturen daalt de nagalmtijd van 1,14 s naar 0,49 s — ruim onder de richtwaarde van 0,6 s. Bezet (6 personen) wordt dat 1,00 s → 0,46 s.

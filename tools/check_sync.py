@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 check_sync.py — verifieert dat de PP-productarray in de web-app exact overeenkomt
-met de waarden berekend uit de bron-CSV (zelfde logica als build_lumenear_calculator_v4.py).
+met de waarden berekend uit de bron-CSV (data/lumenear_2026_acoustic_data.csv).
 
 Gebruik:
   python tools/check_sync.py                          # checkt app/index.html
   python tools/check_sync.py --html pad/naar/file.html
+  python tools/check_sync.py --emit                   # print het JS PP-blok voor app/index.html
 
 Exit 0 = in sync, exit 1 = afwijkingen gevonden.
 Pure Python (geen pandas) zodat het overal draait, ook in CI.
@@ -19,7 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CSV_PATH = ROOT / "excel" / "lumenear_2026_acoustic_data.csv"
+CSV_PATH = ROOT / "data" / "lumenear_2026_acoustic_data.csv"
 
 # Peutz V5 override voor Float "acoustic" varianten (EN-ISO 354, rapport A 3432-1-RA)
 PEUTZ_V5 = {"a_500Hz": 0.99, "a_1000Hz": 0.99, "a_2000Hz": 0.97}
@@ -62,8 +63,8 @@ def calc_area(fam, var, d):
 
 
 def expected_products():
-    """Bereken per product de verwachte {naam: (aw, area, aeq)} uit de CSV."""
-    out = {}
+    """Bereken per product de verwachte (naam, familie, aw, area, aeq) uit de CSV (CSV-volgorde)."""
+    out = []
     with open(CSV_PATH, encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f, delimiter=";"):
             fam = row["Product_Family"]
@@ -87,8 +88,25 @@ def expected_products():
             diff = 1.12 if re.search(r"pendant|hang|free", mounting, re.I) else 1.00
             aeq = round(area * speech * diff, 2)
             aw = fnum(row["aw_ISO11654"])
-            out[name] = (aw, round(area, 2), aeq)
+            out.append((name, fam, aw, round(area, 2), aeq))
     return out
+
+
+def js_num(v):
+    """Compacte JS-notatie zoals in app/index.html: 0.45 -> .45, 2.00 -> 2."""
+    s = f"{v:.2f}".rstrip("0").rstrip(".")
+    return s[1:] if s.startswith("0.") else s
+
+
+def emit_js(products):
+    """Print het 'const PP=[...]' blok om in app/index.html te plakken."""
+    lines = [
+        '{n:"%s",f:"%s",aw:%s,a:%s,eq:%s}' % (n, f, js_num(aw), js_num(a), js_num(eq))
+        for n, f, aw, a, eq in products
+    ]
+    print("const PP=[")
+    print(",\n".join("  " + l for l in lines))
+    print("];")
 
 
 def parse_pp(html_path):
@@ -110,9 +128,15 @@ def parse_pp(html_path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--html", default=str(ROOT / "app" / "index.html"))
+    ap.add_argument("--emit", action="store_true",
+                    help="print het JS PP-blok voor app/index.html en stop")
     args = ap.parse_args()
 
-    exp = expected_products()
+    products = expected_products()
+    if args.emit:
+        emit_js(products)
+        return
+    exp = {n: (aw, a, eq) for n, _f, aw, a, eq in products}
     got = parse_pp(args.html)
 
     errors = []

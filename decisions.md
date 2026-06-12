@@ -4,6 +4,14 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-06-12 — Materialenherziening na data-audit (v5.1)
+**Reden:** Falco vond de keuzes "matig" en de audit bevestigde fouten: "Dun tapijt" gebruikte de tabelwaarden van *heavy carpet on concrete* (spraak-α 0,37) terwijl kantoortapijttegels αw 0,15–0,20 hebben; personen-absorptie ontbrak; meubileringslabels waren ruimtetypes i.p.v. dichtheid; de norm heette ten onrechte "NEN 18041" (= DIN, Duits).
+**Gevolg:** nieuwe lijsten (o.a. Tapijttegels 0,15, lamellenwand/-plafond, PET-vilt wandopties op eigen Peutz-data 0,36/0,90), meubilering = 5 niveaus dichtheid × stoffering, extra akoestiek = additieve checkboxes, personen-invoer (0,46 m²/p.p., 0 = onbezet/worst-case), presets +kantine/callcenter/kinderopvang, celkantoor & klaslokaal 0,8→0,6 s. Aannames zonder datasheet gemarkeerd: tapijttegels 0,15 · lamellenwand 0,55 · lamellenplafond 0,55 · spuitpleister 0,70. Oude opgeslagen projecten worden via een legacy-mapping geconverteerd.
+
+## 2026-06-12 — Excel-versie uitgefaseerd
+**Reden:** Falco: web-app op GitHub/Netlify volstaat; de xlsx werd niet meer gebruikt. De CSV blijft wél de bron van waarheid (octaafbanden + Peutz-data, nodig voor toekomstige frequentieband-feature).
+**Gevolg:** buildscript → backup/, excel/ → data/, PP-regeneratie via `tools/check_sync.py --emit` (pure Python, geen pandas), CI-job excel-build vervallen. Materiaaldata bestaat nu alleen nog in app/index.html.
+
 ## 2026-06-11 — v2-dashboard is de hoofdapp, v1 naar backup
 **Reden:** Falco's v2 (React 3-paneel dashboard van de werk-PC) is functioneel en visueel superieur aan de v1 wizard; data bleek 89/89 in sync met de CSV.
 **Gevolg:** app/index.html = v2 + fixes. v1 staat in backup/v1-index.html, origineel v2-export in backup/v2-dashboard-export-origineel.html.

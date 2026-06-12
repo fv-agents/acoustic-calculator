@@ -8,7 +8,8 @@ Interactief dashboard voor akoestisch advies: berekent de nagalmtijd (RT60, Sabi
 
 - Live RT60-berekening (zonder / met Lumenear) met 3D-ruimtevisualisatie
 - 89 producten uit de Lumenear 2026 catalogus, gemeten conform EN-ISO 354 (Peutz)
-- 9 ruimtepresets met indicatieve richtwaarden, STI-schatting, absorptieverdeling
+- 12 ruimtepresets (incl. kantine, callcenter, kinderopvang) met indicatieve richtwaarden
+- Bezetting telt mee (±0,46 m² Sabine per persoon), STI-schatting, absorptieverdeling
 - **Rapport (PDF)** — printbaar adviesrapport voor architecten en opdrachtgevers
 - Projecten opslaan/openen (.json) + automatische opslag in de browser
 - Werkt volledig offline (geen CDN's; React, htm en Inter zijn gevendored)
@@ -18,10 +19,10 @@ Interactief dashboard voor akoestisch advies: berekent de nagalmtijd (RT60, Sabi
 | Map | Wat |
 |---|---|
 | `app/` | De web-app (Netlify publish dir) — één index.html + vendor/ + fonts/ |
-| `excel/` | Excel-versie: build-script + productdata-CSV (bron van waarheid) |
-| `tools/check_sync.py` | CI-check: web-productdata moet exact matchen met de CSV-berekening |
+| `data/` | Productdata-CSV (bron van waarheid, incl. octaafband-α's en Peutz-data) |
+| `tools/check_sync.py` | CI-check web ↔ CSV + `--emit` om de productarray te regenereren |
 | `docs/` | Documentatie, rekenvoorbeeld, deployment, roadmap |
-| `backup/` | Oude versies (v1 web, originele export) |
+| `backup/` | Oude versies (v1 web, originele export, Excel-buildscript) |
 
 ## Methode
 

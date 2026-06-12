@@ -55,7 +55,7 @@ Kopieer de map `app/` (index.html + vendor/ + fonts/) naar een laptop of USB-sti
 
 ## Productdata bijwerken
 
-1. Pas `excel/lumenear_2026_acoustic_data.csv` aan
-2. `cd excel && python build_lumenear_calculator_v4.py --web` → plak het PP-blok in `app/index.html`
+1. Pas `data/lumenear_2026_acoustic_data.csv` aan
+2. `python tools/check_sync.py --emit` → plak het PP-blok in `app/index.html`
 3. `python tools/check_sync.py` → moet "OK" geven (CI controleert dit ook)
 4. Commit + push → live

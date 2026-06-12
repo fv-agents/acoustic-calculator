@@ -14,19 +14,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: check_sync (app/index.html vs excel/CSV)
+      - name: check_sync (app/index.html vs data/CSV)
         run: python tools/check_sync.py
-
-  excel-build:
-    name: Excel build-script
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install dependencies
-        run: pip install openpyxl pandas
-      - name: Bouw Excel-calculator
-        working-directory: excel
-        run: python build_lumenear_calculator_v4.py --output /tmp/calculator_test.xlsx

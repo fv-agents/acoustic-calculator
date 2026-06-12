@@ -3,6 +3,17 @@
 > Prioriteit: ⭐ = nice to have · ⭐⭐ = waardevol · ⭐⭐⭐ = hoge impact
 > Bijgewerkt: 2026-06-11
 
+## ✅ Gerealiseerd (v5.1, 2026-06-12) — materialen- en data-audit
+
+- **Materialenherziening projectenmarkt** — tapijttegels (αw 0,15, dé kantoorvloer), houten lamellenwand/-plafond, akoestisch spuitpleister, PET-vilt wandopties op eigen Peutz-data (0,36 direct / 0,90 met absorber), metselwerk; schijnkeuzes (gips+glas-mengvormen) weg
+- **"Dun tapijt"-fout gefixt** — waardes waren "heavy carpet on concrete" (0,37); eerlijk hernoemd, tapijttegels toegevoegd
+- **Bezetting** — personen tellen mee (±0,46 m² Sabine p.p.); rapport vermeldt bezet/onbezet
+- **Meubilering zegt nu iets** — 5 niveaus op dichtheid × stoffering i.p.v. ruimtetype-labels
+- **Extra akoestiek = checkboxes** (additief) i.p.v. genummerde ladder
+- **Presets +3** — Bedrijfskantine, Callcenter/klantcontact, Kinderopvang; celkantoor en klaslokaal aangescherpt naar 0,6 s
+- **NEN→DIN 18041** — foutieve normnaam overal gecorrigeerd
+- **Excel-versie uitgefaseerd** — CSV blijft bron van waarheid (`data/`), PP-regeneratie via `check_sync.py --emit`
+
 ## ✅ Gerealiseerd (v5.0, 2026-06-11)
 
 - **PDF-rapport** — 2 pagina's A4 adviesrapport via print-stylesheet: conclusie, grafieken, uitgangssituatie, productadvies, STI, methodiek + disclaimer, Lumenear-branding
@@ -33,7 +44,7 @@ Vereenvoudigde weergave: 3D kamer groot, RT60 voor/na, rating, productenlijst.
 
 ## Bewust uitgesteld (besluit 2026-06-11)
 
-- **NEN 18041-categoriebeoordeling** — "certificaat-waardige output" is op een single-band Sabine-schatting inhoudelijk niet waar te maken; aansprakelijkheidsrisico. Pas met frequentieband-data.
+- **DIN 18041-categoriebeoordeling** — "certificaat-waardige output" is op een single-band Sabine-schatting inhoudelijk niet waar te maken; aansprakelijkheidsrisico. Pas met frequentieband-data (octaafbanden zitten al in de CSV).
 - **Frequentieband-analyse 125–4000 Hz** — octaafband-data zit al in de CSV, maar UI + validatie is veel werk; schijnnauwkeurigheid vermijden.
 - **Live API-koppeling productdata** — het single-file/offline model is juist de kracht; backend = nieuwe faalmodus. CSV + CI-sync volstaat.
 - **CRM/offerte-integratie, GA4-tracking** — prematuur zonder prijzen in de tool.
