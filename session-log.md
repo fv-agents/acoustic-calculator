@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-06-12 (3) — v6.0: dark theme redesign, 3-staps wizard, multi-file architectuur
+**Gedaan:** Volledige UI-rebuild op basis van Claude Design upgrade (Design upgrade/DESIGN-SPEC.md). Dark theme CSS custom properties. DM Serif Display + DM Mono zelfgehost (WOFF2, geen CDN). Babel standalone gevendord (3MB, offline). Single-file index.html gesplitst in data.js + ui-components.jsx + calculator-app.jsx. 89 producten hernoemd naar design convention (Rect/×). localStorage key lumenear_calc_v2. 3-staps wizard: Step 1 ruimte+materialen, Step 2 armaturen split-panel, Step 3 resultaat+PDF. RT60 sticky footer meter met optimal zone per ruimtetype. AnimatedNumber, IsoRoom, ProductCard (thumbnails). PDF via window.print() met A4-stylesheet, print-header+disclaimer hidden on screen. check_sync.py herschreven: leest window.PRODUCTS uit data.js, name normalization (Rectangle↔Rect, x↔×). CI 89/89 groen. docs/DESIGN-SPEC.md bewaard.
+**Besloten:** Engels UI, design naming (Rect/×, localStorage break), window.print() voor PDF.
+**Openstaand:** Falco: domein, embed, thumbnails visueel verifiëren na deploy.
+
 ## 2026-06-12 (2) — v5.2: bronnenonderzoek aannames + auto-suggest
 **Gedaan:** Alle vier aanname-α's onderzocht (ISO 354-rapporten lattenpanelen, ICC/Oscar spuitpleisterdata, Tarkett/DESSO tapijttegels, Aural Exchange personen): lamellenwand gesplitst 0,30 direct / 0,62 op regels+isolatie, lamellenplafond 0,60, rest bevestigd. Brontabel in DOCUMENTATIE §4. Auto-suggest gebouwd: adviesblok rechterpaneel + rapportzin "nog ~X m² Aeq ≈ N× product". Productafbeeldingen onderzocht → hotlinken afgewezen (lazy-load + offline), wacht op 24 thumbnails. Domein/embed: exacte stappen in status.md (vereist het andere Netlify-account).
 **Besloten:** zie decisions.md 2026-06-12 (v5.2-entries).
