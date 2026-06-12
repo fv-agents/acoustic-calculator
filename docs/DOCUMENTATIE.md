@@ -1,6 +1,6 @@
 # Lumenear Akoestische Calculator — Documentatie
 
-> Versie: 5.1 (materialenherziening + bezetting)
+> Versie: 6.0 (dark theme redesign, 3-staps wizard, multi-file architectuur)
 > Bijgewerkt: 2026-06-12
 > Doel: verkooptool voor akoestisch advies — architecten, projectinrichters en het Lumenear salesteam
 
@@ -10,7 +10,7 @@
 
 Interactief webdashboard dat live berekent wat Lumenear armaturen bijdragen aan de akoestiek van een ruimte: nagalmtijd (RT60) zonder en met Lumenear, verbetering in %, normtoetsing (indicatief) en STI-schatting. Inclusief **printbaar adviesrapport (PDF)**.
 
-De app draait volledig zelfstandig: React, htm en het Inter-font zijn lokaal gevendored (`app/vendor/`, `app/fonts/`). Geen CDN's, geen build-stap, geen internetverbinding nodig. Eén `app/index.html` + twee mappen.
+De app draait volledig zelfstandig: React, Babel standalone, DM-fonts en Inter zijn lokaal gevendored (`app/vendor/`, `app/fonts/`). Geen CDN's, geen build-stap, geen internetverbinding nodig. Multi-file: `app/index.html` laadt `data.js` + `ui-components.jsx` + `calculator-app.jsx`.
 
 ## 2. Layout
 
@@ -49,11 +49,11 @@ Volledig rekenvoorbeeld: `BEREKENING-VOORBEELD.md`.
 
 **Bron van waarheid: `data/lumenear_2026_acoustic_data.csv`** (89 producten, octaafband-α's, ISO 354).
 
-De `const PP=[...]` array in `app/index.html` is daarvan afgeleid. Regenereren:
+De `window.PRODUCTS` array in `app/data.js` is daarvan afgeleid. Vergelijken / regenereren:
 
 ```bash
-python tools/check_sync.py --emit   # print het JS-blok → plak in app/index.html
-python tools/check_sync.py          # verifieert de sync (draait ook in CI)
+python tools/check_sync.py          # verifieert data.js ↔ CSV (draait ook in CI)
+python tools/check_sync.py --emit   # print berekende window.PRODUCTS → vergelijk met app/data.js
 ```
 
 Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan alléén in `app/index.html`. Bronnen per waarde (onderzoek 2026-06-12):

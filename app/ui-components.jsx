@@ -160,7 +160,12 @@ function SimpleBarChart({ before, after, target }) {
       ))}
       <div style={{ marginLeft: 142, display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--ok)' }}>
         <div style={{ width: 12, height: 4, background: 'var(--ok)', borderRadius: 2, opacity: .4 }}></div>
-        Optimal range: {(target - 0.2 > 0 ? target - 0.2 : 0).toFixed(1)}–{target.toFixed(1)}s
+        {(() => {
+          const norm = (window.RT60_NORMS || {})[window._currentRt];
+          const lo = norm && norm.optimal ? norm.optimal[0] : Math.max(0, target - 0.2);
+          const hi = norm && norm.optimal ? norm.optimal[1] : target;
+          return `Optimal range: ${lo.toFixed(1)}–${hi.toFixed(1)}s`;
+        })()}
       </div>
     </div>
   );
