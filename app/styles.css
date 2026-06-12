@@ -363,77 +363,11 @@ input[type="number"] { -moz-appearance: textfield; }
   margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);
 }
 
-/* Print header + disclaimer — hidden on screen */
-.print-header { display: none; }
-.print-disclaimer { display: none; }
+/* Print elements hidden on screen — handled by result-styles.css (.print-only) */
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
 }
 
-/* ══════════════════════════════════════════
-   PRINT / PDF REPORT
-   ══════════════════════════════════════════ */
-@media print {
-  @page { size: A4; margin: 18mm 22mm; }
-
-  body { overflow: visible !important; background: #fff !important; }
-  #root, .app-shell { height: auto !important; overflow: visible !important; background: #fff !important; }
-
-  /* Hide all chrome */
-  .app-header, .progress-bar, .rt60-meter,
-  .step-nav, .split-sidebar, .filter-tabs,
-  .product-grid, .field-input, .field-select,
-  .preset-grid, .dim-grid, .checkbox-row,
-  .volume-info, .header-actions { display: none !important; }
-
-  /* Show step container as normal flow */
-  .step-container { overflow: visible !important; height: auto !important; }
-  .step-content { max-width: none !important; padding: 0 !important; background: #fff !important; }
-  .split-layout { display: block !important; }
-  .split-main { overflow: visible !important; padding: 0 !important; }
-
-  /* Print header — branding */
-  .print-header {
-    display: flex !important; justify-content: space-between; align-items: flex-end;
-    margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #111;
-  }
-  .print-header-brand { font-size: 18px; font-weight: 700; letter-spacing: -.5px; color: #111; }
-  .print-header-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-top: 3px; }
-  .print-header-date { font-size: 10px; color: #888; text-align: right; }
-
-  /* Override ALL dark colors to print-safe black */
-  .step-content * { color: #111 !important; background: transparent !important; border-color: #ccc !important; font-family: Georgia, serif !important; }
-  .step-content .t-mono, .step-content .product-aeq,
-  .step-content .row-value, .step-content .animated-value { font-family: 'Courier New', monospace !important; }
-  .step-content .t-section-label { color: #555 !important; letter-spacing: 1.5px; }
-  .step-content .t-step-title { font-size: 22px !important; font-weight: 400 !important; }
-  .step-content .t-step-subtitle { font-size: 13px !important; color: #444 !important; }
-
-  /* Result hero */
-  .result-hero { padding: 20px 0 !important; gap: 32px !important; }
-  .result-number .value { font-size: 56px !important; font-family: Georgia, serif !important; }
-  .result-number .label, .result-number .unit { color: #555 !important; }
-
-  /* Advice boxes — restore subtle tinted bg */
-  .advice-box { border: 1px solid #ccc !important; padding: 12px 16px !important; }
-  .advice-box.ok { background: #f0f5f0 !important; border-color: #6B8F71 !important; }
-  .advice-box.warn { background: #fdf6ee !important; border-color: #C8891A !important; }
-  .advice-box.bad { background: #fdf1ee !important; border-color: #B85C38 !important; }
-
-  /* Summary table */
-  .summary-table td { border-color: #ddd !important; }
-  .summary-table .row-total td { border-top: 2px solid #111 !important; }
-
-  /* Bar chart bars */
-  .bar-track { background: #f0f0f0 !important; }
-
-  /* Page breaks */
-  .result-hero { page-break-inside: avoid; }
-  .advice-box { page-break-inside: avoid; }
-  .summary-table { page-break-inside: avoid; }
-
-  /* Disclaimer small */
-  .print-disclaimer { display: block !important; font-size: 9px !important; color: #888 !important; margin-top: 24px; line-height: 1.5; }
-}
+/* @media print is handled entirely by result-styles.css */

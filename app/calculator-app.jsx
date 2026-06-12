@@ -35,6 +35,8 @@ function App() {
   const [fam, setFam]       = useState('All');
   const [search, setSearch] = useState('');
 
+  window._upgradeQty = qty;
+
   const [ls, setLs] = useState(String(saved.l).replace('.', ','));
   const [ws, setWs] = useState(String(saved.w).replace('.', ','));
   const [hs, setHs] = useState(String(saved.h).replace('.', ','));
@@ -116,9 +118,9 @@ function App() {
 
       {/* ── Header ── */}
       <div className="app-header">
-        <div style={{ display:'flex', alignItems:'center' }}>
-          <span className="logo-mark">LUMENEAR</span>
-          <span className="logo-sub">Acoustic Calculator</span>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <img src="img/lumenear-logo.png" alt="Lumenear"
+            style={{ height:26, filter:'invert(1)', objectFit:'contain' }} />
         </div>
         <div className="header-actions">
           <button className="btn btn-ghost btn-sm"
@@ -266,7 +268,7 @@ function App() {
             </div>
           </div>
         </div>
-        <RT60Meter rt0={calc.r0} rt1={calc.r1} target={calc.tgt} visible={true} />
+        <RT60MeterV2 rt0={calc.r0} rt1={calc.r1} target={calc.tgt} visible={true} roomType={rt} />
         </>
       )}
 
@@ -373,7 +375,7 @@ function App() {
             </div>
           </div>
         </div>
-        <RT60Meter rt0={calc.r0} rt1={calc.r1} target={calc.tgt} visible={true} />
+        <RT60MeterV2 rt0={calc.r0} rt1={calc.r1} target={calc.tgt} visible={true} roomType={rt} />
         </>
       )}
 
@@ -382,56 +384,47 @@ function App() {
           ══════════════════════════════════════════ */}
       {step === 3 && (
         <div className="step-container">
-          <div className="step-content" style={{ maxWidth:680 }}>
+          <div className="step-content" key="s3" style={{ maxWidth:720 }}>
 
-            {/* Print-only branding header */}
-            <div className="print-header">
-              <div>
-                <div className="print-header-brand">LUMENEAR</div>
-                <div className="print-header-sub">Acoustic Advisory Report</div>
-              </div>
-              <div className="print-header-date">
-                <div>{pn}</div>
-                {client && <div style={{ marginTop:2 }}>{client}</div>}
-                <div style={{ marginTop:4, color:'#aaa' }}>{printDate}</div>
-              </div>
-            </div>
+            <PrintHeader projectName={pn} clientName={client} />
 
             <div className="t-section-label">Result</div>
             <h1 className="t-step-title">Acoustic result</h1>
             <p className="t-step-subtitle">RT60 before and after — with a recommendation.</p>
 
-            {/* Big RT60 numbers */}
-            <div className="result-hero">
-              <div className="result-number">
-                <div className="label">Before</div>
-                <div className="value t-display rt-before">
+            {/* Hero numbers */}
+            <div className="result-hero-v2">
+              <div className="rh2-number">
+                <div className="rh2-label">Before</div>
+                <div className="rh2-value" style={{ color:'#94a3b8' }}>
                   <AnimatedNumber value={Math.min(calc.r0, 6)} suffix="s" />
                 </div>
-                <div className="unit">seconds</div>
+                <div className="rh2-unit">seconds</div>
               </div>
-              <div className="result-arrow">→</div>
-              <div className="result-number">
-                <div className="label">After Lumenear</div>
-                <div className="value t-display rt-after">
+              <div className="rh2-arrow">→</div>
+              <div className="rh2-number">
+                <div className="rh2-label">After Lumenear</div>
+                <div className="rh2-value" style={{ color:'var(--accent)' }}>
                   <AnimatedNumber value={Math.min(calc.r1, 6)} suffix="s" />
                 </div>
-                <div className="unit">seconds</div>
+                <div className="rh2-unit">seconds</div>
               </div>
               {hasProducts && calc.imp > 0.5 && (
-                <div className="result-badge">
-                  <div className="pct">−{Math.round(calc.imp)}%</div>
-                  <div className="pct-label">reduction</div>
+                <div className="rh2-badge">
+                  <div className="rh2-badge-pct">−{Math.round(calc.imp)}%</div>
+                  <div className="rh2-badge-label">reduction</div>
                 </div>
               )}
             </div>
 
-            {/* Bar chart */}
-            <SimpleBarChart before={Math.min(calc.r0, 6)} after={Math.min(calc.r1, 6)} target={calc.tgt} />
+            <MetricCards calc={calc} hasProducts={hasProducts} />
+            <DecayCurve rt0={Math.min(calc.r0, 6)} rt1={Math.min(calc.r1, 6)} target={calc.tgt} />
+            <ComparisonChart before={Math.min(calc.r0, 6)} after={Math.min(calc.r1, 6)} target={calc.tgt} roomType={rt} />
+            <AbsorptionDonut parts={calc.parts} lumenearAb={calc.lAb} />
 
             {/* Recommendation */}
-            <div className={`advice-box ${rating.cls}`} style={{ marginTop:20, fontSize:14, lineHeight:1.7 }}>
-              <span style={{ fontWeight:600 }}>
+            <div className={`advice-box ${rating.cls}`} style={{ fontSize:14, lineHeight:1.7 }}>
+              <span style={{ color:rating.color, fontWeight:600 }}>
                 {rating.cls === 'ok' ? '✓' : '⚠'} {rating.text}.
               </span>{' '}
               The reverberation time {hasProducts
@@ -440,11 +433,14 @@ function App() {
               For {rt.toLowerCase()}, {calc.tgt.toFixed(1)}s is the recommended target
               {calc.r1 <= calc.tgt
                 ? ' — your specification meets this target.'
-                : `. Approximately ${calc.aNeed.toFixed(1)} m² more absorption is needed.`}
+                : `. You need approximately ${calc.aNeed.toFixed(1)} m² more absorption to reach it.`}
             </div>
 
+            <PrintPageBreak />
+            <PrintHeader projectName={pn} clientName={client} />
+
             {/* Room details */}
-            <div style={{ marginTop:24 }}>
+            <div style={{ marginBottom:20, marginTop:20 }}>
               <div className="t-section-label">Room details</div>
               <table className="summary-table">
                 <tbody>
@@ -460,22 +456,35 @@ function App() {
               </table>
             </div>
 
-            {/* Fixture summary */}
+            {/* Fixture table */}
             {hasProducts && (
-              <div style={{ marginTop:24 }}>
+              <div style={{ marginBottom:20 }}>
                 <div className="t-section-label">Specified fixtures</div>
                 <table className="summary-table">
+                  <thead>
+                    <tr>
+                      <td style={{ color:'var(--text-sec)', fontSize:10, fontWeight:600 }}>Product</td>
+                      <td className="row-value" style={{ color:'var(--text-sec)', fontSize:10, fontWeight:600 }}>Qty</td>
+                      <td className="row-value" style={{ color:'var(--text-sec)', fontSize:10, fontWeight:600 }}>αw</td>
+                      <td className="row-value" style={{ color:'var(--text-sec)', fontSize:10, fontWeight:600 }}>Aeq/unit</td>
+                      <td className="row-value" style={{ color:'var(--text-sec)', fontSize:10, fontWeight:600 }}>Total</td>
+                    </tr>
+                  </thead>
                   <tbody>
                     {sp.map(p => (
                       <tr key={p.n}>
                         <td style={{ color:'var(--text)' }}>{p.n}</td>
                         <td className="row-value">{p.q}×</td>
-                        <td className="row-value" style={{ color:'var(--accent)' }}>{(p.q * p.eq).toFixed(1)} m²</td>
+                        <td className="row-value">{p.aw}</td>
+                        <td className="row-value">{p.eq} m²</td>
+                        <td className="row-value" style={{ color:'var(--accent)', fontWeight:600 }}>{(p.q * p.eq).toFixed(1)} m²</td>
                       </tr>
                     ))}
                     <tr className="row-total">
                       <td>Total Lumenear absorption</td>
                       <td className="row-value">{sp.reduce((s, p) => s + p.q, 0)} fixtures</td>
+                      <td className="row-value"></td>
+                      <td className="row-value"></td>
                       <td className="row-value">{calc.lAb.toFixed(1)} m² Aeq</td>
                     </tr>
                   </tbody>
@@ -483,12 +492,14 @@ function App() {
               </div>
             )}
 
-            {/* Report section */}
-            <div style={{ marginTop:32, paddingTop:24, borderTop:'1px solid var(--border)' }}>
+            <PrintFooter />
+
+            {/* Report form — hidden in print */}
+            <div className="no-print" style={{ marginTop:32, paddingTop:24, borderTop:'1px solid var(--border)' }}>
               <div className="t-section-label">Report</div>
               <h2 style={{ fontSize:20, fontWeight:300, color:'var(--text)', marginBottom:4 }}>Generate report</h2>
               <p style={{ fontSize:13, color:'var(--text-sec)', marginBottom:20 }}>
-                Enter a project name and download a PDF you can share directly with your client.
+                Download a PDF you can share directly with your client.
               </p>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
                 <div className="field">
@@ -515,16 +526,7 @@ function App() {
               </div>
             </div>
 
-            {/* Print-only disclaimer */}
-            <div className="print-disclaimer">
-              All RT60 calculations are indicative, based on the Sabine formula with speech-averaged α values (500–2000 Hz).
-              Aeq values per fixture are from independent lab tests (EN-ISO 354, Peutz A 3432-1-RA).
-              Pendant products include edge diffraction effect. This tool does not replace on-site acoustic assessment.
-              Norm targets are indicative per room type and do not constitute formal DIN 18041 compliance testing.
-              — Lumenear / In-Zee BV · lumenear.com · info@lumenear.com
-            </div>
-
-            <div className="step-nav">
+            <div className="step-nav no-print">
               <button className="btn btn-ghost" onClick={prev}>← Adjust fixtures</button>
               <div></div>
             </div>

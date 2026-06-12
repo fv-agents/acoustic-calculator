@@ -1,0 +1,559 @@
+/* Lumenear Acoustic Calculator — UPGRADE: Result + Meter V2 + Print Styles
+   Add this CSS to the project (link AFTER styles.css) */
+
+/* ═══════════════════════════════════════════
+   DECAY CURVE
+   ═══════════════════════════════════════════ */
+.decay-chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 16px 8px;
+  margin-bottom: 20px;
+}
+.decay-chart-svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ═══════════════════════════════════════════
+   ABSORPTION DONUT
+   ═══════════════════════════════════════════ */
+.donut-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.donut-layout {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.donut-svg {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+.donut-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.legend-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.legend-row:last-child { border-bottom: none; }
+.legend-highlight {
+  background: rgba(200, 184, 154, .06);
+  border-radius: 4px;
+  padding: 6px 8px 6px 0;
+  margin: -2px -8px -2px 0;
+}
+.legend-highlight .legend-name { font-weight: 700; color: var(--accent); }
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.legend-name { color: var(--text-sec); }
+.legend-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+}
+.legend-pct {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-sec);
+  text-align: right;
+  min-width: 28px;
+}
+
+/* ═══════════════════════════════════════════
+   METRIC CARDS
+   ═══════════════════════════════════════════ */
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  text-align: center;
+}
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.metric-unit {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  opacity: .7;
+  margin-left: 2px;
+}
+.metric-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════
+   COMPARISON CHART
+   ═══════════════════════════════════════════ */
+.comp-chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.comp-chart { position: relative; }
+.comp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.comp-label {
+  width: 120px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-sec);
+  text-align: right;
+}
+.comp-track {
+  flex: 1;
+  position: relative;
+  height: 28px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.comp-bar {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  border-radius: 4px;
+  min-width: 3px;
+}
+.comp-zone-bg {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(107, 143, 113, .08);
+  border-left: 1px solid rgba(107, 143, 113, .2);
+  border-right: 1px solid rgba(107, 143, 113, .2);
+  pointer-events: none;
+}
+.comp-target-line {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--ok);
+  opacity: .6;
+}
+.comp-target-row .comp-track { height: 20px; background: transparent; }
+.comp-value {
+  width: 50px;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-align: right;
+}
+.comp-scale-row { margin-bottom: 0; margin-top: -4px; }
+.comp-scale-track {
+  height: 16px !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+.comp-tick {
+  position: absolute;
+  top: 0;
+  font-size: 8px;
+  color: var(--text-sec);
+  font-family: var(--font-mono);
+  transform: translateX(-50%);
+}
+.comp-zone-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--ok);
+  margin-top: 8px;
+}
+.comp-zone-dot {
+  width: 12px;
+  height: 4px;
+  background: var(--ok);
+  border-radius: 2px;
+  opacity: .4;
+}
+
+/* ═══════════════════════════════════════════
+   RT60 METER V2 — bigger, with sound waves
+   ═══════════════════════════════════════════ */
+.rt60-meter-v2 {
+  background: #0a0a0a;
+  border-top: 1px solid var(--border);
+  padding: 12px 28px 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.rt60-meter-v2.meter-hidden {
+  opacity: 0;
+  transform: translateY(100%);
+  pointer-events: none;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Sound wave animation */
+.meter-v2-wave { flex-shrink: 0; }
+@keyframes meterWave {
+  0%   { r: 4; opacity: .5; stroke-width: 1.2; }
+  100% { r: 16; opacity: 0; stroke-width: .3; }
+}
+
+.meter-v2-data { flex: 1; min-width: 0; }
+
+.meter-v2-vals {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.mv2-item { display: flex; align-items: center; gap: 6px; }
+.mv2-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-sec);
+}
+.mv2-num {
+  font-size: 14px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.mv2-arrow {
+  font-size: 14px;
+  color: var(--accent);
+  opacity: .5;
+}
+.mv2-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ok);
+  background: rgba(107, 143, 113, .12);
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+/* Track */
+.meter-v2-track {
+  position: relative;
+  height: 14px;
+  background: var(--surface);
+  border-radius: 7px;
+  overflow: visible;
+}
+.mv2-zone {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 7px;
+}
+.mv2-green { background: rgba(107, 143, 113, .18); }
+.mv2-orange { background: rgba(200, 137, 26, .1); }
+.mv2-red { background: rgba(184, 92, 56, .08); border-radius: 0 7px 7px 0; }
+
+.mv2-target-tick {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 20px;
+  background: var(--ok);
+  opacity: .4;
+  border-radius: 1px;
+  transition: left .5s cubic-bezier(.4, 0, .2, 1);
+}
+
+.mv2-marker {
+  position: absolute;
+  top: -5px;
+  width: 6px;
+  height: 24px;
+  border-radius: 3px;
+  transition: left .5s cubic-bezier(.4, 0, .2, 1);
+  z-index: 2;
+}
+.mv2-marker-before { background: #94a3b8; }
+.mv2-marker-after { background: #C8B89A; }
+
+.mv2-marker-label {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: inherit;
+  white-space: nowrap;
+}
+.mv2-marker-before .mv2-marker-label { color: #94a3b8; }
+.mv2-marker-after .mv2-marker-label { color: #C8B89A; }
+
+/* Scale */
+.meter-v2-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 8px;
+  color: var(--text-sec);
+  font-family: var(--font-mono);
+}
+
+
+/* ═══════════════════════════════════════════
+   UPGRADED RESULT HERO — refined spacing
+   ═══════════════════════════════════════════ */
+.result-hero-v2 {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0 24px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.rh2-number { text-align: center; }
+.rh2-number .rh2-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-sec);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.rh2-number .rh2-value {
+  font-family: var(--font-display);
+  font-size: 64px;
+  line-height: 1;
+}
+.rh2-number .rh2-unit {
+  font-size: 11px;
+  color: var(--text-sec);
+  margin-top: 4px;
+}
+.rh2-arrow {
+  font-size: 24px;
+  color: var(--accent);
+  opacity: .5;
+}
+.rh2-badge {
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: 20px;
+  background: rgba(107, 143, 113, .12);
+}
+.rh2-badge-pct {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ok);
+}
+.rh2-badge-label {
+  font-size: 9px;
+  color: var(--ok);
+  margin-top: 2px;
+}
+
+/* Section dividers */
+.result-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+
+/* ═══════════════════════════════════════════
+   PRINT / PDF STYLES
+   ═══════════════════════════════════════════ */
+.print-only { display: none !important; }
+
+@media print {
+  /* Show print elements */
+  .print-only { display: block !important; }
+
+  /* Color inversion for paper */
+  :root {
+    --bg: #ffffff !important;
+    --surface: #f5f4f2 !important;
+    --raised: #eeedeb !important;
+    --border: #d8d6d3 !important;
+    --border-hover: #c0bebb !important;
+    --text: #1a1a1a !important;
+    --text-sec: #5a5856 !important;
+    --accent: #8B7B63 !important;
+    --accent-dim: #a09080 !important;
+    --ok: #4a7050 !important;
+    --warn: #8a6510 !important;
+    --alert: #8a4528 !important;
+  }
+
+  body {
+    background: white !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  #root { height: auto !important; }
+  .app-shell { height: auto !important; overflow: visible !important; }
+
+  /* Hide interactive UI */
+  .app-header,
+  .progress-bar,
+  .rt60-meter-v2,
+  .rt60-meter,
+  .step-nav,
+  .no-print,
+  .report-form-section,
+  .btn,
+  button,
+  a.btn { display: none !important; }
+
+  /* Allow scroll */
+  .step-container {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .step-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Print header */
+  .print-hdr {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #1a1a1a;
+    margin-bottom: 24px;
+  }
+  .print-logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
+  }
+  .print-tagline {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8B7B63;
+    margin-top: 2px;
+  }
+  .print-meta {
+    text-align: right;
+    font-size: 11px;
+    color: #5a5856;
+    line-height: 1.6;
+  }
+
+  /* Print footer */
+  .print-ftr {
+    display: block !important;
+    margin-top: 32px;
+    padding-top: 12px;
+    border-top: 1px solid #d8d6d3;
+    font-size: 8px;
+    color: #8a8480;
+    text-align: center;
+  }
+
+  /* Page breaks */
+  .print-page-break {
+    display: block !important;
+    page-break-before: always;
+    height: 0;
+  }
+
+  /* Chart adjustments for print */
+  .decay-chart-wrap,
+  .donut-wrap,
+  .comp-chart-wrap {
+    border-color: #d8d6d3 !important;
+    background: #f9f8f7 !important;
+  }
+
+  .decay-chart-svg line[stroke="#2E2E2E"] { stroke: #d8d6d3 !important; }
+  .decay-chart-svg rect[stroke="#2E2E2E"] { stroke: #d8d6d3 !important; }
+  .decay-chart-svg text[fill="#8A8480"] { fill: #5a5856 !important; }
+  .decay-chart-svg rect[fill="#1E1E1E"] { fill: #f0efed !important; }
+
+  /* Donut text for print */
+  .donut-svg text[fill="#C8B89A"] { fill: #8B7B63 !important; }
+  .donut-svg text[fill="#8A8480"] { fill: #5a5856 !important; }
+
+  /* Metric cards */
+  .metric-card { background: #f9f8f7 !important; border-color: #d8d6d3 !important; }
+
+  /* Hero numbers */
+  .rh2-value { color: #1a1a1a !important; }
+
+  /* Advice box adjustments */
+  .advice-box.ok { background: rgba(74, 112, 80, .08) !important; border-color: rgba(74, 112, 80, .3) !important; }
+  .advice-box.warn { background: rgba(138, 101, 16, .08) !important; border-color: rgba(138, 101, 16, .3) !important; }
+  .advice-box.bad { background: rgba(138, 69, 40, .08) !important; border-color: rgba(138, 69, 40, .3) !important; }
+
+  /* Table for print */
+  .summary-table td { border-color: #d8d6d3 !important; }
+  .summary-table .row-total td { border-color: #8B7B63 !important; color: #8B7B63 !important; }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 18mm 20mm;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REDUCED MOTION
+   ═══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .mv2-marker,
+  .mv2-target-tick,
+  .comp-bar { transition-duration: 0s !important; }
+  .meter-v2-wave svg circle { animation: none !important; }
+}
