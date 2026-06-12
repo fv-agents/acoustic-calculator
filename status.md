@@ -2,22 +2,21 @@
 _Bijgewerkt: 2026-06-12_
 
 ## Huidige staat
-**v6.0 live** — volledige UI-rebuild: dark theme, 3-staps wizard, Engelse UI, multi-file architectuur.
-- `app/data.js` — 89 producten, design naming (Rect/×)
-- `app/ui-components.jsx` — AnimatedNumber, IsoRoom, RT60Meter, ProductCard, SimpleBarChart
-- `app/calculator-app.jsx` — 3-staps wizard, Sabine-engine, PDF via window.print()
-- `app/styles.css` — dark design system, DM Serif Display + DM Mono zelfgehost, print A4
-- `app/vendor/babel.min.js` — Babel standalone gevendord (offline, geen CDN)
-- CI groen: 89/89 in sync, `tools/check_sync.py` leest `window.PRODUCTS` uit data.js
-- `docs/DESIGN-SPEC.md` bewaard voor finetuning
+**v6.1 live** — result page upgrade + Lumenear logo.
+- `app/result-components.jsx` — DecayCurve, AbsorptionDonut, MetricCards, ComparisonChart, RT60MeterV2, PrintHeader/Footer/PageBreak
+- `app/result-styles.css` — stijlen voor nieuwe componenten + volledig @media print (CSS custom property inversion, A4, 2-pagina PDF)
+- `app/calculator-app.jsx` — Step 3 gebruikt nieuwe visualisaties; RT60MeterV2 in Steps 1+2; Lumenear logo in header
+- `app/img/lumenear-logo.png` — echte brand PNG, wit via `filter:invert(1)`
+- CI groen: 89/89 in sync, 11/11 unit tests pass
+- Audit v6.0 uitgevoerd: Inter font-fix, bar chart range fix, .gitignore, cache headers, docs bijgewerkt
 
 ## Blocker
 Geen.
 
 ## Volgende stap (vereisen actie van Falco — niet vanaf deze machine te doen)
-1. **Domein**: log in op het Netlify-account waar de site draait (niet falcovile@gmail.com) → Site settings → Domain management → add `calculator.lumenear.com` → CNAME `calculator` → `lumenear-acoustic-calculator.netlify.app` bij de DNS-provider.
-2. **Embed op lumenear.com**: WordPress-pagina met het iframe-snippet uit docs/DEPLOYMENT.md (CSP staat al goed).
-3. **Productafbeeldingen testen**: check of alle 24 thumbnails renderen na deploy (app/img/*.jpg zijn meegecommit).
+1. **Domein**: log in op het Netlify-account waar de site draait (niet falcovile@gmail.com) → Site settings → Domain management → add `calculator.lumenear.com` → CNAME bij DNS-provider.
+2. **Embed op lumenear.com**: WordPress-pagina met iframe-snippet uit docs/DEPLOYMENT.md (CSP staat goed).
+3. **Visueel testen**: Step 3 in browser checken — decay curve, donut, RT60MeterV2.
 
 ## Roadmap
-v6.1: product thumbnail card finetuning · v7.0: SVG/DXF export voor projectdocumentatie.
+v7.0: SVG/DXF export voor projectdocumentatie.

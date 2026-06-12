@@ -2,6 +2,16 @@
 
 ---
 
+## 2026-06-12 (5) — v6.1: result page upgrade + Lumenear logo
+**Gedaan:** result-components.jsx (DecayCurve SVG, AbsorptionDonut SVG, MetricCards 4×KPI, ComparisonChart met norm-zone, RT60MeterV2 geluidsgolf-animatie) + result-styles.css (print: CSS custom property inversion, A4 2-pagina PDF). calculator-app.jsx: Step 3 volledig vervangen, RT60Meter → RT60MeterV2, Lumenear logo PNG (filter:invert) in header, window._upgradeQty sync. Oude @media print uit styles.css verwijderd. CI groen.
+**Besloten:** logo via filter:invert(1) op zwarte PNG — werkt op donkere header.
+**Openstaand:** visueel testen in browser; Falco-acties: domein, embed.
+
+## 2026-06-12 (4) — audit v6.0: 8 fixes
+**Gedaan:** Inter @font-face toegevoegd (inter-var.woff2 was aanwezig maar niet gedeclareerd), SimpleBarChart optimal range label gefixt (nu via RT60_NORMS), CI step name gecorrigeerd, .gitignore aangemaakt, cache headers netlify.toml, README + DOCUMENTATIE.md bijgewerkt naar v6.0, tools/test_calc.py (11 unit tests Sabine-engine). CI 89/89 + 11/11 groen.
+**Besloten:** geen E2E browser tests — acceptabel voor dit stadium.
+**Openstaand:** —
+
 ## 2026-06-12 (3) — v6.0: dark theme redesign, 3-staps wizard, multi-file architectuur
 **Gedaan:** Volledige UI-rebuild op basis van Claude Design upgrade (Design upgrade/DESIGN-SPEC.md). Dark theme CSS custom properties. DM Serif Display + DM Mono zelfgehost (WOFF2, geen CDN). Babel standalone gevendord (3MB, offline). Single-file index.html gesplitst in data.js + ui-components.jsx + calculator-app.jsx. 89 producten hernoemd naar design convention (Rect/×). localStorage key lumenear_calc_v2. 3-staps wizard: Step 1 ruimte+materialen, Step 2 armaturen split-panel, Step 3 resultaat+PDF. RT60 sticky footer meter met optimal zone per ruimtetype. AnimatedNumber, IsoRoom, ProductCard (thumbnails). PDF via window.print() met A4-stylesheet, print-header+disclaimer hidden on screen. check_sync.py herschreven: leest window.PRODUCTS uit data.js, name normalization (Rectangle↔Rect, x↔×). CI 89/89 groen. docs/DESIGN-SPEC.md bewaard.
 **Besloten:** Engels UI, design naming (Rect/×, localStorage break), window.print() voor PDF.
