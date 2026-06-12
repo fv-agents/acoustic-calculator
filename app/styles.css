@@ -355,8 +355,9 @@ input[type="number"] { -moz-appearance: textfield; }
   margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);
 }
 
-/* Print header — hidden on screen */
+/* Print header + disclaimer — hidden on screen */
 .print-header { display: none; }
+.print-disclaimer { display: none; }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
