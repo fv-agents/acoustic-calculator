@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
-check_sync.py — verifieert dat de PP-productarray in de web-app exact overeenkomt
-met de waarden berekend uit de bron-CSV (data/lumenear_2026_acoustic_data.csv).
+check_sync.py — verifies that product data in app/data.js matches values
+calculated from the source CSV (data/lumenear_2026_acoustic_data.csv).
 
-Gebruik:
-  python tools/check_sync.py                          # checkt app/index.html
-  python tools/check_sync.py --html pad/naar/file.html
-  python tools/check_sync.py --emit                   # print het JS PP-blok voor app/index.html
+Usage:
+  python tools/check_sync.py              # check app/data.js
+  python tools/check_sync.py --emit       # print updated window.PRODUCTS JS block
 
-Exit 0 = in sync, exit 1 = afwijkingen gevonden.
-Pure Python (geen pandas) zodat het overal draait, ook in CI.
+Exit 0 = in sync, exit 1 = drift detected.
+Pure Python (no pandas) — runs everywhere including CI.
 """
 
 import argparse
@@ -19,10 +18,11 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT     = Path(__file__).resolve().parent.parent
 CSV_PATH = ROOT / "data" / "lumenear_2026_acoustic_data.csv"
+JS_PATH  = ROOT / "app" / "data.js"
 
-# Peutz V5 override voor Float "acoustic" varianten (EN-ISO 354, rapport A 3432-1-RA)
+# Peutz V5 override for Float acoustic variants (EN-ISO 354, report A 3432-1-RA)
 PEUTZ_V5 = {"a_500Hz": 0.99, "a_1000Hz": 0.99, "a_2000Hz": 0.97}
 
 
@@ -32,8 +32,17 @@ def fnum(v):
     return float(str(v).replace(",", "."))
 
 
+def normalize_name(name):
+    """Normalize a product name for CSV↔JS comparison.
+    CSV uses 'Rectangle' and 'x' for dimensions; data.js uses 'Rect' and '×'.
+    """
+    name = name.replace("Rectangle", "Rect")
+    name = re.sub(r'(\d+)[×x](\d+)', r'\1x\2', name)
+    return name
+
+
 def calc_area(fam, var, d):
-    """Zelfde logica als calc_area in build_lumenear_calculator_v4.py."""
+    """Calculate acoustic surface area from CSV columns (same logic as original build script)."""
     a = None
     if fam == "Float" and d is not None:
         a = 2 * math.pi * (d / 2000) ** 2
@@ -63,106 +72,104 @@ def calc_area(fam, var, d):
 
 
 def expected_products():
-    """Bereken per product de verwachte (naam, familie, aw, area, aeq) uit de CSV (CSV-volgorde)."""
+    """Compute expected (normalized_name, fam, aw, area, aeq) from CSV."""
     out = []
     with open(CSV_PATH, encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f, delimiter=";"):
-            fam = row["Product_Family"]
-            var = row["Product_Variant"]
-            name = f"{fam} {var}"
-            d = fnum(row["Diameter_mm"])
+            fam  = row["Product_Family"]
+            var  = row["Product_Variant"]
+            name = normalize_name(f"{fam} {var}")
+            d    = fnum(row["Diameter_mm"])
             area = fnum(row["Acoustic_Surface_m2"])
             if area is None:
                 area = calc_area(fam, var, d)
             if area is None:
-                print(f"FOUT: geen oppervlak bepaalbaar voor '{name}'")
+                print(f"ERROR: cannot determine area for '{fam} {var}'")
                 sys.exit(1)
 
             alphas = {k: fnum(row[k]) for k in ("a_500Hz", "a_1000Hz", "a_2000Hz")}
             if fam == "Float" and "acoustic" in var.lower():
                 alphas.update(PEUTZ_V5)
-            # Zelfde afrondingsvolgorde als het build-script: eerst speech avg op 2 dec.
             speech = round(sum(alphas.values()) / 3, 2)
 
             mounting = row["Mounting_Type"] or ""
             diff = 1.12 if re.search(r"pendant|hang|free", mounting, re.I) else 1.00
-            aeq = round(area * speech * diff, 2)
-            aw = fnum(row["aw_ISO11654"])
+            aeq  = round(area * speech * diff, 2)
+            aw   = fnum(row["aw_ISO11654"])
             out.append((name, fam, aw, round(area, 2), aeq))
     return out
 
 
+def parse_data_js(js_path):
+    """Parse window.PRODUCTS from app/data.js.
+    Returns dict: normalized_name → (aw, area, aeq).
+    """
+    text = Path(js_path).read_text(encoding="utf-8")
+    m = re.search(r"window\.PRODUCTS\s*=\s*\[(.*?)\];", text, re.S)
+    if not m:
+        print(f"ERROR: window.PRODUCTS not found in {js_path}")
+        sys.exit(1)
+    out = {}
+    pat = re.compile(r'\{n:"([^"]+)",f:"([^"]+)",[^}]*?aw:([\d.]+),a:([\d.]+),eq:([\d.]+)')
+    for n, _f, aw, a, eq in pat.findall(m.group(1)):
+        out[normalize_name(n)] = (float(aw), float(a), float(eq))
+    return out
+
+
 def js_num(v):
-    """Compacte JS-notatie zoals in app/index.html: 0.45 -> .45, 2.00 -> 2."""
+    """Compact JS number notation: 0.45 → .45, 2.00 → 2."""
     s = f"{v:.2f}".rstrip("0").rstrip(".")
     return s[1:] if s.startswith("0.") else s
 
 
 def emit_js(products):
-    """Print het 'const PP=[...]' blok om in app/index.html te plakken."""
-    lines = [
-        '{n:"%s",f:"%s",aw:%s,a:%s,eq:%s}' % (n, f, js_num(aw), js_num(a), js_num(eq))
-        for n, f, aw, a, eq in products
-    ]
-    print("const PP=[")
-    print(",\n".join("  " + l for l in lines))
+    """Print a window.PRODUCTS block with CSV-calculated values (for reference)."""
+    print("window.PRODUCTS = [")
+    for n, f, aw, a, eq in products:
+        print(f'  {{n:"{n}",f:"{f}",aw:{js_num(aw)},a:{js_num(a)},eq:{js_num(eq)}}},')
     print("];")
-
-
-def parse_pp(html_path):
-    """Parse de const PP=[...] array uit de web-app."""
-    text = Path(html_path).read_text(encoding="utf-8")
-    m = re.search(r"const PP\s*=\s*\[(.*?)\];", text, re.S)
-    if not m:
-        print(f"FOUT: geen 'const PP=[...]' gevonden in {html_path}")
-        sys.exit(1)
-    out = {}
-    pat = re.compile(
-        r'\{n:"([^"]+)",f:"[^"]+",aw:([\d.]+),a:([\d.]+),eq:([\d.]+)\}'
-    )
-    for n, aw, a, eq in pat.findall(m.group(1)):
-        out[n] = (float(aw), float(a), float(eq))
-    return out
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--html", default=str(ROOT / "app" / "index.html"))
+    ap.add_argument("--js",   default=str(JS_PATH),
+                    help="Path to app/data.js (default: app/data.js)")
     ap.add_argument("--emit", action="store_true",
-                    help="print het JS PP-blok voor app/index.html en stop")
+                    help="Print window.PRODUCTS JS block and exit")
     args = ap.parse_args()
 
     products = expected_products()
     if args.emit:
         emit_js(products)
         return
+
     exp = {n: (aw, a, eq) for n, _f, aw, a, eq in products}
-    got = parse_pp(args.html)
+    got = parse_data_js(args.js)
 
     errors = []
     for name in sorted(set(exp) | set(got)):
         if name not in got:
-            errors.append(f"ONTBREEKT in web-app: {name}")
+            errors.append(f"MISSING in data.js: {name}")
             continue
         if name not in exp:
-            errors.append(f"ONBEKEND product in web-app (niet in CSV): {name}")
+            errors.append(f"UNKNOWN product in data.js (not in CSV): {name}")
             continue
         e_aw, e_a, e_eq = exp[name]
         g_aw, g_a, g_eq = got[name]
         if abs(e_eq - g_eq) > 0.005:
-            errors.append(f"Aeq afwijking {name}: verwacht {e_eq}, web heeft {g_eq}")
+            errors.append(f"Aeq mismatch {name}: expected {e_eq}, got {g_eq}")
         if abs(e_a - g_a) > 0.005:
-            errors.append(f"Oppervlak afwijking {name}: verwacht {e_a}, web heeft {g_a}")
+            errors.append(f"Area mismatch {name}: expected {e_a}, got {g_a}")
         if e_aw is not None and abs(e_aw - g_aw) > 0.005:
-            errors.append(f"aw afwijking {name}: verwacht {e_aw}, web heeft {g_aw}")
+            errors.append(f"aw mismatch {name}: expected {e_aw}, got {g_aw}")
 
-    print(f"Producten in CSV: {len(exp)} | in web-app: {len(got)}")
+    print(f"Products in CSV: {len(exp)} | in data.js: {len(got)}")
     if errors:
-        print(f"\n{len(errors)} AFWIJKING(EN):")
+        print(f"\n{len(errors)} MISMATCH(ES) FOUND:")
         for e in errors:
             print(f"  - {e}")
         sys.exit(1)
-    print("OK: web-app productdata is volledig in sync met de CSV-berekening.")
+    print("OK: data.js is fully in sync with the CSV calculation.")
 
 
 if __name__ == "__main__":
