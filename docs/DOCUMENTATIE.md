@@ -56,9 +56,17 @@ python tools/check_sync.py --emit   # print het JS-blok → plak in app/index.ht
 python tools/check_sync.py          # verifieert de sync (draait ook in CI)
 ```
 
-Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan alléén in `app/index.html`. Bronnen: Sengpiel/Harris-absorptietabellen, Peutz A 3432-1-RA (PET-vilt wandopties), fabrikantdata tapijttegels (αw 0,15–0,20).
+Materiaaldata (FLOOR/WALL/CEIL/FURN/EX) en presets staan alléén in `app/index.html`. Bronnen per waarde (onderzoek 2026-06-12):
 
-**Nog te verifiëren met datasheet** (gemarkeerd als aanname in de code): Tapijttegels 0,15 · Houten lamellenwand op vilt 0,55 · Houten lamellenplafond op vilt 0,55 · Akoestisch spuitpleister 0,70.
+| Waarde | Bron |
+|---|---|
+| Tapijttegels 0,15 | Fabrikantdata Tarkett/DESSO: standaard tegels αw 0,15–0,20 |
+| Lamellenwand direct op wand 0,30 | ISO 354-testrapporten lattenpanelen (αw ≈ 0,3 MH direct geschroefd) |
+| Lamellenwand op regels + isolatie 0,62 | Zelfde testreeks: regels + minerale wol → ≈ 0,62 MH |
+| Lamellenplafond 0,60 | Plafondmontage = plenum; tussen direct- en spouwwaarde |
+| Akoestisch spuitpleister 0,70 | 25 mm op vaste ondergrond: α 0,50/0,80/0,85 → spraak 0,72; NRC-range fabrikanten 0,65–0,90 |
+| Personen 0,46 m²/p.p. | Sengpiel (0,42/0,46/0,50) en Aural Exchange (0,44/0,45/0,45) — twee bronnen consistent |
+| PET-vilt wandopties 0,36 / 0,90 | Eigen Peutz-rapport A 3432-1-RA (V1 / V4-V5) |
 
 De Excel-versie is per 2026-06-12 uitgefaseerd; het buildscript staat in `backup/build_lumenear_calculator_v4.py`.
 

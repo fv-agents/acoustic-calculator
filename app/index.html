@@ -114,6 +114,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--g
 .mini-b:focus-visible{outline:2px solid var(--t400)}
 .mini-b.plus{border-color:var(--t400);background:var(--t50);color:var(--t700)}
 .mini-b.del{border-color:var(--g200);background:var(--g100);color:var(--g500);font-size:10px;margin-left:1px}
+.advice{background:#fffbeb;border:1px solid #fde68a;border-left:3px solid var(--amber);border-radius:var(--rx);padding:8px 10px;font-size:10px;line-height:1.5;color:var(--g700)}
+.advice.ok{background:var(--t50);border-color:var(--t200);border-left-color:var(--t600);color:var(--t700);font-weight:600}
 
 /* BARS */
 .bars{display:flex;align-items:flex-end;gap:6px;height:100px;padding:0 2px}
@@ -207,18 +209,19 @@ const html=htm.bind(React.createElement);
 
 /* ══════════ DATA — producten sync met data/lumenear_2026_acoustic_data.csv (zie tools/check_sync.py) ══════════
    Materiaalwaardes = spraakgemiddelde α (500–2000 Hz). Bronnen: Sengpiel/Harris-tabellen,
-   Peutz A 3432-1-RA (PET-vilt), fabrikantdata (tapijttegels αw 0.15–0.20).
-   [aanname, datasheet gewenst]: Tapijttegels .15 · Lamellenwand .55 · Lamellenplafond .55 · Spuitpleister .70 */
+   Peutz A 3432-1-RA (PET-vilt), fabrikantdata tapijttegels (αw 0.15–0.20, Tarkett/DESSO),
+   ISO 354-testrapporten lamellenpanelen (direct ≈0.30 / op regels+isolatie ≈0.62),
+   akoestisch pleister 25mm spraak-α ≈0.72 (NRC-range 0.65–0.90). Zie docs/DOCUMENTATIE.md §4. */
 const FLOOR={"Weet ik niet":.02,"Harde vloer (beton/tegels/gietvloer)":.02,"Linoleum / vinyl / PVC":.04,"Parquet / laminaat":.06,"Houten vloer op balken":.08,"Tapijttegels (kantoor)":.15,"Vast tapijt (op beton)":.37,"Hoogpolig tapijt + ondervloer":.66};
-const WALL={"Weet ik niet":.02,"Beton / kalkzandsteen":.02,"Metselwerk (schoon)":.04,"Tegels / natuursteen":.01,"Stucwerk":.04,"Gipsplaat (standaard)":.05,"Gipsplaat + isolatie":.07,"Houten panelen (dicht)":.08,"Veel glas (>50%)":.04,"Glazen systeemwand":.03,"Houten lamellenwand op vilt":.55,"Zachte wandbekleding":.3,"PET-vilt panelen (direct op wand)":.36,"Akoestische panelen met spouw/absorber":.9};
-const CEIL={"Weet ik niet":.02,"Betonplafond":.02,"Gipsplafond (dicht)":.05,"Houten plafond":.08,"Houten lamellenplafond op vilt":.55,"Akoestisch spuitpleister":.7,"Metalen plafond (dicht)":.06,"Metalen plafond (geperforeerd)":.48,"Open plafond (installaties)":.06,"Systeemplafond (oud/dun)":.42,"Systeemplafond (standaard)":.65,"Systeemplafond (hoog absorberend)":.92};
+const WALL={"Weet ik niet":.02,"Beton / kalkzandsteen":.02,"Metselwerk (schoon)":.04,"Tegels / natuursteen":.01,"Stucwerk":.04,"Gipsplaat (standaard)":.05,"Gipsplaat + isolatie":.07,"Houten panelen (dicht)":.08,"Veel glas (>50%)":.04,"Glazen systeemwand":.03,"Houten lamellenwand (direct op wand)":.3,"Houten lamellenwand (op regels + isolatie)":.62,"Zachte wandbekleding":.3,"PET-vilt panelen (direct op wand)":.36,"Akoestische panelen met spouw/absorber":.9};
+const CEIL={"Weet ik niet":.02,"Betonplafond":.02,"Gipsplafond (dicht)":.05,"Houten plafond":.08,"Houten lamellenplafond op vilt":.6,"Akoestisch spuitpleister":.7,"Metalen plafond (dicht)":.06,"Metalen plafond (geperforeerd)":.48,"Open plafond (installaties)":.06,"Systeemplafond (oud/dun)":.42,"Systeemplafond (standaard)":.65,"Systeemplafond (hoog absorberend)":.92};
 const FURN={"Leeg / casco":.005,"Spaarzaam, hard meubilair":.02,"Normaal gemeubileerd, overwegend hard":.05,"Normaal gemeubileerd met stoffering":.08,"Dicht gemeubileerd / veel gestoffeerd (lounge)":.12};
 const EX={"Planten / aankleding":.01,"Gordijnen (licht)":.02,"Gordijnen (zwaar)":.05,"Akoestische bureauschermen":.06,"Roomdividers":.08};
 const PERSON_AEQ=.46; // m² Sabine per zittende persoon, spraakgemiddeld (klassieke tabelwaarde .42/.46/.50)
 /* Vertaling van oude (v5.0) materiaalnamen naar de huidige lijsten, voor import/autosave van eerdere projecten. */
 const LEGACY={
   fm:{"Harde vloer (beton/tegels)":"Harde vloer (beton/tegels/gietvloer)","Dun tapijt":"Vast tapijt (op beton)","Dik tapijt (+ ondervloer)":"Hoogpolig tapijt + ondervloer"},
-  wm:{"Beton / steen":"Beton / kalkzandsteen","Houten panelen":"Houten panelen (dicht)","Gips + weinig glas (~25%)":"Gipsplaat (standaard)","Gips + veel glas (~50%)":"Veel glas (>50%)","Overwegend glas (~75%)":"Veel glas (>50%)","Akoestische wandpanelen":"PET-vilt panelen (direct op wand)"},
+  wm:{"Beton / steen":"Beton / kalkzandsteen","Houten panelen":"Houten panelen (dicht)","Gips + weinig glas (~25%)":"Gipsplaat (standaard)","Gips + veel glas (~50%)":"Veel glas (>50%)","Overwegend glas (~75%)":"Veel glas (>50%)","Akoestische wandpanelen":"PET-vilt panelen (direct op wand)","Houten lamellenwand op vilt":"Houten lamellenwand (op regels + isolatie)"},
   cm:{},
   fu:{"Weet ik niet":"Leeg / casco","Leeg / weinig meubels":"Leeg / casco","Kantoor - bureaus+stoelen":"Normaal gemeubileerd met stoffering","Kantoor - volledig ingericht":"Normaal gemeubileerd met stoffering","Vergaderruimte":"Normaal gemeubileerd, overwegend hard","Restaurant / horeca":"Normaal gemeubileerd, overwegend hard","Lounge / gestoffeerd":"Dicht gemeubileerd / veel gestoffeerd (lounge)","Retail / winkel":"Spaarzaam, hard meubilair","Onderwijs / school":"Normaal gemeubileerd, overwegend hard","Zorg / medisch":"Normaal gemeubileerd, overwegend hard"}
 };
@@ -422,7 +425,7 @@ function Pie({d}){
 }
 
 /* Het printbare adviesrapport — zelfde state, statisch gerenderd. */
-function Report({pn,client,author,l,w,h,pe,rt,fm,wm,cm,fu,ex,c,sp,rat,sti,parts}){
+function Report({pn,client,author,l,w,h,pe,rt,fm,wm,cm,fu,ex,c,sp,rat,sti,parts,adv}){
   const hasP=sp.length>0;
   const normTxt=rt==="(zelf invullen)"?"de gehanteerde richtwaarde":`de richtwaarde voor ${rt.toLowerCase()}`;
   const ratColor={ "rpill-excellent":"#16a34a","rpill-good":"#34d399","rpill-fair":"#f59e0b","rpill-poor":"#f97316","rpill-bad":"#ef4444","rpill-terrible":"#7f1d1d"}[rat.c];
@@ -454,8 +457,8 @@ function Report({pn,client,author,l,w,h,pe,rt,fm,wm,cm,fu,ex,c,sp,rat,sti,parts}
       <section>
         <h2>Conclusie</h2>
         <div className="rep-conclusie">
-          ${hasP?html`<p>Met de voorgestelde Lumenear armaturen daalt de nagalmtijd van <b>${rtDisp(c.r0)} s</b> naar <b>${rtDisp(c.r1)} s</b> (${Math.round(c.imp)}% verbetering). De ruimte ${c.r1<=c.tgt?"voldoet daarmee aan":"blijft daarmee boven"} ${normTxt} van ${nl(c.tgt,1)} s.</p>`
-          :html`<p>In de huidige situatie bedraagt de berekende nagalmtijd <b>${rtDisp(c.r0)} s</b>; ${normTxt} is ${nl(c.tgt,1)} s. Er zijn nog geen Lumenear armaturen geselecteerd.</p>`}
+          ${hasP?html`<p>Met de voorgestelde Lumenear armaturen daalt de nagalmtijd van <b>${rtDisp(c.r0)} s</b> naar <b>${rtDisp(c.r1)} s</b> (${Math.round(c.imp)}% verbetering). De ruimte ${c.r1<=c.tgt?"voldoet daarmee aan":"blijft daarmee boven"} ${normTxt} van ${nl(c.tgt,1)} s.${adv?` Voor het volledig halen van de richtwaarde is indicatief nog circa ${nl(adv.need,1)} m² extra absorptie nodig (≈ ${adv.n}× ${adv.ref}).`:""}</p>`
+          :html`<p>In de huidige situatie bedraagt de berekende nagalmtijd <b>${rtDisp(c.r0)} s</b>; ${normTxt} is ${nl(c.tgt,1)} s.${adv?` Om die te halen is indicatief circa ${nl(adv.need,1)} m² absorptie nodig — bijvoorbeeld ${adv.n}× ${adv.ref}.`:""}</p>`}
           <span className="rep-pill" style=${{background:ratColor,color:rat.c==="rpill-fair"?"#212529":"#fff"}}>${hasP?"Met Lumenear":"Huidige situatie"}: ${rat.t}</span>
         </div>
         <div className="rep-cards">
@@ -592,7 +595,9 @@ function App(){
     const r1=.161*vol/Math.max(rAb+lAb,.01);
     const imp=r0>0?(1-r1/r0)*100:0;
     const tgt=(PR[rt]||{}).t||.8;
-    return{vol,fA,wA,cA,rAb,lAb,r0,r1,imp,tgt,
+    // Hoeveel m² Aeq ontbreekt er nog om de richtwaarde te halen?
+    const aNeed=Math.max(0,.161*vol/tgt-(rAb+lAb));
+    return{vol,fA,wA,cA,rAb,lAb,r0,r1,imp,tgt,aNeed,
       parts:{fAb,wAb,cAb,fuAb,exAb,pAb},
       bd:[{n:"Vloer",v:fAb},{n:"Wanden",v:wAb},{n:"Plafond",v:cAb},{n:"Meubels",v:fuAb},{n:"Extra",v:exAb},{n:"Personen",v:pAb},{n:"Lumenear",v:lAb}].filter(d=>d.v>0)};
   },[l,w,h,pe,fm,wm,cm,fu,ex,qty,rt]);
@@ -601,6 +606,9 @@ function App(){
   const fp=PP.filter(x=>(fam==="Alle"||x.f===fam)&&(!q||x.n.toLowerCase().includes(q)));
   const sp=PP.filter(x=>qty[x.n]>0).map(x=>({...x,q:qty[x.n]}));
   const hasP=sp.length>0;
+  // Auto-suggest: referentie = sterkste reeds gekozen product, anders een representatief voorbeeld.
+  const advRef=hasP?sp.reduce((a,b)=>b.eq>a.eq?b:a):PP.find(p=>p.n==="Float acoustic Rectangle 1200x2400");
+  const adv=c.aNeed>0?{need:c.aNeed,n:Math.ceil(c.aNeed/advRef.eq),ref:advRef.n,example:!hasP}:null;
 
   const rat=(()=>{
     const r=c.r1/c.tgt;
@@ -756,6 +764,11 @@ function App(){
           </div>`}
 
           <div className="rsec">
+            ${adv?html`<div className="advice">Nog <b>~${nl(adv.need,1)} m² Aeq</b> nodig voor de richtwaarde van ${nl(c.tgt,1)} s.<br/>Indicatief: <b>${adv.n}× ${adv.ref}</b>${adv.example?" (voorbeeld — kies zelf een product)":" extra"}.</div>`
+            :html`<div className="advice ok">✓ Richtwaarde van ${nl(c.tgt,1)} s gehaald${hasP?` met ${nl(c.lAb,1)} m² Lumenear-absorptie`:""}.</div>`}
+          </div>
+
+          <div className="rsec">
             <div className="rtitle">RT60 vergelijking</div>
             <${Bars} d=${[{l:"Zonder",v:Math.min(c.r0,6),lab:rtDisp(c.r0),c:"#94a3b8"},{l:"Met Lumenear",v:Math.min(c.r1,6),lab:rtDisp(c.r1),c:"#0d9488"},{l:"Richtwaarde",v:c.tgt,lab:nl(c.tgt,1),c:"#f59e0b"}]}/>
           </div>
@@ -800,7 +813,7 @@ function App(){
       ${note?html`<div className="toast" role="status">${note}<button aria-label="Sluiten" onClick=${()=>sNote(null)}>×</button></div>`:null}
     </div>
 
-    <${Report} pn=${pn} client=${client} author=${author} l=${l} w=${w} h=${h} pe=${pe} rt=${rt} fm=${fm} wm=${wm} cm=${cm} fu=${fu} ex=${ex} c=${c} sp=${sp} rat=${rat} sti=${sti} parts=${c.parts}/>
+    <${Report} pn=${pn} client=${client} author=${author} l=${l} w=${w} h=${h} pe=${pe} rt=${rt} fm=${fm} wm=${wm} cm=${cm} fu=${fu} ex=${ex} c=${c} sp=${sp} rat=${rat} sti=${sti} parts=${c.parts} adv=${adv}/>
     </div>`;
 }
 

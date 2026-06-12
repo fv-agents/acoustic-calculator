@@ -4,6 +4,14 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-06-12 — Aanname-waardes definitief na bronnenonderzoek (v5.2)
+**Reden:** vier waardes stonden als aanname. Onderzoek: lattenpanelen ISO 354-rapporten tonen αw ≈0,30 direct op wand vs ≈0,62 op regels + isolatie — één waarde 0,55 was te optimistisch voor directe montage (de gangbare). Spuitpleister 25mm: spraak-α 0,72 (NRC 0,65–0,90) → 0,70 klopt. Tapijttegels: fabrikantrange αw 0,15–0,20 → 0,15 klopt. Personen: tweede bron (0,44/0,45/0,45) bevestigt 0,46.
+**Gevolg:** lamellenwand gesplitst in twee opties (0,30 / 0,62) met legacy-mapping naar de spouwvariant; lamellenplafond 0,55→0,60 (plenum). Brontabel in docs/DOCUMENTATIE.md §4.
+
+## 2026-06-12 — Productafbeeldingen: niet hotlinken vanaf lumenear.com
+**Reden:** site gebruikt lazy-loaded placeholders (URL's niet stabiel benaderbaar) en hotlinken breekt de offline-werking — een kernfeature.
+**Gevolg:** wachten op 24 lokale familie-thumbnails in app/img/; dan inbouwen met fallback.
+
 ## 2026-06-12 — Materialenherziening na data-audit (v5.1)
 **Reden:** Falco vond de keuzes "matig" en de audit bevestigde fouten: "Dun tapijt" gebruikte de tabelwaarden van *heavy carpet on concrete* (spraak-α 0,37) terwijl kantoortapijttegels αw 0,15–0,20 hebben; personen-absorptie ontbrak; meubileringslabels waren ruimtetypes i.p.v. dichtheid; de norm heette ten onrechte "NEN 18041" (= DIN, Duits).
 **Gevolg:** nieuwe lijsten (o.a. Tapijttegels 0,15, lamellenwand/-plafond, PET-vilt wandopties op eigen Peutz-data 0,36/0,90), meubilering = 5 niveaus dichtheid × stoffering, extra akoestiek = additieve checkboxes, personen-invoer (0,46 m²/p.p., 0 = onbezet/worst-case), presets +kantine/callcenter/kinderopvang, celkantoor & klaslokaal 0,8→0,6 s. Aannames zonder datasheet gemarkeerd: tapijttegels 0,15 · lamellenwand 0,55 · lamellenplafond 0,55 · spuitpleister 0,70. Oude opgeslagen projecten worden via een legacy-mapping geconverteerd.

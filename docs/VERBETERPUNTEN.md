@@ -26,19 +26,21 @@
 - **NL-notatie** — decimale komma overal, rating-pill met context ("Met Lumenear: Prima")
 - **CI-bewaking datasync** — web-productdata wordt automatisch tegen de CSV gecontroleerd
 
+## ✅ Aanvulling v5.2 (2026-06-12)
+
+- **Aanname-waardes onderzocht en definitief** — lamellenwand gesplitst (0,30 direct / 0,62 op regels+isolatie, ISO 354-rapporten), spuitpleister 0,70 bevestigd, tapijttegels 0,15 bevestigd (fabrikantrange), personen 0,46 door tweede bron bevestigd. Brontabel in DOCUMENTATIE.md §4.
+- **Auto-suggest** — adviesblok in het rechterpaneel én in het rapport: "nog ~X m² Aeq nodig ≈ N× [product]" tot de richtwaarde gehaald is; groene bevestiging zodra gehaald.
+
 ## Open — aanbevolen volgorde
 
 ### ⭐⭐⭐ Productafbeeldingen tonen
-Miniatuur per productkaart (URL-mapping naar lumenear.com). Visueel sterkste volgende stap.
+Onderzocht 2026-06-12: lumenear.com gebruikt lazy-loaded placeholders — hotlinken is fragiel én breekt de offline-werking. **Pad vooruit:** lever 24 familie-thumbnails aan (bijv. uit de catalogus-PDF) in `app/img/<familie>.jpg`, dan worden ze met één kleine wijziging op de productkaarten getoond (offline-proof, met nette fallback).
 
 ### ⭐⭐ Meerdere ruimten per project
 Project > ruimten > producten met gecombineerde bestellijst. Vereist forse state-herstructurering — als aparte sprint doen.
 
 ### ⭐⭐ Klant-facing presentatiemodus
 Vereenvoudigde weergave: 3D kamer groot, RT60 voor/na, rating, productenlijst.
-
-### ⭐⭐ Aanbevolen producten (auto-suggest)
-"Om deze ruimte op 0,6 s te brengen: minimaal 4× Float acoustic Rectangle 1200×2400."
 
 ### ⭐ Meertaligheid (EN minimaal), QR-delen, vergelijkingsmodus, productkaart-uitklap
 
