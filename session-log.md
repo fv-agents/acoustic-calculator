@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-06-15 — v6.2: 4-staps wizard + sticky UX
+**Gedaan:** Wizard uitgebreid van 3 naar 4 stappen (Space / Materials / Fixtures / Result). Stap 1 behoudt ruimtetype + afmetingen; stap 2 nieuw met alle materiaal-dropdowns + absorptie-overzicht. Sticky nav-balken: step-nav volledig transparant, step-nav-solid op stap 4. Sidebar fixture-lijst: qty stepper + verwijderknop per product. Sidebar-actions sticky onderaan. Progress bar bijgewerkt naar 4 stappen. Header Download PDF disabled tot step 4.
+**Besloten:** 4 stappen communiceren beter dat er meer te doen is; transparante balk met btn-primary geeft floating-knop zonder visuele balk.
+**Openstaand:** Falco-acties: domein, embed, visueel testen alle stappen.
+
 ## 2026-06-12 (5) — v6.1: result page upgrade + Lumenear logo
 **Gedaan:** result-components.jsx (DecayCurve SVG, AbsorptionDonut SVG, MetricCards 4×KPI, ComparisonChart met norm-zone, RT60MeterV2 geluidsgolf-animatie) + result-styles.css (print: CSS custom property inversion, A4 2-pagina PDF). calculator-app.jsx: Step 3 volledig vervangen, RT60Meter → RT60MeterV2, Lumenear logo PNG (filter:invert) in header, window._upgradeQty sync. Oude @media print uit styles.css verwijderd. CI groen.
 **Besloten:** logo via filter:invert(1) op zwarte PNG — werkt op donkere header.
