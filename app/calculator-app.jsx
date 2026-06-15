@@ -340,11 +340,25 @@ function App() {
             {sp.length > 0 ? (
               <div style={{ background:'var(--bg)', borderRadius:'var(--radius)', padding:10, marginBottom:12 }}>
                 {sp.map(p => (
-                  <div key={p.n} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0', borderBottom:'1px solid var(--border)', fontSize:11 }}>
-                    <span style={{ color:'var(--text-sec)', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginRight:8 }}>{p.n}</span>
-                    <span style={{ color:'var(--accent)', fontWeight:600, fontFamily:'var(--font-mono)', fontSize:10, flexShrink:0 }}>
-                      {p.q}× {(p.q * p.eq).toFixed(1)} m²
-                    </span>
+                  <div key={p.n} style={{ padding:'6px 0', borderBottom:'1px solid var(--border)' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
+                      <span style={{ color:'var(--text-sec)', fontSize:11, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginRight:6 }}>{p.n}</span>
+                      <button onClick={() => setQtyFor(p.n, 0)}
+                        style={{ background:'none', border:'none', color:'var(--text-sec)', cursor:'pointer', fontSize:14, lineHeight:1, padding:'0 2px', flexShrink:0 }}
+                        title="Remove">×</button>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      <div className="qty-stepper">
+                        <button className="qty-btn" onClick={() => setQtyFor(p.n, p.q - 1)}>−</button>
+                        <input className="qty-input" type="number" value={p.q}
+                          onChange={e => setQtyFor(p.n, e.target.value)}
+                          onFocus={e => e.target.select()} />
+                        <button className="qty-btn plus" onClick={() => setQtyFor(p.n, p.q + 1)}>+</button>
+                      </div>
+                      <span style={{ color:'var(--accent)', fontWeight:600, fontFamily:'var(--font-mono)', fontSize:10 }}>
+                        {(p.q * p.eq).toFixed(1)} m²
+                      </span>
+                    </div>
                   </div>
                 ))}
                 <div style={{ display:'flex', justifyContent:'space-between', paddingTop:8, marginTop:4, fontWeight:700, color:'var(--accent)', fontSize:12, borderTop:'2px solid var(--accent)' }}>
@@ -369,7 +383,7 @@ function App() {
               </div>
             )}
 
-            <div style={{ marginTop:16 }}>
+            <div className="sidebar-actions">
               <button className="btn btn-primary" style={{ width:'100%', justifyContent:'center' }} onClick={next}>View result →</button>
               <button className="btn btn-ghost" style={{ width:'100%', justifyContent:'center', marginTop:6 }} onClick={prev}>← Back</button>
             </div>
@@ -513,22 +527,23 @@ function App() {
                     placeholder="Optional — appears on the report" />
                 </div>
               </div>
-              <div style={{ display:'flex', gap:10, marginTop:20 }}>
-                <button className="btn btn-primary btn-lg" style={{ flex:1, justifyContent:'center' }}
-                  disabled={!pn.trim()} onClick={() => window.print()}>
-                  Download report (PDF)
-                </button>
-                <a href="https://lumenear.com/contact" target="_blank" rel="noopener noreferrer"
-                  className="btn btn-ghost btn-lg"
-                  style={{ flex:1, justifyContent:'center', textDecoration:'none' }}>
-                  Request a quote →
-                </a>
-              </div>
             </div>
 
             <div className="step-nav no-print">
               <button className="btn btn-ghost" onClick={prev}>← Adjust fixtures</button>
-              <div></div>
+              <div style={{ display:'flex', gap:10 }}>
+                <button className="btn btn-primary btn-lg"
+                  disabled={!pn.trim()}
+                  style={!pn.trim() ? { opacity:.4, cursor:'default' } : {}}
+                  onClick={() => window.print()}>
+                  Download report
+                </button>
+                <a href="https://lumenear.com/contact" target="_blank" rel="noopener noreferrer"
+                  className="btn btn-ghost btn-lg"
+                  style={{ textDecoration:'none' }}>
+                  Request a quote →
+                </a>
+              </div>
             </div>
           </div>
         </div>

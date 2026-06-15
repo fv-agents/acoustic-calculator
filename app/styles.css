@@ -357,10 +357,18 @@ input[type="number"] { -moz-appearance: textfield; }
   font-family: var(--font-mono); font-weight: 500; color: var(--text);
 }
 
-/* ── Footer nav ── */
+/* ── Footer nav — sticky within scrollable step-container ── */
 .step-nav {
   display: flex; justify-content: space-between; align-items: center;
-  margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);
+  margin-top: 32px; padding: 16px 0 24px; border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; background: var(--bg); z-index: 10;
+}
+
+/* Sidebar sticky action bar */
+.sidebar-actions {
+  position: sticky; bottom: 0; background: var(--surface);
+  padding-top: 12px; margin-top: 16px; z-index: 10;
+  border-top: 1px solid var(--border);
 }
 
 /* Print elements hidden on screen — handled by result-styles.css (.print-only) */
