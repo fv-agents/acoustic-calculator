@@ -12,7 +12,7 @@ const DEFAULTS = {
 function loadState() {
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
-    return s ? { ...DEFAULTS, ...s, step: Math.min(s.step || 1, 3) } : DEFAULTS;
+    return s ? { ...DEFAULTS, ...s, step: Math.min(s.step || 1, 4) } : DEFAULTS;
   } catch { return DEFAULTS; }
 }
 
@@ -104,7 +104,7 @@ function App() {
     onBlur:   e => { const v = clampDim(e.target.value); setNum(v); setStr(String(v).replace('.', ',')); },
   });
 
-  const next = () => setStep(s => Math.min(s + 1, 3));
+  const next = () => setStep(s => Math.min(s + 1, 4));
   const prev = () => setStep(s => Math.max(s - 1, 1));
   const goTo = (s) => setStep(s);
 
@@ -128,8 +128,8 @@ function App() {
             New
           </button>
           <button className="btn btn-primary btn-sm"
-            disabled={step < 3 || !pn.trim()}
-            style={(step < 3 || !pn.trim()) ? { opacity:.4, cursor:'default' } : {}}
+            disabled={step < 4 || !pn.trim()}
+            style={(step < 4 || !pn.trim()) ? { opacity:.4, cursor:'default' } : {}}
             onClick={() => window.print()}>
             Download PDF
           </button>
@@ -139,9 +139,10 @@ function App() {
       {/* ── Progress bar ── */}
       <div className="progress-bar">
         {[
-          { n:1, label:'Space & Materials' },
-          { n:2, label:'Fixtures' },
-          { n:3, label:'Result & Report' },
+          { n:1, label:'Space' },
+          { n:2, label:'Materials' },
+          { n:3, label:'Fixtures' },
+          { n:4, label:'Result & Report' },
         ].map((s, i) => (
           <React.Fragment key={s.n}>
             {i > 0 && <div className="progress-connector"></div>}
@@ -213,40 +214,57 @@ function App() {
               </div>
             </div>
 
-            {/* Materials */}
-            <div style={{ marginTop:32, paddingTop:24, borderTop:'1px solid var(--border)' }}>
-              <div className="t-section-label">Materials & Furnishing</div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginTop:12 }}>
-                {[
-                  ['Floor',      fm, setFm, window.FLOOR_MATERIALS],
-                  ['Walls',      wm, setWm, window.WALL_MATERIALS],
-                  ['Ceiling',    cm, setCm, window.CEILING_MATERIALS],
-                  ['Furnishing', fu, setFu, window.FURNISHING],
-                ].map(([label, val, setter, dict]) => (
-                  <div className="field" key={label}>
-                    <label className="field-label">{label}</label>
-                    <select className="field-select" value={val} onChange={e => setter(e.target.value)}>
-                      {Object.keys(dict).map(k => <option key={k}>{k}</option>)}
-                    </select>
-                    {dict[val] !== undefined && <div className="alpha-hint">α = {dict[val]}</div>}
-                  </div>
-                ))}
-              </div>
+            <div className="step-nav">
+              <div></div>
+              <button className="btn btn-primary" onClick={next}>Materials &amp; Furnishing →</button>
+            </div>
+          </div>
+        </div>
+        <RT60MeterV2 rt0={calc.r0} rt1={calc.r1} target={calc.tgt} visible={true} roomType={rt} />
+        </>
+      )}
 
-              <div style={{ marginTop:12 }}>
-                <label className="field-label">Existing acoustic treatments</label>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, marginTop:4 }}>
-                  {Object.keys(window.EXTRAS).map(k => (
-                    <label key={k} className="checkbox-row">
-                      <input type="checkbox" checked={ex.includes(k)} onChange={() => toggleEx(k)} />
-                      <span>{k}</span>
-                    </label>
-                  ))}
+      {/* ══════════════════════════════════════════
+          STEP 2 — Materials & Furnishing
+          ══════════════════════════════════════════ */}
+      {step === 2 && (
+        <>
+        <div className="step-container">
+          <div className="step-content">
+
+            <div className="t-section-label">Materials</div>
+            <h1 className="t-step-title">Materials & Furnishing</h1>
+            <p className="t-step-subtitle">Set the surface materials and existing treatments for an accurate RT60 calculation.</p>
+
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginTop:24 }}>
+              {[
+                ['Floor',      fm, setFm, window.FLOOR_MATERIALS],
+                ['Walls',      wm, setWm, window.WALL_MATERIALS],
+                ['Ceiling',    cm, setCm, window.CEILING_MATERIALS],
+                ['Furnishing', fu, setFu, window.FURNISHING],
+              ].map(([label, val, setter, dict]) => (
+                <div className="field" key={label}>
+                  <label className="field-label">{label}</label>
+                  <select className="field-select" value={val} onChange={e => setter(e.target.value)}>
+                    {Object.keys(dict).map(k => <option key={k}>{k}</option>)}
+                  </select>
+                  {dict[val] !== undefined && <div className="alpha-hint">α = {dict[val]}</div>}
                 </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop:16 }}>
+              <label className="field-label">Existing acoustic treatments</label>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0, marginTop:4 }}>
+                {Object.keys(window.EXTRAS).map(k => (
+                  <label key={k} className="checkbox-row">
+                    <input type="checkbox" checked={ex.includes(k)} onChange={() => toggleEx(k)} />
+                    <span>{k}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            {/* Absorption summary */}
             <div style={{ marginTop:20, background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--radius)', padding:16 }}>
               <div className="t-section-label">Room absorption (current)</div>
               <table className="summary-table">
@@ -263,11 +281,8 @@ function App() {
             </div>
 
             <div className="step-nav">
-              <span style={{ fontSize:11, color:'var(--text-sec)', display:'flex', alignItems:'center', gap:6, paddingBottom:2 }}>
-                <span style={{ fontSize:16, lineHeight:1 }}>↓</span>
-                Materials &amp; Furnishing below
-              </span>
-              <button className="btn btn-ghost" onClick={next}>Select fixtures →</button>
+              <button className="btn btn-ghost" onClick={prev}>← Back</button>
+              <button className="btn btn-primary" onClick={next}>Select fixtures →</button>
             </div>
           </div>
         </div>
@@ -276,9 +291,9 @@ function App() {
       )}
 
       {/* ══════════════════════════════════════════
-          STEP 2 — Select Fixtures
+          STEP 3 — Select Fixtures
           ══════════════════════════════════════════ */}
-      {step === 2 && (
+      {step === 3 && (
         <>
         <div className="split-layout">
 
@@ -286,7 +301,7 @@ function App() {
           <div className="split-main">
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, gap:12 }}>
               <div>
-                <div className="t-section-label">Step 2</div>
+                <div className="t-section-label">Step 3</div>
                 <h2 style={{ fontSize:20, fontWeight:500, color:'var(--text)' }}>Add Lumenear fixtures</h2>
               </div>
               <input className="field-input" type="search" placeholder="Search products…"
@@ -397,9 +412,9 @@ function App() {
       )}
 
       {/* ══════════════════════════════════════════
-          STEP 3 — Result & Report
+          STEP 4 — Result & Report
           ══════════════════════════════════════════ */}
-      {step === 3 && (
+      {step === 4 && (
         <div className="step-container">
           <div className="step-content" key="s3" style={{ maxWidth:720 }}>
 
