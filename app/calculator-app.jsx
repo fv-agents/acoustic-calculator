@@ -263,8 +263,11 @@ function App() {
             </div>
 
             <div className="step-nav">
-              <div></div>
-              <button className="btn btn-primary btn-lg" onClick={next}>Select fixtures →</button>
+              <span style={{ fontSize:11, color:'var(--text-sec)', display:'flex', alignItems:'center', gap:6, paddingBottom:2 }}>
+                <span style={{ fontSize:16, lineHeight:1 }}>↓</span>
+                Materials &amp; Furnishing below
+              </span>
+              <button className="btn btn-ghost" onClick={next}>Select fixtures →</button>
             </div>
           </div>
         </div>
@@ -529,7 +532,7 @@ function App() {
               </div>
             </div>
 
-            <div className="step-nav no-print">
+            <div className="step-nav step-nav-solid no-print">
               <button className="btn btn-ghost" onClick={prev}>← Adjust fixtures</button>
               <div style={{ display:'flex', gap:10 }}>
                 <button className="btn btn-primary btn-lg"
