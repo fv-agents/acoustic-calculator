@@ -120,13 +120,12 @@ function ProductCard({ product, qty, onSetQty }) {
           <span title="Acoustic surface area">{product.a} m²</span>
           <span className="product-aeq" title="Equivalent absorption area per fixture (EN-ISO 354)">Aeq {product.eq} m²</span>
         </div>
-        <div className="qty-stepper">
-          <button className="qty-btn" onClick={() => onSetQty(Math.max(0, qty - 1))}>−</button>
-          <input className="qty-input" type="number" min="0" value={qty}
-            onFocus={e => e.target.select()}
-            onChange={e => onSetQty(Math.max(0, Math.floor(Number(e.target.value) || 0)))} />
-          <button className="qty-btn plus" onClick={() => onSetQty(qty + 1)}>+</button>
-        </div>
+        <NumberStepper
+          value={qty}
+          onChange={v => onSetQty(Math.max(0, Math.floor(v)))}
+          min={0} max={999} step={1} size="sm"
+          label={`Quantity — ${product.n}`}
+        />
       </div>
     </div>
   );
@@ -171,19 +170,34 @@ function SimpleBarChart({ before, after, target }) {
   );
 }
 
-/* ── Rating helpers ── */
+/* ── Rating helpers — anchored to DIN 18041 tolerance bands ──
+ * Rating follows the per-space optimal/acceptable bands from RT60_NORMS
+ * (looked up via window._currentRt), not a naive rt/target ratio. This makes
+ * a value just over target read as "Good" rather than failing, while staying
+ * defensible: green runs through the published `acceptable` limit.
+ */
+function _rtBands(target) {
+  const norm = (window.RT60_NORMS || {})[window._currentRt];
+  if (norm && norm.optimal) {
+    return { lo: norm.optimal[0], hi: norm.optimal[1], acc: norm.acceptable || norm.optimal[1] * 1.33 };
+  }
+  // Fallback when no norm is registered: derive a band around the target.
+  return { lo: Math.max(0, target - 0.2), hi: target, acc: target * 1.33 };
+}
 function getRating(rt, target) {
-  const r = rt / target;
-  if (r <= 1)    return { text: 'Excellent', color: 'var(--ok)',    cls: 'ok' };
-  if (r <= 1.15) return { text: 'Good',      color: 'var(--ok)',    cls: 'ok' };
-  if (r <= 1.3)  return { text: 'Fair',      color: 'var(--warn)',  cls: 'warn' };
-  if (r <= 1.6)  return { text: 'Poor',      color: 'var(--warn)',  cls: 'warn' };
+  const { hi, acc } = _rtBands(target);
+  // At or below the optimal upper bound (incl. very dry) → top rating.
+  // Below the optimal lower bound is acoustically over-damped, but we cap at
+  // "Excellent" without claiming better-than-optimal (placement is honest).
+  if (rt <= hi)         return { text: 'Excellent',         color: 'var(--ok)',    cls: 'ok' };
+  if (rt <= acc)        return { text: 'Good',              color: 'var(--ok)',    cls: 'ok' };
+  if (rt <= acc * 1.25) return { text: 'Fair',              color: 'var(--warn)',  cls: 'warn' };
   return { text: 'Needs improvement', color: 'var(--alert)', cls: 'bad' };
 }
 function getRatingColor(rt, target) {
-  const r = rt / target;
-  if (r <= 1.15) return 'var(--ok)';
-  if (r <= 1.5)  return 'var(--warn)';
+  const { acc } = _rtBands(target);
+  if (rt <= acc)        return 'var(--ok)';     // green through the acceptable limit
+  if (rt <= acc * 1.25) return 'var(--warn)';
   return 'var(--alert)';
 }
 

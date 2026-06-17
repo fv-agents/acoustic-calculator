@@ -18,3 +18,7 @@ __pycache__/
 *.tmp
 *.bak
 *.swp
+
+# Restore backups / tooling artifacts
+_restore-*/
+.playwright-mcp/

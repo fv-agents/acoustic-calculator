@@ -34,6 +34,7 @@ function App() {
   const [qty, setQty] = useState(saved.qty || {});
   const [fam, setFam]       = useState('All');
   const [search, setSearch] = useState('');
+  const [announce, setAnnounce] = useState('');
 
   window._upgradeQty = qty;
 
@@ -78,6 +79,14 @@ function App() {
   const hasProducts = sp.length > 0;
   const rating = getRating(calc.r1, calc.tgt);
 
+  /* Announce the live result to assistive tech (steps 3–4) */
+  useEffect(() => {
+    if (step < 3) return;
+    const after = Math.min(calc.r1, 6).toFixed(1);
+    const red = hasProducts && calc.imp > 0.5 ? `, a ${Math.round(calc.imp)}% reduction` : '';
+    setAnnounce(`Reverberation after Lumenear: ${after} seconds${red}. Rating: ${rating.text}.`);
+  }, [calc.r1, calc.imp, step, hasProducts, rating.text]);
+
   /* ── Helpers ── */
   const setPreset = (key) => {
     setRt(key);
@@ -115,6 +124,8 @@ function App() {
 
   return (
     <div className="app-shell">
+
+      <LiveRegion message={announce} />
 
       {/* ── Header ── */}
       <div className="app-header">
@@ -365,14 +376,13 @@ function App() {
                         style={{ background:'none', border:'none', color:'var(--text-sec)', cursor:'pointer', fontSize:14, lineHeight:1, padding:'0 2px', flexShrink:0 }}
                         title="Remove">×</button>
                     </div>
-                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                      <div className="qty-stepper">
-                        <button className="qty-btn" onClick={() => setQtyFor(p.n, p.q - 1)}>−</button>
-                        <input className="qty-input" type="number" value={p.q}
-                          onChange={e => setQtyFor(p.n, e.target.value)}
-                          onFocus={e => e.target.select()} />
-                        <button className="qty-btn plus" onClick={() => setQtyFor(p.n, p.q + 1)}>+</button>
-                      </div>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+                      <NumberStepper
+                        value={p.q}
+                        onChange={v => setQtyFor(p.n, v)}
+                        min={0} max={999} step={1} size="sm"
+                        label={`Quantity — ${p.n}`}
+                      />
                       <span style={{ color:'var(--accent)', fontWeight:600, fontFamily:'var(--font-mono)', fontSize:10 }}>
                         {(p.q * p.eq).toFixed(1)} m²
                       </span>
@@ -524,6 +534,24 @@ function App() {
               </div>
             )}
 
+            {/* Method & assumptions — trust signals, on screen + print */}
+            <div style={{ marginBottom:20 }}>
+              <div className="t-section-label">Method &amp; assumptions</div>
+              <table className="summary-table">
+                <tbody>
+                  <tr><td className="row-label">Calculation</td><td className="row-value">Sabine reverberation (RT60), per octave-band absorption</td></tr>
+                  <tr><td className="row-label">Target bands</td><td className="row-value">DIN 18041 (indicative, not normative)</td></tr>
+                  <tr><td className="row-label">Coefficients</td><td className="row-value">ISO 11654 (αw) · EN-ISO 354 (Aeq)</td></tr>
+                  <tr><td className="row-label">Fixture placement</td><td className="row-value">Per Lumenear guidance — near the sound source</td></tr>
+                </tbody>
+              </table>
+              <p style={{ fontSize:11, color:'var(--text-sec)', marginTop:8, lineHeight:1.6 }}>
+                Lumenear absorption is calculated for placement according to our guidance; we always advise positioning fixtures
+                where they work hardest. Material coefficients use published worst-case values, so the real-world result is
+                typically at least as good as shown.
+              </p>
+            </div>
+
             <PrintFooter />
 
             {/* Report form — hidden in print */}
@@ -534,34 +562,43 @@ function App() {
                 Download a PDF you can share directly with your client.
               </p>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-                <div className="field">
-                  <label className="field-label">Project name *</label>
+                <Field label="Project name" required
+                  error={!pn.trim() ? 'Required for the report header.' : ''}>
                   <input className="field-input" value={pn} onChange={e => setPn(e.target.value)}
-                    placeholder="e.g. Office renovation — Building A" />
-                </div>
-                <div className="field">
-                  <label className="field-label">Client / organisation</label>
+                    placeholder="e.g. Office renovation, Building A" />
+                </Field>
+                <Field label="Client / organisation" hint="Optional — appears on the report.">
                   <input className="field-input" value={client} onChange={e => setClient(e.target.value)}
-                    placeholder="Optional — appears on the report" />
-                </div>
+                    placeholder="Optional" />
+                </Field>
               </div>
             </div>
 
             <div className="step-nav step-nav-solid no-print">
-              <button className="btn btn-ghost" onClick={prev}>← Adjust fixtures</button>
-              <div style={{ display:'flex', gap:10 }}>
-                <button className="btn btn-primary btn-lg"
-                  disabled={!pn.trim()}
-                  style={!pn.trim() ? { opacity:.4, cursor:'default' } : {}}
-                  onClick={() => window.print()}>
-                  Download report
-                </button>
-                <a href="https://lumenear.com/contact" target="_blank" rel="noopener noreferrer"
-                  className="btn btn-ghost btn-lg"
-                  style={{ textDecoration:'none' }}>
-                  Request a quote →
-                </a>
-              </div>
+              <Button variant="ghost" onClick={prev}>← Adjust fixtures</Button>
+              <Button variant="primary" size="lg" disabled={!pn.trim()}
+                onClick={() => window.print()}>
+                Download report
+              </Button>
+            </div>
+
+            {/* Sales conversion — separate from the report (Su3) */}
+            <div className="no-print" style={{ marginTop:8, paddingTop:24, borderTop:'1px solid var(--border)' }}>
+              <QuoteRequest
+                onAnnounce={setAnnounce}
+                context={() => ({
+                  project: pn.trim(),
+                  client: client.trim(),
+                  room: { l, w, h, volume: +calc.vol.toFixed(1), type: rt, targetRT: calc.tgt },
+                  results: {
+                    rtBefore: +Math.min(calc.r0, 6).toFixed(2),
+                    rtAfter: +Math.min(calc.r1, 6).toFixed(2),
+                    reductionPct: Math.round(calc.imp),
+                    rating: rating.text,
+                  },
+                  products: sp.map(p => ({ name: p.n, qty: p.q, aeqEach: p.eq })),
+                })}
+              />
             </div>
           </div>
         </div>

@@ -442,7 +442,10 @@ function PrintFooter() {
   return (
     <div className="print-only print-ftr">
       <div>lumenear.com · info@lumenear.com · In-Zee BV · VAT NL8652.93.909.B01</div>
-      <div style={{ marginTop: 4, opacity: .6 }}>Calculated with the Lumenear Acoustic Calculator — indicative, based on Sabine formula</div>
+      <div style={{ marginTop: 4, opacity: .6 }}>
+        Indicative calculation — Sabine formula, target bands per DIN 18041. Absorption coefficients per ISO 11654 / EN-ISO 354.
+        Lumenear absorption assumes placement according to Lumenear guidance (near the sound source).
+      </div>
     </div>
   );
 }
