@@ -166,22 +166,28 @@ function ProductCard({ product, qty, onSetQty }) {
         />
       </div>
       <div className="product-info">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
-          <div className="product-name" title={product.n}>{product.n}</div>
-          <button className="product-info-btn" onClick={() => setShowSpecs(true)}
-            aria-label={`Specs and links for ${product.n}`} title="Specs & links">i</button>
-        </div>
+        <div className="product-name" title={product.n}>{product.n}</div>
         <div className="product-specs">
           <span title="Weighted absorption coefficient (ISO 11654)">αw {product.aw}</span>
           <span title="Acoustic surface area">{product.a} m²</span>
           <span className="product-aeq" title="Equivalent absorption area per fixture (EN-ISO 354)">Aeq {product.eq} m²</span>
         </div>
-        <NumberStepper
-          value={qty}
-          onChange={v => onSetQty(Math.max(0, Math.floor(v)))}
-          min={0} max={999} step={1} size="sm"
-          label={`Quantity — ${product.n}`}
-        />
+        <div className="product-row">
+          <NumberStepper
+            value={qty}
+            onChange={v => onSetQty(Math.max(0, Math.floor(v)))}
+            min={0} max={999} step={1} size="sm"
+            label={`Quantity — ${product.n}`}
+          />
+          <button className="product-specs-btn" onClick={() => setShowSpecs(true)}
+            aria-label={`Specs and links for ${product.n}`}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 7.5h.01" />
+            </svg>
+            Specs
+          </button>
+        </div>
       </div>
       {showSpecs && <ProductDetailModal product={product} specs={specs} onClose={() => setShowSpecs(false)} />}
     </div>
