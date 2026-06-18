@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumenear — Acoustic Calculator</title>
 <meta name="description" content="Calculate the RT60 reverberation time of a room and the acoustic effect of Lumenear fixtures. Includes a downloadable advisory report.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23141414'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23C8B89A' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23C8B89A'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lumenear — Acoustic Calculator">
+<meta property="og:description" content="See how Lumenear fixtures improve a room's reverberation time, with a shareable advisory report.">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="result-styles.css">
 <link rel="stylesheet" href="kit-styles.css">
@@ -15,6 +19,26 @@
 <script src="product-specs.js"></script>
 </head>
 <body>
+
+<!-- Mobile gate — shown only on phones (pure CSS, renders before React) -->
+<div id="mobile-gate">
+  <div class="mg-inner">
+    <img src="img/lumenear-logo.png" alt="Lumenear" class="mg-logo">
+    <h1 class="mg-title">Best viewed on desktop</h1>
+    <p class="mg-text">The acoustic calculator needs a larger screen to work properly. Please open <b>calculator.lumenear.com</b> on a desktop or tablet.</p>
+  </div>
+</div>
+
+<!-- Hidden static form so Netlify detects and provisions the "quote" form -->
+<form name="quote" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="name">
+  <input type="email" name="email">
+  <input type="text" name="company">
+  <textarea name="message"></textarea>
+  <input type="text" name="details">
+  <input type="text" name="bot-field">
+</form>
+
 <div id="root"></div>
 <script type="text/babel" src="kit-components.jsx"></script>
 <script type="text/babel" src="ui-components.jsx"></script>

@@ -11,13 +11,33 @@
  */
 const { useState: _useStateQ } = React;
 
-/* ── Transport adapter — THE SEAM. Replace the body to go live. ── */
+/* ── Transport adapter — Netlify Forms (zero-backend) ──
+ * Posts to the "quote" form declared statically in index.html. Works on the
+ * deployed Netlify site; locally the POST fails and the error state is shown.
+ * To swap providers later, replace this function body only.
+ */
 async function submitQuote(payload) {
-  // Assemble is done by the caller; here we only transport.
-  console.info('[submitQuote] lead payload →', payload);
-  await new Promise(res => setTimeout(res, 900));          // simulate round-trip
-  // To exercise the error path during testing, throw new Error('...') here.
-  return { ok: true, id: 'mock-' + Date.now() };
+  const c = payload.contact || {};
+  const details = [
+    payload.project && `Project: ${payload.project}`,
+    payload.client && `Client: ${payload.client}`,
+    payload.room && `Room: ${payload.room.type}, ${payload.room.l}×${payload.room.w}×${payload.room.h} m (${payload.room.volume} m³), target ${payload.room.targetRT}s`,
+    payload.results && `Result: ${payload.results.rtBefore}s → ${payload.results.rtAfter}s (${payload.results.reductionPct}% reduction, ${payload.results.rating})`,
+    payload.products && payload.products.length && 'Fixtures: ' + payload.products.map(p => `${p.qty}× ${p.name}`).join(', '),
+  ].filter(Boolean).join('\n');
+
+  const body = new URLSearchParams({
+    'form-name': 'quote',
+    name: c.name || '', email: c.email || '', company: c.company || '',
+    message: payload.message || '', details,
+  });
+  const res = await fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+  });
+  if (!res.ok) throw new Error('Form submission failed (' + res.status + ')');
+  return { ok: true };
 }
 window.submitQuote = window.submitQuote || submitQuote;
 
