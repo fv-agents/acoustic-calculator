@@ -161,17 +161,24 @@ window.PERSON_AEQ = .46;
 
 /* Presets start from a realistic but acoustically POOR baseline (hard,
  * untreated surfaces, no existing treatments) so there is clear, visible
- * headroom to improve — different per room. Extras are never pre-selected. */
+ * headroom to improve — different per room. Extras are never pre-selected.
+ * "Other" is the exception: a neutral, average room for unlisted cases. */
 window.ROOM_PRESETS = {
   "Open office":       { fl:"Carpet tiles (office)", wl:"Plaster", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
+  "Office":            { fl:"Parquet / laminate", wl:"Plaster", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.8 },
   "Meeting room":      { fl:"Carpet tiles (office)", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
-  "Restaurant / café": { fl:"Hard floor (concrete / tiles / poured)", wl:"Plaster", cl:"Open ceiling (services exposed)", fu:"Normal, mostly hard", ex:[], t:1 },
   "Classroom":         { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
+  "Restaurant / café": { fl:"Hard floor (concrete / tiles / poured)", wl:"Plaster", cl:"Open ceiling (services exposed)", fu:"Normal, mostly hard", ex:[], t:1 },
   "Lobby / reception": { fl:"Hard floor (concrete / tiles / poured)", wl:"Mostly glass (>50%)", cl:"Concrete ceiling", fu:"Normal, mostly hard", ex:[], t:1 },
+  "Public space":      { fl:"Hard floor (concrete / tiles / poured)", wl:"Mostly glass (>50%)", cl:"Concrete ceiling", fu:"Sparse, hard furniture", ex:[], t:1.2 },
+  "Other":             { fl:"Carpet tiles (office)", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal with upholstery", ex:[], t:.8 },
 };
 
 window.RT60_NORMS = {
   "Open office":      { optimal:[0.4,0.6], acceptable:0.8 },
+  "Office":           { optimal:[0.5,0.8], acceptable:1.0 },
+  "Public space":     { optimal:[1.0,1.5], acceptable:1.8 },
+  "Other":            { optimal:[0.5,0.8], acceptable:1.0 },
   "Cell office":      { optimal:[0.4,0.6], acceptable:0.8 },
   "Call center":      { optimal:[0.3,0.5], acceptable:0.6 },
   "Meeting room":     { optimal:[0.4,0.6], acceptable:0.7 },
