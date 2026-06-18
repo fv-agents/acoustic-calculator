@@ -159,19 +159,15 @@ window.EXTRAS = {
 
 window.PERSON_AEQ = .46;
 
+/* Presets start from a realistic but acoustically POOR baseline (hard,
+ * untreated surfaces, no existing treatments) so there is clear, visible
+ * headroom to improve — different per room. Extras are never pre-selected. */
 window.ROOM_PRESETS = {
-  "(custom)":          { fl:"", wl:"", cl:"", fu:"", ex:[], t:.8 },
-  "Open office":       { fl:"Carpet tiles (office)", wl:"Plasterboard + insulation", cl:"System ceiling (standard)", fu:"Normal with upholstery", ex:["Acoustic desk screens"], t:.6 },
-  "Cell office":       { fl:"Carpet tiles (office)", wl:"Plasterboard + insulation", cl:"System ceiling (standard)", fu:"Normal with upholstery", ex:["Plants / decoration"], t:.6 },
-  "Call center":       { fl:"Carpet tiles (office)", wl:"Plasterboard + insulation", cl:"System ceiling (standard)", fu:"Normal with upholstery", ex:["Acoustic desk screens"], t:.5 },
-  "Meeting room":      { fl:"Carpet tiles (office)", wl:"Plasterboard + insulation", cl:"Gypsum ceiling (closed)", fu:"Normal with upholstery", ex:[], t:.6 },
+  "Open office":       { fl:"Carpet tiles (office)", wl:"Plaster", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
+  "Meeting room":      { fl:"Carpet tiles (office)", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
   "Restaurant / café": { fl:"Hard floor (concrete / tiles / poured)", wl:"Plaster", cl:"Open ceiling (services exposed)", fu:"Normal, mostly hard", ex:[], t:1 },
-  "Canteen":           { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard (standard)", cl:"System ceiling (standard)", fu:"Normal, mostly hard", ex:[], t:.9 },
-  "Lobby / reception": { fl:"Hard floor (concrete / tiles / poured)", wl:"Mostly glass (>50%)", cl:"Concrete ceiling", fu:"Dense / heavily upholstered (lounge)", ex:["Plants / decoration"], t:1 },
-  "Classroom":         { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard (standard)", cl:"System ceiling (old / thin)", fu:"Normal, mostly hard", ex:[], t:.6 },
-  "Childcare":         { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard (standard)", cl:"System ceiling (standard)", fu:"Normal, mostly hard", ex:[], t:.6 },
-  "Healthcare":        { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard + insulation", cl:"System ceiling (standard)", fu:"Normal, mostly hard", ex:["Curtains (light)"], t:.8 },
-  "Retail / shop":     { fl:"Hard floor (concrete / tiles / poured)", wl:"Glass partition wall", cl:"Open ceiling (services exposed)", fu:"Sparse, hard furniture", ex:[], t:1 },
+  "Classroom":         { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
+  "Lobby / reception": { fl:"Hard floor (concrete / tiles / poured)", wl:"Mostly glass (>50%)", cl:"Concrete ceiling", fu:"Normal, mostly hard", ex:[], t:1 },
 };
 
 window.RT60_NORMS = {

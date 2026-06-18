@@ -94,7 +94,7 @@ function QuoteRequest({ context, onAnnounce }) {
     <form className="no-print quote-flow" onSubmit={handleSubmit} noValidate aria-labelledby="quote-heading">
       <div className="t-section-label">Next step</div>
       <h2 id="quote-heading" style={{ fontSize:20, fontWeight:300, color:'var(--text)', marginBottom:4 }}>
-        Request a tailored quote
+        Request a quote
       </h2>
       <p style={{ fontSize:13, color:'var(--text-sec)', marginBottom:18, lineHeight:1.6 }}>
         Get a fixture proposal and pricing for this exact result. Your room and selection are sent along automatically.

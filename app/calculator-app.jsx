@@ -5,8 +5,8 @@ const STORE_KEY = 'lumenear_calc_v2';
 
 const DEFAULTS = {
   step: 1, pn: '', client: '', l: 8, w: 6, h: 2.8, pe: 0,
-  rt: 'Meeting room', fm: 'Carpet tiles (office)', wm: 'Plasterboard + insulation',
-  cm: 'Gypsum ceiling (closed)', fu: 'Normal with upholstery', ex: [], qty: {},
+  rt: 'Meeting room', fm: 'Carpet tiles (office)', wm: 'Plasterboard (standard)',
+  cm: 'Gypsum ceiling (closed)', fu: 'Normal, mostly hard', ex: [], qty: {},
 };
 
 function loadState() {
@@ -94,8 +94,19 @@ function App() {
     if (!p) return;
     if (p.fl) setFm(p.fl); if (p.wl) setWm(p.wl);
     if (p.cl) setCm(p.cl); if (p.fu) setFu(p.fu);
-    if (p.ex) setEx([...p.ex]);
+    setEx([]);   // existing acoustic treatments always off on a preset
   };
+  const resetAll = () => { try { localStorage.removeItem(STORE_KEY); } catch {} location.reload(); };
+  const resetBtn = (
+    <button className="btn btn-ghost btn-sm" onClick={resetAll}
+      title="Reset all inputs" aria-label="Reset calculator" style={{ gap: 5 }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6" />
+      </svg>
+      Reset
+    </button>
+  );
   const toggleEx = (k) => setEx(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
   const setQtyFor = (name, val) => {
     const v = Math.max(0, Math.floor(Number(val) || 0));
@@ -292,7 +303,10 @@ function App() {
             </div>
 
             <div className="step-nav">
-              <button className="btn btn-ghost" onClick={prev}>← Back</button>
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="btn btn-ghost" onClick={prev}>← Back</button>
+                {resetBtn}
+              </div>
               <button className="btn btn-primary" onClick={next}>Select fixtures →</button>
             </div>
           </div>
@@ -365,7 +379,21 @@ function App() {
               </div>
             )}
 
-            <div className="t-section-label" style={{ marginTop:8 }}>Selected fixtures</div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:8 }}>
+              <div className="t-section-label" style={{ margin:0 }}>Selected fixtures</div>
+              {sp.length > 0 && (
+                <button onClick={() => setQty({})}
+                  title="Remove all selected fixtures" aria-label="Remove all selected fixtures"
+                  style={{ background:'none', border:'none', color:'var(--text-sec)', cursor:'pointer',
+                    fontSize:10, display:'flex', alignItems:'center', gap:3, padding:0 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6" />
+                  </svg>
+                  Clear all
+                </button>
+              )}
+            </div>
             {sp.length > 0 ? (
               <div style={{ background:'var(--bg)', borderRadius:'var(--radius)', padding:10, marginBottom:12 }}>
                 {sp.map(p => (
@@ -402,7 +430,7 @@ function App() {
 
             {calc.aNeed > 0 ? (
               <div className="advice-box warn" style={{ fontSize:11, lineHeight:1.6 }}>
-                <b style={{ color:'var(--warn)' }}>~{calc.aNeed.toFixed(1)} m²</b> more absorption needed to reach the {calc.tgt.toFixed(1)}s target.
+                Add <b style={{ color:'var(--warn)' }}>~{calc.aNeed.toFixed(1)} m²</b> more absorption to reach the {calc.tgt.toFixed(1)}s target.
               </div>
             ) : (
               <div className="advice-box ok" style={{ fontSize:11, lineHeight:1.6 }}>
@@ -413,7 +441,10 @@ function App() {
 
             <div className="sidebar-actions">
               <button className="btn btn-primary" style={{ width:'100%', justifyContent:'center' }} onClick={next}>View result →</button>
-              <button className="btn btn-ghost" style={{ width:'100%', justifyContent:'center', marginTop:6 }} onClick={prev}>← Back</button>
+              <div style={{ display:'flex', gap:6, marginTop:6 }}>
+                <button className="btn btn-ghost" style={{ flex:1, justifyContent:'center' }} onClick={prev}>← Back</button>
+                {resetBtn}
+              </div>
             </div>
           </div>
         </div>
@@ -475,7 +506,7 @@ function App() {
               For {rt.toLowerCase()}, {calc.tgt.toFixed(1)}s is the recommended target
               {calc.r1 <= calc.tgt
                 ? ' — your specification meets this target.'
-                : `. You need approximately ${calc.aNeed.toFixed(1)} m² more absorption to reach it.`}
+                : `. Adding around ${calc.aNeed.toFixed(1)} m² more absorption would bring it to the ${calc.tgt.toFixed(1)}s target.`}
             </div>
 
             <PrintPageBreak />
@@ -534,24 +565,6 @@ function App() {
               </div>
             )}
 
-            {/* Method & assumptions — trust signals, on screen + print */}
-            <div style={{ marginBottom:20 }}>
-              <div className="t-section-label">Method &amp; assumptions</div>
-              <table className="summary-table">
-                <tbody>
-                  <tr><td className="row-label">Calculation</td><td className="row-value">Sabine reverberation (RT60), per octave-band absorption</td></tr>
-                  <tr><td className="row-label">Target bands</td><td className="row-value">DIN 18041 (indicative, not normative)</td></tr>
-                  <tr><td className="row-label">Coefficients</td><td className="row-value">ISO 11654 (αw) · EN-ISO 354 (Aeq)</td></tr>
-                  <tr><td className="row-label">Fixture placement</td><td className="row-value">Per Lumenear guidance — near the sound source</td></tr>
-                </tbody>
-              </table>
-              <p style={{ fontSize:11, color:'var(--text-sec)', marginTop:8, lineHeight:1.6 }}>
-                Lumenear absorption is calculated for placement according to our guidance; we always advise positioning fixtures
-                where they work hardest. Material coefficients use published worst-case values, so the real-world result is
-                typically at least as good as shown.
-              </p>
-            </div>
-
             <PrintFooter />
 
             {/* Report form — hidden in print */}
@@ -575,7 +588,10 @@ function App() {
             </div>
 
             <div className="step-nav step-nav-solid no-print">
-              <Button variant="ghost" onClick={prev}>← Adjust fixtures</Button>
+              <div style={{ display:'flex', gap:8 }}>
+                <Button variant="ghost" onClick={prev}>← Adjust fixtures</Button>
+                {resetBtn}
+              </div>
               <Button variant="primary" size="lg" disabled={!pn.trim()}
                 onClick={() => window.print()}>
                 Download report
