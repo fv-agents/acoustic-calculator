@@ -127,10 +127,6 @@ function ProductDetailModal({ product, specs, onClose }) {
       <div className="kit-modal" role="dialog" aria-modal="true" aria-labelledby="pdm-title"
         onClick={e => e.stopPropagation()}>
         <button ref={closeRef} className="kit-modal-close" onClick={onClose} aria-label="Close">×</button>
-        <div className="kit-modal-media">
-          <img src={specs.img || `img/${product.f}.jpg`} alt={product.n}
-            onError={e => { e.target.closest('.kit-modal-media').style.display = 'none'; }} />
-        </div>
         <div className="kit-modal-body">
           <div className="t-section-label" style={{ marginBottom: 2 }}>{product.f}</div>
           <h3 id="pdm-title" className="kit-modal-title">{product.n}</h3>
@@ -144,6 +140,10 @@ function ProductDetailModal({ product, specs, onClose }) {
             {specs.web && <a className="btn btn-primary btn-sm" href={specs.web} target="_blank" rel="noopener noreferrer">View page ↗</a>}
             {specs.sheet && <a className="btn btn-ghost btn-sm" href={specs.sheet} target="_blank" rel="noopener noreferrer">Product sheet (PDF) ↓</a>}
           </div>
+        </div>
+        <div className="kit-modal-media">
+          <img src={specs.img || `img/${product.f}.jpg`} alt={product.n}
+            onError={e => { e.target.closest('.kit-modal-media').classList.add('is-empty'); }} />
         </div>
       </div>
     </div>
