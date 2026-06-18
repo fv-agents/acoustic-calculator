@@ -164,8 +164,8 @@ window.PERSON_AEQ = .46;
  * headroom to improve — different per room. Extras are never pre-selected.
  * "Other" is the exception: a neutral, average room for unlisted cases. */
 window.ROOM_PRESETS = {
-  "Open office":       { fl:"Carpet tiles (office)", wl:"Plaster", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
   "Office":            { fl:"Parquet / laminate", wl:"Plaster", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.8 },
+  "Open office":       { fl:"Carpet tiles (office)", wl:"Plaster", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
   "Meeting room":      { fl:"Carpet tiles (office)", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
   "Classroom":         { fl:"Linoleum / vinyl / PVC", wl:"Plasterboard (standard)", cl:"Gypsum ceiling (closed)", fu:"Normal, mostly hard", ex:[], t:.6 },
   "Restaurant / café": { fl:"Hard floor (concrete / tiles / poured)", wl:"Plaster", cl:"Open ceiling (services exposed)", fu:"Normal, mostly hard", ex:[], t:1 },
