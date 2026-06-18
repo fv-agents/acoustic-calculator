@@ -98,14 +98,69 @@ function RT60Meter({ rt0, rt1, target, visible = true }) {
   );
 }
 
+/* ── Product Detail Modal — specs + links (D3) ── */
+function ProductDetailModal({ product, specs, onClose }) {
+  const closeRef = useRef(null);
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    if (closeRef.current) closeRef.current.focus();
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const cct   = specs.cct && specs.cct.length ? specs.cct.join(' / ') + ' K' : null;
+  const dim   = specs.dim && specs.dim.length ? specs.dim.join(' · ') : null;
+  const light = specs.lm ? `${specs.lm} lm · ${specs.watt} W` : (specs.watt ? `${specs.watt} W` : null);
+  const rows = [
+    ['Light output', light],
+    ['Colour temperature', cct],
+    ['Dimming', dim],
+    ['Felt colours', specs.colors && specs.colors.length ? `${specs.colors.length} colours` : null],
+    ['Absorption αw', product.aw],
+    ['Equivalent absorption', `${product.eq} m² per fixture`],
+    ['Mounting', product.mt],
+    ['Diameter', product.d ? `${product.d} mm` : null],
+  ].filter(r => r[1] != null && r[1] !== '');
+
+  return (
+    <div className="kit-modal-overlay" onClick={onClose}>
+      <div className="kit-modal" role="dialog" aria-modal="true" aria-labelledby="pdm-title"
+        onClick={e => e.stopPropagation()}>
+        <button ref={closeRef} className="kit-modal-close" onClick={onClose} aria-label="Close">×</button>
+        <div className="kit-modal-media">
+          <img src={specs.img || `img/${product.f}.jpg`} alt={product.n}
+            onError={e => { e.target.closest('.kit-modal-media').style.display = 'none'; }} />
+        </div>
+        <div className="kit-modal-body">
+          <div className="t-section-label" style={{ marginBottom: 2 }}>{product.f}</div>
+          <h3 id="pdm-title" className="kit-modal-title">{product.n}</h3>
+          {product.note && <p className="kit-modal-note">{product.note}</p>}
+          <dl className="kit-spec-list">
+            {rows.map(([k, v]) => (
+              <div className="kit-spec-row" key={k}><dt>{k}</dt><dd>{v}</dd></div>
+            ))}
+          </dl>
+          <div className="kit-modal-actions">
+            {specs.web && <a className="btn btn-primary btn-sm" href={specs.web} target="_blank" rel="noopener noreferrer">View page ↗</a>}
+            {specs.sheet && <a className="btn btn-ghost btn-sm" href={specs.sheet} target="_blank" rel="noopener noreferrer">Product sheet (PDF) ↓</a>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Product Card ── */
 function ProductCard({ product, qty, onSetQty }) {
+  const [showSpecs, setShowSpecs] = useState(false);
   const isSelected = qty > 0;
+  const specs = (window.PRODUCT_SPECS || {})[product.n] || {};
   return (
     <div className={`product-card ${isSelected ? 'selected' : ''}`}>
-      <div className="product-thumb">
+      <div className="product-thumb" onClick={() => setShowSpecs(true)}
+        style={{ cursor: 'pointer' }} title="View specs & links">
         <img
-          src={`img/${product.f}.jpg`}
+          src={specs.img || `img/${product.f}.jpg`}
           alt={product.f}
           onError={e => { e.target.style.display = 'none'; }}
         />
@@ -113,7 +168,8 @@ function ProductCard({ product, qty, onSetQty }) {
       <div className="product-info">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
           <div className="product-name" title={product.n}>{product.n}</div>
-          <span className="product-family">{product.f}</span>
+          <button className="product-info-btn" onClick={() => setShowSpecs(true)}
+            aria-label={`Specs and links for ${product.n}`} title="Specs & links">i</button>
         </div>
         <div className="product-specs">
           <span title="Weighted absorption coefficient (ISO 11654)">αw {product.aw}</span>
@@ -127,6 +183,7 @@ function ProductCard({ product, qty, onSetQty }) {
           label={`Quantity — ${product.n}`}
         />
       </div>
+      {showSpecs && <ProductDetailModal product={product} specs={specs} onClose={() => setShowSpecs(false)} />}
     </div>
   );
 }
