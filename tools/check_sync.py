@@ -94,7 +94,13 @@ def expected_products():
 
             mounting = row["Mounting_Type"] or ""
             diff = 1.12 if re.search(r"pendant|hang|free", mounting, re.I) else 1.00
-            aeq  = round(area * speech * diff, 2)
+
+            # Measured/scaled Aeq overrides real ISO 354 object test data (Merford
+            # lab report, 2026-05-12) or a family-specific extrapolation from it.
+            # Bypasses the material-model formula so diffraction isn't double-applied
+            # on top of an already-measured object value.
+            override = fnum(row["Equivalent_Absorption_Aeq_m2"])
+            aeq = override if override is not None else round(area * speech * diff, 2)
             aw   = fnum(row["aw_ISO11654"])
             out.append((name, fam, aw, round(area, 2), aeq))
     return out
