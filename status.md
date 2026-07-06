@@ -5,9 +5,10 @@ _Bijgewerkt: 2026-07-06_
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures, klaar voor `calculator.lumenear.com`.
 
 ### Nieuw sinds 06-07
-- **Herziene Merford-cijfers verwerkt** (41 rijen: Toad/Halo/Nova/Cone/Float bijgewerkt, Blaze + Line voor het eerst met eigen cijfers) + materiaal-oppervlak nu expliciet i.p.v. berekend voor die rijen. **Flora toegevoegd** als nieuwe productlijn (4 varianten) — marketingtekst/ovale afmetingen nog placeholder.
-- CI groen: 93/93 sync, 11/11 unit tests. Nog niet gecommit/gepusht.
-- **Openstaand:** de 20 op 01-07 geëxtrapoleerde producten (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) zijn nog gebaseerd op de oude familieratio — met Falco bespreken of herrekening nodig is.
+- **Herziene Merford-cijfers verwerkt** (41 rijen: Toad/Halo/Nova/Cone/Float bijgewerkt, Blaze + Line voor het eerst met eigen cijfers) + materiaal-oppervlak nu expliciet i.p.v. berekend voor die rijen.
+- **Flora toegevoegd** als nieuwe productlijn (4 varianten), maar **verborgen** (`hidden:true`) tot lancering — data staat klaar, komt niet in de fixture-catalogus of familiefilter totdat Falco 'm activeert.
+- **19 geëxtrapoleerde producten teruggedraaid** (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) naar de oorspronkelijke materiaalformule — de familie-ratio-aanname uit 01-07 bleek niet stabiel genoeg. Toad Oval 1750 uitgezonderd (heeft nu een eigen echte meetwaarde).
+- CI groen: 93/93 sync, 11/11 unit tests. Gecommit en gepusht.
 
 ### Sinds 01-07
 - Echte Merford ISO 354 labmetingen verwerkt (7 armaturen, 12-05-2026). `tools/check_sync.py`: `Equivalent_Absorption_Aeq_m2`-kolom in de CSV is een override boven de materiaalformule wanneer gevuld (voorkomt dubbele diffractiecorrectie op al-gemeten waarden).
@@ -51,8 +52,8 @@ Geen.
 - Blaze had t/m 01-07 nog Toad's placeholder-cijfers; sinds 06-07 eigen cijfers (zie decisions.md 2026-07-06).
 - ~~Float-oppervlak in data.js (~2×) vs Merford-rapport~~ — opgelost op 06-07 (oppervlak nu expliciet gezet i.p.v. berekend).
 - Cone-waarden zijn de minst zekere van de Merford-set (combimeting + geometrische split naar losse maten, niet los gemeten) — Falco's tabel markeert dit zelf met een *.
-- Flora: marketingtekst en ovale afmetingen (W×L) zijn placeholder ("TBD") — nog geen productfoto/omschrijving voor de specs-modal.
-- De 20 op 01-07 extrapoleerde producten (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) zijn nog niet herrekend met de herziene basis — de gebruikte familieratio bleek minder stabiel dan gedacht.
+- Flora: `hidden:true` — verborgen tot lancering. Marketingtekst en ovale afmetingen (W×L) nog placeholder ("TBD"). Activeren = `hidden` verwijderen in `app/data.js` (4 rijen) zodra productinfo compleet is.
+- ~~De 20 op 01-07 extrapoleerde producten~~ — 19 op 06-07 teruggedraaid naar de oorspronkelijke materiaalformule (familieratio bleek niet stabiel). Toad Oval 1750 heeft wél een eigen echte meetwaarde.
 
 ## Roadmap
 v7.0: SVG/DXF export voor projectdocumentatie.

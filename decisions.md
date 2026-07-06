@@ -4,6 +4,14 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-07-06 (2) — Flora verborgen tot lancering; 19 geëxtrapoleerde producten teruggedraaid
+
+**Flora verborgen:** nieuwe lamp, nog niet gelanceerd. Data blijft staan in CSV + `app/data.js` (voor toekomstig gebruik), maar een `hidden:true`-vlag op de 4 Flora-rijen sluit ze uit van `window.FAMILIES` en de fixture-catalogus (`app/calculator-app.jsx` regel ~132, `filtered`). `check_sync.py`'s parser negeert onbekende velden (niet-greedy regex), dus `hidden` breekt de sync-check niet. Zet `hidden:false` (of verwijder het veld) zodra Flora live gaat.
+
+**19 Phase-B-extrapolaties (01-07) teruggedraaid:** Falco: "hou alles aan wat ik zojuist gestuurd heb, verwijder de oude info" — de familie-ratio-extrapolatie voor Breeze/Orbit/Wing/Cloud(×6)/Sliced/Blooom/Drop/Cage/Podge/Spott(×2)/Pyknic bleek na de herziening van 06-07 op losse schroeven te staan (zie besluit 2026-07-06 (1)). Override in `Equivalent_Absorption_Aeq_m2` verwijderd voor deze 19 rijen → vallen terug op de oorspronkelijke materiaalformule (oppervlak×spraak-α×diffractie), exact gelijk aan de waardes van vóór de Merford-verwerking. **Toad Oval 1750 bleef ongemoeid** — die heeft sinds 06-07 wél een eigen echte meetwaarde (geen extrapolatie meer).
+
+**Gevolg:** CI groen (93/93 sync, 11/11 tests). Product-scope die nu op echte/directe Merford-data staat: Toad, Halo, Nova, Column, Twist, Cone, Float, Blaze, Line (in totaal 46 rijen). De rest van de catalogus (incl. de 19 teruggedraaide) staat weer op de langlopende materiaalformule, zoals vóór 01-07.
+
 ## 2026-07-06 — Herziene Merford-tabel verwerkt (vervangt deels 2026-07-01); Flora toegevoegd
 
 **Aanleiding:** Falco leverde een herziene tabel met materiaal-oppervlak + spraakgewogen Aobj per product. De 7 zelf gemeten basismaten (Toad 1500, Halo 1400, Nova 2800, Twist ref/vloerlamp/klein, Column 1600/2000, Float round 800) kwamen exact overeen met wat op 01-07 verwerkt was — bevestigt dat de onderliggende meting hetzelfde is. Maar de geschaalde tussenmaten wijken nu structureel anders af, met name Nova 1800 (1,87→2,82, +51%) en de Float oval/rectangle-varianten (−26 tot −41%). Dit wijst erop dat de scaling-methode in deze versie afwijkt van de eerste xlsx (niet louter lineaire oppervlakteschaling). Falco gaf aan geen apart brondocument te hebben — alleen deze tabel, 1-op-1 overgenomen zoals geplakt.

@@ -129,7 +129,7 @@ function App() {
   const goTo = (s) => setStep(s);
 
   const q = search.trim().toLowerCase();
-  const filtered = PP.filter(x => (fam === 'All' || x.f === fam) && (!q || x.n.toLowerCase().includes(q)));
+  const filtered = PP.filter(x => !x.hidden && (fam === 'All' || x.f === fam) && (!q || x.n.toLowerCase().includes(q)));
 
   const printDate = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
 
