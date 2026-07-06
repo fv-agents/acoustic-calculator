@@ -1,14 +1,17 @@
 # Status — Acoustic Calculator
-_Bijgewerkt: 2026-07-01_
+_Bijgewerkt: 2026-07-06_
 
 ## Huidige staat
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures, klaar voor `calculator.lumenear.com`.
 
-### Nieuw sinds 01-07
-- **Echte Merford ISO 354 labmetingen verwerkt** (7 armaturen, 12-05-2026) — 65 van de 89 producten kregen een gecorrigeerde Aeq (Toad/Halo/Nova/Column/Twist/Float/Cone direct, 20 andere producten via familie-specifieke extrapolatie). Zie decisions.md 2026-07-01 voor volledige methodologie en scope.
-- `tools/check_sync.py`: `Equivalent_Absorption_Aeq_m2`-kolom in de CSV is nu een override boven de materiaalformule wanneer gevuld (voorkomt dubbele diffractiecorrectie op al-gemeten waarden).
-- CI groen: 89/89 sync, 11/11 unit tests.
-- Bronbestanden meting: `Akoestische testen/2026-05-12 Merford ISO354 meetrapport.pdf` + verwerkt xlsx-overzicht.
+### Nieuw sinds 06-07
+- **Herziene Merford-cijfers verwerkt** (41 rijen: Toad/Halo/Nova/Cone/Float bijgewerkt, Blaze + Line voor het eerst met eigen cijfers) + materiaal-oppervlak nu expliciet i.p.v. berekend voor die rijen. **Flora toegevoegd** als nieuwe productlijn (4 varianten) — marketingtekst/ovale afmetingen nog placeholder.
+- CI groen: 93/93 sync, 11/11 unit tests. Nog niet gecommit/gepusht.
+- **Openstaand:** de 20 op 01-07 geëxtrapoleerde producten (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) zijn nog gebaseerd op de oude familieratio — met Falco bespreken of herrekening nodig is.
+
+### Sinds 01-07
+- Echte Merford ISO 354 labmetingen verwerkt (7 armaturen, 12-05-2026). `tools/check_sync.py`: `Equivalent_Absorption_Aeq_m2`-kolom in de CSV is een override boven de materiaalformule wanneer gevuld (voorkomt dubbele diffractiecorrectie op al-gemeten waarden).
+- Bronbestanden meting: `Akoestische testen/2026-05-12 Merford ISO354 meetrapport.pdf` + verwerkt xlsx-overzicht (v1 — zie 06-07 voor de herziene tabel, geen apart brondocument ontvangen).
 
 ### Nieuw sinds 12-06
 - **Specs-modal per lamp**: klik kaart of "Specs"-knop → lumen/watt/kleurtemp/dimming/viltkleuren + αw/Aeq + links naar productpagina & product sheet (`product-specs.js`, uit RRP-xlsx + web; geen prijzen).
@@ -43,11 +46,13 @@ Geen.
 3. **Rooktest na live**: mobiel-gate op telefoon + één echte test-lead via het offerteformulier.
 
 ## Bekende gaten
-- Lumen ontbreekt voor E27-decolampen (Drop/Cage/Podge/Spott/Pyknic/Blooom) en Float oval/rect (stond niet op de site).
+- Lumen ontbreekt voor E27-decolampen (Drop/Cage/Podge/Spott/Pyknic/Blooom), Float oval/rect en de nieuwe Flora-lijn (stonden niet op de site).
 - `submitQuote` evt. later naar Supabase/endpoint i.p.v. Netlify Forms (seam = 1 functie).
-- Blaze (deelde voorheen Toad's cijfers als placeholder) nog niet apart getest/gecorrigeerd — bewust buiten scope gehouden bij de Merford-verwerking van 01-07.
-- Float-oppervlak in data.js (~2×) vs Merford-rapport nog niet verklaard/opgelost (speelt nu geen rol, want de nieuwe Aeq's komen direct uit de meting, niet via het oppervlak herberekend).
-- Cone-waarden zijn de minst zekere van de Merford-set (combimeting + geometrische split naar losse maten, niet los gemeten).
+- Blaze had t/m 01-07 nog Toad's placeholder-cijfers; sinds 06-07 eigen cijfers (zie decisions.md 2026-07-06).
+- ~~Float-oppervlak in data.js (~2×) vs Merford-rapport~~ — opgelost op 06-07 (oppervlak nu expliciet gezet i.p.v. berekend).
+- Cone-waarden zijn de minst zekere van de Merford-set (combimeting + geometrische split naar losse maten, niet los gemeten) — Falco's tabel markeert dit zelf met een *.
+- Flora: marketingtekst en ovale afmetingen (W×L) zijn placeholder ("TBD") — nog geen productfoto/omschrijving voor de specs-modal.
+- De 20 op 01-07 extrapoleerde producten (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) zijn nog niet herrekend met de herziene basis — de gebruikte familieratio bleek minder stabiel dan gedacht.
 
 ## Roadmap
 v7.0: SVG/DXF export voor projectdocumentatie.

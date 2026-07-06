@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-06 — Herziene Merford-tabel + Flora toegevoegd
+**Gedaan:** Falco leverde een herziene materiaal+Aobj-tabel (geen apart brondocument, direct overgenomen). 41 bestaande rijen bijgewerkt (Toad/Halo/Nova/Cone/Float: nieuwe Aeq + materiaal-oppervlak expliciet gezet i.p.v. berekend; Blaze en Line kregen voor het eerst eigen cijfers). Flora toegevoegd als nieuwe productlijn (4 varianten, Technical/Pendant/single-layer-PET-felt, bevestigd door Falco). CI groen (93/93 sync, 11/11 tests).
+**Besloten:** zie decisions.md 2026-07-06.
+**Openstaand:** Flora's marketingtekst en ovale afmetingen zijn placeholders (TBD). De 20 op 01-07 geëxtrapoleerde producten (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) zijn NIET herrekend — de familieratio waar ze op gebaseerd waren blijkt met de herziene cijfers minder stabiel dan gedacht. Nog niet gecommit/gepusht.
+
 ## 2026-07-01 — Merford ISO 354 labmetingen verwerkt in productcatalogus
 **Gedaan:** Analyse van het Merford-meetrapport (12-05-2026, 7 opstellingen echte armaturen in nagalmkamer, ISO 354) + het verwerkte xlsx-overzicht (23 varianten via lineaire/frequentie-schaling). Zelfcheck tegen `app/data.js` toonde dat de bestaande materiaalformule (oppervlak×αw×diffractie) voor Toad/Halo/Nova/Column/Twist consistent 12–25% te hoog zat; Cone (minst directe afleiding) 16–30% te laag. Na interview met Falco (scope, Float-constructie, Blaze, Cone-onzekerheid, extrapolatie-aanpak): `Equivalent_Absorption_Aeq_m2`-kolom in de CSV geactiveerd als override boven de formule (voorkomt dubbele diffractiecorrectie), 65 van 89 producten bijgewerkt — 43 direct uit de meting/xlsx, 20 via familie-specifieke extrapolatie (eigen familieratio waar getest, anders gemiddelde van de geteste families excl. Cone). `tools/check_sync.py` aangepast, CSV + `app/data.js` geregenereerd, CI groen (89/89 + 11/11).
 **Besloten:** zie decisions.md 2026-07-01 (herziet besluit 2026-06-11 over die kolom). Blaze bewust niet meebewegen met Toad. Geen UI-indicatie gemeten-vs-geschat. CSV-methodologiekolom ongewijzigd (blijft overal "ISO 354" zeggen).

@@ -4,6 +4,18 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-07-06 — Herziene Merford-tabel verwerkt (vervangt deels 2026-07-01); Flora toegevoegd
+
+**Aanleiding:** Falco leverde een herziene tabel met materiaal-oppervlak + spraakgewogen Aobj per product. De 7 zelf gemeten basismaten (Toad 1500, Halo 1400, Nova 2800, Twist ref/vloerlamp/klein, Column 1600/2000, Float round 800) kwamen exact overeen met wat op 01-07 verwerkt was — bevestigt dat de onderliggende meting hetzelfde is. Maar de geschaalde tussenmaten wijken nu structureel anders af, met name Nova 1800 (1,87→2,82, +51%) en de Float oval/rectangle-varianten (−26 tot −41%). Dit wijst erop dat de scaling-methode in deze versie afwijkt van de eerste xlsx (niet louter lineaire oppervlakteschaling). Falco gaf aan geen apart brondocument te hebben — alleen deze tabel, 1-op-1 overgenomen zoals geplakt.
+
+**Gevolg (41 rijen bijgewerkt in CSV + data.js):** naast de Aeq-override is nu ook `Acoustic_Surface_m2` expliciet gezet voor alle 41 rijen (i.p.v. de eerdere `calc_area()`-formule), zodat materiaal-oppervlak en Aeq als bij elkaar horend paar vastliggen. Dit lost en passant de eerder gesignaleerde Float-oppervlak-discrepantie op (was ~2× te groot in data.js t.o.v. het Merford-rapport — nu 0,50 m² voor Float round 800, conform het rapport). Cone's materiaal-oppervlak is ook gecorrigeerd (0,60→0,46 en 0,93→0,81 m²) — Falco's tabel markeert deze met een * (blijft de minst directe afleiding: combimeting + geometrische split).
+
+**Blaze en Line kregen voor het eerst eigen cijfers** (voorheen resp. bewust ongemoeid gelaten als Toad-placeholder, en niet aangepast wegens ontbrekende testbasis). Falco bevestigde: "het zijn kennelijk ook gemeten/berekende waarden" — dus nu op dezelfde manier verwerkt (override in Aeq + oppervlak).
+
+**Flora toegevoegd als nieuwe productlijn** (4 varianten: 800/1200/1800/oval) — bestond nog niet in de catalogus. Categorie/montage/constructie (Technical, Pendant, single layer 9mm PET Felt free hanging, αw 0.45) door Falco bevestigd; exacte productbeschrijving/marketingtekst en de W×L-afmetingen van de ovale variant ontbreken nog (Notes-veld tijdelijk als "TBD"-achtig geformuleerd in de CSV, `d:null` voor oval in data.js).
+
+**Onopgeloste kwestie — niet geblokkeerd, wel gevlagd:** de 20 producten die op 01-07 via een familie-specifieke correctieratio geëxtrapoleerd zijn (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) zijn gebaseerd op een destijds vrij consistente Toad-ratio (~0,80 over alle 3 maten). Met de herziene cijfers is die ratio niet meer consistent (Toad 1500 0,80 / 1000 0,97 / 750 0,90) — de aanname "één stabiele familieratio" houdt dus minder goed stand dan gedacht. Deze 20 rijen zijn **nog niet opnieuw doorgerekend** met de herziene basis; moet met Falco besproken worden of dat nu alsnog moet, of wachten op verdere metingen.
+
 ## 2026-07-01 — Merford ISO 354 objectmetingen verwerkt; Equivalent_Absorption_Aeq_m2-kolom weer actief (herziet besluit 2026-06-11)
 
 **Aanleiding:** Merford (Gorinchem, niet-RvA-geaccrediteerd eigen lab) heeft op 2026-05-12 7 opstellingen van echte Lumenear-armaturen in een nagalmkamer gemeten volgens ISO 354 (i.p.v. het materiaal-niveau ISO 11654 dat de rest van de catalogus gebruikt): Toad 1500, Halo 1400, Nova 2800, Twist (7 diverse modellen gecombineerd), Cone (3×750+3×1000 combimeting), Column 1600, Float 800 (zonder verlichting, 158cm). Bronbestanden: `Akoestische testen/2026-05-12 Merford ISO354 meetrapport.pdf` + verwerkt overzicht (xlsx, lineaire/frequentie-schaling naar 23 varianten).
