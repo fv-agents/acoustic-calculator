@@ -394,7 +394,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .mg-title { font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.2; margin-bottom: 12px; }
 .mg-text { font-size: 14px; color: var(--text-sec); line-height: 1.6; }
 .mg-text b { color: var(--accent); font-weight: 600; }
-@media (max-width: 767px), (max-height: 430px) and (orientation: landscape) {
+@media screen and (max-width: 767px), screen and (max-height: 430px) and (orientation: landscape) {
   #mobile-gate {
     display: flex; position: fixed; inset: 0; z-index: 9999;
     align-items: center; justify-content: center;
