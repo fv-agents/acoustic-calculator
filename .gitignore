@@ -22,3 +22,7 @@ __pycache__/
 # Restore backups / tooling artifacts
 _restore-*/
 .playwright-mcp/
+
+# Local Netlify folder
+.netlify
+.env

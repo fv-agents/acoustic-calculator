@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-17 — Tijdelijke login (Basic Auth) + Supabase monitoring
+**Gedaan:** Netlify Edge Function gebouwd die de hele site achter HTTP Basic Auth zet (`netlify/edge-functions/basic-auth.ts`), credentials via env var `AUTH_USERS`. Nieuwe Supabase-tabel `calculator_access_log` (zelfde project als AIF) logt elke geslaagde login (insert-only anon-key policy, geen service_role gebruikt). Lokaal getest met `netlify dev`: alle drie scenario's (geen auth/fout wachtwoord/goede login) correct, log-rij bevestigd in Supabase, testrij verwijderd.
+**Besloten:** zie decisions.md 2026-07-17.
+**Openstaand:** Falco moet zelf 3 env vars zetten in het Netlify-dashboard van de calculator-site (staat op ander account dan de CLI-login) — `AUTH_USERS`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` — en opnieuw deployen. Eerste 4 accounts (falco/rik/jelle/frank @in-zee.nl) klaargezet, wachtwoord door Falco gekozen.
+
 ## 2026-07-06 (2) — Flora verborgen; extrapolaties teruggedraaid
 **Gedaan:** Flora kreeg `hidden:true` (data blijft, UI-catalogus/familielijst sluit 'm uit) tot Falco de lamp lanceert. De 19 op 01-07 geëxtrapoleerde producten (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) teruggedraaid naar de oorspronkelijke materiaalformule — de Aeq-override verwijderd omdat de onderliggende familie-ratio-aanname na de tabelherziening niet stabiel bleek. Toad Oval 1750 ongemoeid (heeft nu een eigen echte meetwaarde). CI groen (93/93, 11/11).
 **Besloten:** zie decisions.md 2026-07-06 (2).

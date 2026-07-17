@@ -4,6 +4,20 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-07-17 — Tijdelijke Basic Auth-gate + Supabase login-log
+
+**Reden:** Falco wil de calculator op `calculator.lumenear.com` zetten maar voorlopig achter een login, met individuele accounts per klant/tester (niet één gedeeld wachtwoord) zodat hij weet wie toegang heeft.
+
+**Gekozen aanpak:** Netlify Edge Function (`netlify/edge-functions/basic-auth.ts`) gate't de hele site (`path:"/*"`) met HTTP Basic Auth. Credentials staan in de Netlify env var `AUTH_USERS` (`gebruiker:wachtwoord,gebruiker:wachtwoord`, geen database nodig voor het beheer). Geen credentials geconfigureerd = fail closed (site blijft dicht, niet per ongeluk open).
+
+**Monitoring via Supabase** (zelfde project als AIF: `Agent` / `rcgwxafbgeexwujbclfh`): nieuwe tabel `calculator_access_log` (username, tijdstip, ip, user-agent) — los van de AIF-tabellen. Bewust **geen service_role key** in de edge function: die geeft volledige toegang tot alle AIF-data (leads, contacts, etc.) en zou bij een leak in de Netlify-config een groot risico zijn. In plaats daarvan de publieke anon/publishable key + een insert-only RLS policy (`anon can insert login events`) — die key kan alleen wegschrijven naar deze ene tabel, niets lezen. Logs bekijk je via Supabase Studio.
+
+**Getest lokaal** met `netlify dev` (los van de live site — die staat op een ander Netlify-account dan de CLI-login, zie [[project-netlify-cli]]): geen auth → 401, verkeerd wachtwoord → 401, juiste inlog → 200 + rij in `calculator_access_log`. Testrij achteraf verwijderd.
+
+**Vereist voor livegang (Falco-actie, kan niet via CLI omdat de site op een ander account staat):** in Netlify dashboard van de acoustic-calculator-site 3 env vars zetten: `AUTH_USERS`, `SUPABASE_URL` (`https://rcgwxafbgeexwujbclfh.supabase.co`), `SUPABASE_ANON_KEY` (de publishable key uit het Agent-project). Daarna opnieuw deployen.
+
+**Bewust tijdelijk:** deze auth-laag moet eruit (of vervangen worden) zodra de calculator publiek/embedded gaat — Basic Auth-prompts werken onvoorspelbaar in iframes (embed-plan in status.md), dus dit is geen oplossing voor de embed-fase.
+
 ## 2026-07-06 (2) — Flora verborgen tot lancering; 19 geëxtrapoleerde producten teruggedraaid
 
 **Flora verborgen:** nieuwe lamp, nog niet gelanceerd. Data blijft staan in CSV + `app/data.js` (voor toekomstig gebruik), maar een `hidden:true`-vlag op de 4 Flora-rijen sluit ze uit van `window.FAMILIES` en de fixture-catalogus (`app/calculator-app.jsx` regel ~132, `filtered`). `check_sync.py`'s parser negeert onbekende velden (niet-greedy regex), dus `hidden` breekt de sync-check niet. Zet `hidden:false` (of verwijder het veld) zodra Flora live gaat.
