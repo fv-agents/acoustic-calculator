@@ -1,0 +1,22 @@
+name: Keep-alive calculator auth project
+
+# Supabase's free tier pauses a project after ~7 days without API activity.
+# Deze workflow pingt het geïsoleerde calculator-auth-project (lumenear-calculator-auth,
+# bevat GEEN AIF-data) dagelijks, zodat het nooit pauzeert terwijl de calculator
+# maar af en toe gebruikt wordt. Zie decisions.md 2026-07-17 (3).
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # dagelijks 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase REST endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping
+        run: |
+          curl -sf -o /dev/null -w "HTTP %{http_code}\n" \
+            "https://yclomlaxufhnfsqwougx.supabase.co/rest/v1/" \
+            -H "apikey: sb_publishable_FwIKHltiOyi3lF4iiOvgCg_tDF8TPdt"

@@ -4,6 +4,24 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-07-17 (3) — Calculator-auth verhuisd naar eigen, geïsoleerd Supabase-project
+
+**Reden:** Falco's terechte vraag — "mensen met inlog horen geen enkele info uit het Supabase-project te kunnen lezen". Op het gedeelde AIF-project ("Agent") was dat *op dat moment* met de juiste policies wel zo, maar structureel niet gegarandeerd: AIF wordt actief doorontwikkeld met tientallen tabellen, en tijdens deze sessie vonden we al 4 tabellen (`events`, `error_logs`, `system_log`, `telegram_state`) die per ongeluk open stonden voor iedereen — inclusief `events` met echte lead-contactdata (naam/e-mail/bedrijf). Een calculator-account had daar met een projectbrede Supabase-sessie potentieel bij gekund als er ooit weer zo'n policy-fout gemaakt wordt.
+
+**Besloten:** apart Supabase-project **`lumenear-calculator-auth`** (`yclomlaxufhnfsqwougx`, eu-west-1, gratis tier), dat helemaal geen AIF-tabellen bevat — alleen `calculator_access_log` + de 4 auth-accounts. Zelfs een volledige misconfiguratie hier kan nooit AIF-data raken, want de data bestaat er simpelweg niet. `app/auth.js` wijst nu naar dit project. De oude `calculator_access_log`-tabel op het AIF-project is verwijderd.
+
+**Afgewogen alternatief (verworpen):** teruggaan naar een Edge Function zonder Supabase (geen database-afhankelijkheid, geen pauzeer-risico), maar dan geen self-service wachtwoord-reset meer. Falco koos voor het apart-project met keep-alive i.p.v. dat te laten vallen.
+
+**Gratis-tier pauzeer-risico opgelost met keep-alive:** Supabase pauzeert projecten na ~7 dagen zonder API-activiteit. Nieuwe GitHub Actions workflow `.github/workflows/keep-alive.yml` pingt dit project dagelijks (06:00 UTC) — ruim binnen de marge, geen risico op een "slapende" login voor een klant die maar af en toe inlogt.
+
+**4 accounts overgezet** (falco/rik/jelle/frank @in-zee.nl, Welkom2026!). Falco en rik via de normale signup-API; jelle en frank rechtstreeks via SQL (dezelfde bcrypt-hash, want zelfde wachtwoord) omdat Supabase's e-mail-rate-limit na 2 signups alweer dichtsloeg — bevestigt nogmaals dat dit project zonder eigen SMTP niet geschikt is voor veel/snelle accountaanmaak. Alle 4 accounts los getest en werkend bevonden.
+
+**Nog open — Falco-actie, ongewijzigd t.o.v. vorige versie, nu op het NIEUWE project:**
+1. Authentication → URL Configuration → Site URL + Redirect URLs instellen op het `lumenear-calculator-auth`-project (niet meer "Agent") — nodig voor de wachtwoord-reset-link.
+2. Optioneel: eigen SMTP voor betrouwbare reset-mails (zie bevinding hierboven).
+
+**Nog open, los van de calculator — de 4 AIF-tabellen met te ruime policies zijn nog niet gefixt** (was het gesprek vóór deze migratie; de calculator raakt dit nu niet meer, maar het blijft een lek richting *iedereen* met de publieke AIF-anon-key, ongeacht calculator-login). SQL hiervoor staat klaar, wachtte op Falco's akkoord toen het gesprek naar de architectuurwissel overging — apart oppakken.
+
 ## 2026-07-17 (2) — Eigen inlogscherm op Supabase Auth (vervangt Basic Auth Edge Function)
 
 **Reden:** Falco wilde een "professioneel" inlogscherm met logo/huisstijl, wachtwoord-vergeten, onthoud-mij en toegang-aanvragen. HTTP Basic Auth (2026-07-17 (1)) gebruikt altijd de kale browser-popup — daar is niets aan te stylen, dus dat vereiste een architectuurwissel.

@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-17 (3) — Calculator-auth verhuisd naar geïsoleerd Supabase-project
+**Gedaan:** Nieuw, apart Supabase-project `lumenear-calculator-auth` aangemaakt (bevat geen AIF-data), `calculator_access_log`-tabel + policy daar opnieuw gezet, 4 accounts overgezet (2 via signup-API, 2 rechtstreeks via SQL na een e-mail-rate-limit), `app/auth.js` omgezet naar het nieuwe project. Keep-alive GitHub Actions workflow toegevoegd (dagelijkse ping) tegen het gratis-tier pauzeer-risico na inactiviteit. Oude `calculator_access_log`-tabel op het AIF-project verwijderd. Volledige login-flow opnieuw getest tegen het nieuwe project — werkt.
+**Besloten:** zie decisions.md 2026-07-17 (3).
+**Openstaand:** Falco moet Site URL/Redirect URLs instellen op het NIEUWE project (niet meer "Agent"). De 4 te-open AIF-tabellen (events/error_logs/system_log/telegram_state) staan nog steeds open voor iedereen met de AIF-anon-key — los van de calculator, nog niet gefixt, SQL staat klaar in decisions.md 2026-07-17 (1)/(3).
+
 ## 2026-07-17 (2) — Eigen inlogscherm (Supabase Auth) i.p.v. Basic Auth
 **Gedaan:** Basic Auth Edge Function vervangen door een gestileerd inlogscherm op Supabase Auth: login, wachtwoord vergeten, toegang aanvragen (nieuw Netlify Forms-formulier `access-request`), onthoud-mij, en een nieuw-wachtwoord-scherm voor de reset-link. Nieuwe bestanden: `app/auth.js` (REST-client, geen SDK), `app/auth-components.jsx`, `app/auth-styles.css`. `calculator-app.jsx` wrapt nu in `<AuthGate>` + logout-knop in header. Oude Edge Function + AUTH_USERS-logica verwijderd. Volledige flow getest met een tijdelijk Supabase-testaccount (aangemaakt/opgeruimd zonder service_role key aan te raken): login/foutmelding/onthoud-mij/logout allemaal bevestigd werkend.
 **Besloten:** zie decisions.md 2026-07-17 (2).

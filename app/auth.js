@@ -1,9 +1,11 @@
 /* Lumenear Acoustic Calculator — Supabase Auth client (plain REST, geen SDK)
    Publieke anon/publishable key — veilig om hier te staan, alle rechten lopen via
-   Supabase RLS-policies (zie decisions.md 2026-07-17 / 2026-07-24). */
+   Supabase RLS-policies. Dit is een APART, geïsoleerd Supabase-project
+   (lumenear-calculator-auth) — bevat uitsluitend calculator-logins, geen enkele
+   AIF-data. Zie decisions.md 2026-07-17 (3). */
 
-window.SUPABASE_URL = 'https://rcgwxafbgeexwujbclfh.supabase.co';
-window.SUPABASE_ANON_KEY = 'sb_publishable_zOgbro4SVGlaZLFgBzEHFw_eVqHZAQz';
+window.SUPABASE_URL = 'https://yclomlaxufhnfsqwougx.supabase.co';
+window.SUPABASE_ANON_KEY = 'sb_publishable_FwIKHltiOyi3lF4iiOvgCg_tDF8TPdt';
 
 const AUTH_STORE_KEY = 'lumenear_auth_session';
 
