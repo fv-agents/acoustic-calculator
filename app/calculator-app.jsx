@@ -155,6 +155,10 @@ function App() {
             onClick={() => window.print()}>
             Download PDF
           </button>
+          <button className="btn btn-ghost btn-sm auth-logout no-print"
+            onClick={async () => { await window.LumenearAuth.signOut(); location.reload(); }}>
+            Log out
+          </button>
         </div>
       </div>
 
@@ -624,4 +628,4 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(<AuthGate><App /></AuthGate>);

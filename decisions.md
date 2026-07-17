@@ -4,6 +4,29 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-07-17 (2) — Eigen inlogscherm op Supabase Auth (vervangt Basic Auth Edge Function)
+
+**Reden:** Falco wilde een "professioneel" inlogscherm met logo/huisstijl, wachtwoord-vergeten, onthoud-mij en toegang-aanvragen. HTTP Basic Auth (2026-07-17 (1)) gebruikt altijd de kale browser-popup — daar is niets aan te stylen, dus dat vereiste een architectuurwissel.
+
+**Gekozen aanpak:** client-side gate op **Supabase Auth** (zelfde project als AIF), via directe REST-calls (`app/auth.js`) — bewust géén `@supabase/supabase-js` SDK vendored, om in lijn te blijven met de bestaande no-CDN/lightweight-dependency-filosofie van dit project. Login/forgot-password/request-access/set-new-password UI in `app/auth-components.jsx` + `app/auth-styles.css`, gestyled met dezelfde design tokens als de rest van de app (dark theme, DM Serif Display, Lumenear-logo). `calculator-app.jsx` rendert nu `<AuthGate><App/></AuthGate>` i.p.v. `<App/>` direct; logout-knop toegevoegd aan de header.
+
+**Belangrijke security-tradeoff (bewust geaccepteerd, met Falco besproken vooraf):** de oude Edge Function blokkeerde de site volledig server-side. Dit is client-side — de statische bestanden zijn technisch downloadbaar zonder in te loggen (de browser moet de loginpagina zelf kunnen laden), al toont de app zonder geldige sessie alleen het inlogscherm, geen werkende calculator. Acceptabel voor een tijdelijke klant-gate zonder gevoelige data.
+
+**"Toegang aanvragen"** = nieuw Netlify Forms-formulier `access-request` (zelfde patroon als de bestaande `quote`-form in quote-flow.jsx), hidden static form in index.html. **Vereist dezelfde Netlify-actie die al openstond voor de quote-form:** Forms → notificatie-mail instellen, nu voor twee formulieren.
+
+**Login-logging:** hergebruikt de bestaande `calculator_access_log`-tabel (2026-07-17 (1)) — client-side call na succesvolle Supabase-login, zelfde insert-only anon-policy. Supabase Auth zelf toont ook een Users-overzicht (Authentication-tab) met last-sign-in — dat is nu het primaire "wie heeft toegang"-overzicht, de logtabel blijft voor gedetailleerde login-events.
+
+**Getest:** volledige flow lokaal met een tijdelijk Supabase-testaccount (aangemaakt via het publieke signup-endpoint met de anon key, daarna `email_confirmed_at` gezet via SQL — bewust géén service_role key gebruikt/opgevraagd, om dat privilege niet onnodig aan te raken). Login, foutieve inlog (nette foutmelding), "onthoud mij" (sessie overleeft reload), en logout: allemaal bevestigd werkend. Testaccount + testlog-rij achteraf verwijderd.
+
+**Belangrijke bevinding — Supabase's standaard e-mailservice is zwaar rate-limited** (429 `over_email_send_rate_limit` al na een paar verzoeken zonder eigen SMTP). De "wachtwoord vergeten"-functie werkt technisch correct, maar zal bij een handjevol testers af en toe falen totdat Falco eigen SMTP instelt in Supabase (Authentication → Settings → SMTP). Voor de eerste 4-5 accounts is dit waarschijnlijk oké (Falco kan handmatig een wachtwoord resetten via Supabase Studio als de mail niet aankomt), maar geen structurele oplossing.
+
+**Oude Basic Auth Edge Function verwijderd** (`netlify/edge-functions/basic-auth.ts`, netlify.toml edge_functions-blok). De Netlify env var `AUTH_USERS` die Falco eerder instelde is nu ongebruikt — mag blijven staan (onschadelijk) of verwijderd worden, geen functionele impact meer.
+
+**Nog te doen (Falco, via Supabase dashboard):**
+1. Authentication → Users → 4 accounts aanmaken (falco/rik/jelle/frank @in-zee.nl, wachtwoord Welkom2026!, "Auto Confirm User" aanvinken zodat ze direct kunnen inloggen zonder bevestigingsmail).
+2. Authentication → URL Configuration → Site URL zetten op `https://calculator.lumenear.com` (of voorlopig de netlify.app-URL) + die URL toevoegen aan Redirect URLs — nodig voor de wachtwoord-reset-link.
+3. Optioneel maar aanbevolen: eigen SMTP instellen voor betrouwbare reset-mails.
+
 ## 2026-07-17 — Tijdelijke Basic Auth-gate + Supabase login-log
 
 **Reden:** Falco wil de calculator op `calculator.lumenear.com` zetten maar voorlopig achter een login, met individuele accounts per klant/tester (niet één gedeeld wachtwoord) zodat hij weet wie toegang heeft.

@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-17 (2) — Eigen inlogscherm (Supabase Auth) i.p.v. Basic Auth
+**Gedaan:** Basic Auth Edge Function vervangen door een gestileerd inlogscherm op Supabase Auth: login, wachtwoord vergeten, toegang aanvragen (nieuw Netlify Forms-formulier `access-request`), onthoud-mij, en een nieuw-wachtwoord-scherm voor de reset-link. Nieuwe bestanden: `app/auth.js` (REST-client, geen SDK), `app/auth-components.jsx`, `app/auth-styles.css`. `calculator-app.jsx` wrapt nu in `<AuthGate>` + logout-knop in header. Oude Edge Function + AUTH_USERS-logica verwijderd. Volledige flow getest met een tijdelijk Supabase-testaccount (aangemaakt/opgeruimd zonder service_role key aan te raken): login/foutmelding/onthoud-mij/logout allemaal bevestigd werkend.
+**Besloten:** zie decisions.md 2026-07-17 (2).
+**Openstaand:** Falco moet in Supabase de 4 echte accounts aanmaken + Site URL/Redirect URLs instellen (nodig voor reset-link) + idealiter eigen SMTP (Supabase's standaard mailservice bleek zwaar rate-limited, 429 al na een paar verzoeken). Netlify env var AUTH_USERS is nu ongebruikt, mag blijven staan.
+
 ## 2026-07-17 — Tijdelijke login (Basic Auth) + Supabase monitoring
 **Gedaan:** Netlify Edge Function gebouwd die de hele site achter HTTP Basic Auth zet (`netlify/edge-functions/basic-auth.ts`), credentials via env var `AUTH_USERS`. Nieuwe Supabase-tabel `calculator_access_log` (zelfde project als AIF) logt elke geslaagde login (insert-only anon-key policy, geen service_role gebruikt). Lokaal getest met `netlify dev`: alle drie scenario's (geen auth/fout wachtwoord/goede login) correct, log-rij bevestigd in Supabase, testrij verwijderd.
 **Besloten:** zie decisions.md 2026-07-17.

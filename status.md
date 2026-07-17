@@ -1,10 +1,15 @@
 # Status — Acoustic Calculator
-_Bijgewerkt: 2026-07-06_
+_Bijgewerkt: 2026-07-17_
 
 ## Huidige staat
-**Production-ready** — 4-staps wizard + verkoop-/specfeatures, klaar voor `calculator.lumenear.com`.
+**Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
 
-### Nieuw sinds 06-07
+### Nieuw sinds 17-07
+- **Eigen inlogscherm op Supabase Auth** vervangt de tijdelijke Basic Auth Edge Function: login, wachtwoord vergeten, toegang aanvragen, onthoud-mij. Zie decisions.md 2026-07-17 (2).
+- **Blocker voor livegang:** Falco moet in Supabase de 4 accounts aanmaken + Site URL/Redirect URLs instellen. Zonder dat kan niemand inloggen.
+- Supabase's standaard e-mailservice is rate-limited — wachtwoord-reset kan af en toe falen tot er eigen SMTP is ingesteld.
+
+### Sinds 06-07
 - **Herziene Merford-cijfers verwerkt** (41 rijen: Toad/Halo/Nova/Cone/Float bijgewerkt, Blaze + Line voor het eerst met eigen cijfers) + materiaal-oppervlak nu expliciet i.p.v. berekend voor die rijen.
 - **Flora toegevoegd** als nieuwe productlijn (4 varianten), maar **verborgen** (`hidden:true`) tot lancering — data staat klaar, komt niet in de fixture-catalogus of familiefilter totdat Falco 'm activeert.
 - **19 geëxtrapoleerde producten teruggedraaid** (Breeze/Orbit/Wing/Cloud/Sliced/Blooom/Drop/Cage/Podge/Spott/Pyknic) naar de oorspronkelijke materiaalformule — de familie-ratio-aanname uit 01-07 bleek niet stabiel genoeg. Toad Oval 1750 uitgezonderd (heeft nu een eigen echte meetwaarde).
@@ -39,7 +44,7 @@ _Bijgewerkt: 2026-07-06_
 - CI groen: 89/89 in sync, 11/11 unit tests pass
 
 ## Blocker
-Geen.
+Inloggen werkt pas nadat Falco in Supabase (project "Agent") de 4 accounts heeft aangemaakt + Site URL/Redirect URLs heeft ingesteld. Zie decisions.md 2026-07-17 (2), sectie "Nog te doen".
 
 ## Volgende stap (vereisen actie van Falco)
 1. **Online zetten**: Netlify → Domain management → add `calculator.lumenear.com` → CNAME bij DNS-provider naar de netlify-site. SSL gaat automatisch.

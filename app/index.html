@@ -12,11 +12,13 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="result-styles.css">
 <link rel="stylesheet" href="kit-styles.css">
+<link rel="stylesheet" href="auth-styles.css">
 <script src="vendor/react.production.min.js"></script>
 <script src="vendor/react-dom.production.min.js"></script>
 <script src="vendor/babel.min.js"></script>
 <script src="data.js"></script>
 <script src="product-specs.js"></script>
+<script src="auth.js"></script>
 </head>
 <body>
 
@@ -39,9 +41,19 @@
   <input type="text" name="bot-field">
 </form>
 
+<!-- Hidden static form so Netlify detects and provisions the "access-request" form -->
+<form name="access-request" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="name">
+  <input type="email" name="email">
+  <input type="text" name="company">
+  <textarea name="message"></textarea>
+  <input type="text" name="bot-field">
+</form>
+
 <div id="root"></div>
 <script type="text/babel" src="kit-components.jsx"></script>
 <script type="text/babel" src="ui-components.jsx"></script>
+<script type="text/babel" src="auth-components.jsx"></script>
 <script type="text/babel" src="quote-flow.jsx"></script>
 <script type="text/babel" src="result-components.jsx"></script>
 <script type="text/babel" src="calculator-app.jsx"></script>

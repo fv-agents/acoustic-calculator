@@ -5,11 +5,9 @@
   publish = "app"
   command = "echo 'static site - no build step'"
 
-# Tijdelijke Basic Auth-gate voor de hele site (verwijderen bij publieke lancering).
-# Vereist env vars in Netlify: AUTH_USERS, SUPABASE_URL, SUPABASE_ANON_KEY.
-[[edge_functions]]
-  path = "/*"
-  function = "basic-auth"
+# Login-gate: eigen inlogscherm op Supabase Auth (app/auth.js + auth-components.jsx),
+# vervangt de tijdelijke Basic Auth Edge Function van 2026-07-17.
+# Verwijderen bij publieke lancering (dan mag iedereen zonder inlog bij de calculator).
 
 # Security headers. Bewust GEEN X-Frame-Options: die kent geen allowlist;
 # embedding wordt geregeld via CSP frame-ancestors (lumenear.com + self).
