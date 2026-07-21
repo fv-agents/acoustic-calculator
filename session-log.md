@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-21 (15) — Float Rect 600×2400 watt/lm aangevuld + labelfout gecorrigeerd
+**Gedaan:** Falco stuurde de in-zee.nl-specstabel voor Float Rect 600×2400 (2 LED-opties): Cubic reflector = 34W/4140lm, Prismatic difusor = 30W/3846lm. `"Float Rect light 600×2400"` in `product-specs.js` kreeg de Cubic-cijfers (34W/4140lm) als representatieve waarde — zelfde cijfers als al bij `"Float Rect light 1200×2400"` stonden. **Labelfout uit (14) gecorrigeerd:** die entry noemde 34W/4140lm daar per ongeluk "Prismatic" en 30W/3846lm "Cubic" — precies andersom volgens deze nieuwe, expliciete tabel. Waarschijnlijke verklaring: Float Rect is een lineair lichtprofiel waarbij de LED-specs schalen met de lengte (2400mm), niet de breedte (600 vs 1200mm) — vandaar dat beide breedtes dezelfde tabel geven.
+**Getest:** node-check op CRLF-behoud (31, ongewijzigd) + waarde. `check_sync.py` (92/92) en `test_calc.py` (11/11) groen.
+**Openstaand:** Flora-afmetingen (komt van Falco).
+
 ## 2026-07-21 (14) — Float watt/lm aangevuld + fixturekaart naar 3-regelig format
 **Gedaan:** Falco stuurde een screenshot van de PDF-fixturekaart voor "Float Oval downlight 2000" met "aw 0.55" gemarkeerd: "Waarom aw hier? Doe eerst lm en W - volgende regel afmeting lamp - onderste regel Eaq". Root cause: `product-specs.js` had `watt:null, lm:null` voor 4 Float-varianten (Oval 1200/2000, Rect 1200×1200, Rect 1200×2400) ondanks dat het echte lichtarmaturen zijn — de fallback-logica in `drawFixtureGrid()` (watt/lm→aw) was correct, de brondata niet. Waarden (al eerder deze sessie gescraped van de in-zee.nl Float-pagina) alsnog ingevuld: Oval 1200=9W/1160lm, Oval 2000=18W/2310lm, Rect 1200×1200=26W/2350lm, Rect 1200×2400=34W/4140lm (Prismatic-variant, representatief; Cubic-variant was 30W/3846lm). Rect 600×2400 blijft onbevestigd (geen bron gevonden) — bewust niet gegokt.
 **Kaartlayout herstructureerd** (`report-pdf.js`, `drawFixtureGrid`): was 1 regel lichtspecs + 1 gecombineerde regel "afmeting · Aeq"; nu strikt 3 losse regels — (1) `{lm} lm · {watt} W` (of `aw {aw}` voor puur akoestische producten), (2) afmeting alleen, (3) `{Aeq} m² Aeq each` alleen. `cardH` 178→189pt, `Product details`-sectie z'n `minFollow` 190→201 om de extra regel te laten passen zonder afknijpen.

@@ -5,7 +5,7 @@ _Bijgewerkt: 2026-07-21_
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
 
 ### Nieuw sinds 21-07
-- **Float watt/lm aangevuld + fixturekaart 3-regelig**: 4 Float-varianten (Oval 1200/2000, Rect 1200×1200, Rect 1200×2400) toonden "aw" op de PDF-fixturekaart i.p.v. lichtoutput omdat `product-specs.js` nog `watt:null`/`lm:null` had — nu ingevuld met eerder gescrapete in-zee.nl-waarden. Elke fixturekaart toont nu strikt 3 losse regels: lm+W → afmeting → Aeq. Rect 600×2400 blijft onbevestigd. Zie session-log 21-07 (14).
+- **Float watt/lm aangevuld + fixturekaart 3-regelig**: 5 Float-varianten (Oval 1200/2000, Rect 1200×1200, Rect 1200×2400, Rect 600×2400) toonden "aw" op de PDF-fixturekaart i.p.v. lichtoutput omdat `product-specs.js` nog `watt:null`/`lm:null` had — nu allemaal ingevuld met in-zee.nl-waarden (Rect 600×2400 = 34W/4140lm Cubic-reflector, zelfde tabel als 1200×2400 — lineair profiel, specs schalen met lengte niet breedte). Elke fixturekaart toont nu strikt 3 losse regels: lm+W → afmeting → Aeq. Zie session-log 21-07 (14)+(15).
 - **Catalogus: 92 producten (was 93)** — "Edge acoustic" (104mm) verwijderd op Falco's instructie, "Edge XL acoustic" (Ø140×540mm) is nu de enige Edge. Verwijderd uit zowel `data.js` als de bron-CSV. Cloud round XL 2400 en Macaron wall-varianten (450/600/800) kregen alsnog een bevestigde `dim`. Zie session-log 21-07 (13).
 - **Echte productafmetingen (W×L×H)**: producten hebben nu een bevestigde `dim`-string (van in-zee.nl gescraped + Falco's handmatige aanvulling voor Nova/Blaze/Orbit/Wing/Bold), zichtbaar in de stap-3 specs-modal en de PDF-fixturekaarten. Gevonden discrepanties (Sliced 800→Ø660, Blaze 550→Ø350, Cloud round 1200→Ø1190) bewust niet stilzwijgend gecorrigeerd in het `d`-veld — zie session-log 21-07 (12). Nog open: Flora-afmetingen (komt van Falco).
 - **Afmetingen + qty-badge**: nieuwe `window.getProductDimension()` (`data.js`) toont volledige W×L voor rechthoekige/ovale producten (voorheen weggegooid, `d:null`) i.p.v. alleen een kale diameter — zowel in de stap-3 specs-modal als in het PDF-rapport. Qty op de PDF-fixturekaart is nu een opvallende accent-kleurige badge i.p.v. verstopt in de specregel. Zie session-log 21-07 (11).
@@ -65,7 +65,8 @@ Inloggen werkt pas nadat Falco in Supabase (project "Agent") de 4 accounts heeft
 3. **Rooktest na live**: mobiel-gate op telefoon + één echte test-lead via het offerteformulier.
 
 ## Bekende gaten
-- Lumen ontbreekt voor E27-decolampen (Drop/Cage/Podge/Spott/Pyknic/Blooom), Float oval/rect en de nieuwe Flora-lijn (stonden niet op de site).
+- ~~Lumen ontbreekt voor... Float oval/rect~~ — opgelost op 21-07, alle 5 Float-varianten hebben nu watt/lm (zie session-log (14)+(15)).
+- Lumen ontbreekt voor E27-decolampen (Drop/Cage/Podge/Spott/Pyknic/Blooom) en de nieuwe Flora-lijn (stonden niet op de site).
 - `submitQuote` evt. later naar Supabase/endpoint i.p.v. Netlify Forms (seam = 1 functie).
 - Blaze had t/m 01-07 nog Toad's placeholder-cijfers; sinds 06-07 eigen cijfers (zie decisions.md 2026-07-06).
 - ~~Float-oppervlak in data.js (~2×) vs Merford-rapport~~ — opgelost op 06-07 (oppervlak nu expliciet gezet i.p.v. berekend).
