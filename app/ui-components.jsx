@@ -124,7 +124,7 @@ function ProductDetailModal({ product, specs, onClose }) {
     ['Absorption αw', product.aw],
     ['Equivalent absorption', `${product.eq} m² per fixture`],
     ['Mounting', product.mt],
-    ['Diameter', product.d ? `${product.d} mm` : null],
+    ['Dimensions', window.getProductDimension(product)],
   ].filter(r => r[1] != null && r[1] !== '');
 
   return (

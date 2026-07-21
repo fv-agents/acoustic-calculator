@@ -106,6 +106,23 @@ window.EQ_BOUNDS = (() => {
   return [Math.min(...vals), Math.max(...vals)];
 })();
 
+/* Best-known size, straight from the catalogued dimension — never the
+ * shipping-carton size (RRP "Parcel Size" includes packaging, not the
+ * fixture itself, so it's deliberately not used here).
+ * - Round fixtures: product.d is the diameter → "Ø1200 mm".
+ * - Rectangular/oval fixtures: product.d is null, but W×L is spelled out
+ *   in the name (e.g. "Float Rect light 1200×2400") → recovered here.
+ * - Single-number ovals (e.g. "Toad Oval 1750"): shown as-is, no Ø prefix
+ *   since it's one axis of an oval, not a true diameter. */
+window.getProductDimension = function (p) {
+  if (p.d) return `Ø${p.d} mm`;
+  const rect = p.n.match(/(\d+)\s*×\s*(\d+)/);
+  if (rect) return `${rect[1]} × ${rect[2]} mm`;
+  const single = p.n.match(/(\d{3,4})(?!.*\d)/);
+  if (single) return `${single[1]} mm`;
+  return null;
+};
+
 window.FLOOR_MATERIALS = {
   "Unknown / not sure": .02,
   "Hard floor (concrete / tiles / poured)": .02,

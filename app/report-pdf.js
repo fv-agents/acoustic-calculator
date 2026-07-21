@@ -433,6 +433,14 @@
           safeAddImage(doc, f._img, 'PNG', cx + (cardW - dw) / 2, cy + 8 + (boxH - dh) / 2, dw, dh);
         }
 
+        // Quantity badge — top-right corner, drawn after the photo so it
+        // always stays on top and stays legible.
+        const badgeW = 30, badgeH = 17;
+        setFill(doc, COLOR.accent);
+        doc.roundedRect(cx + cardW - badgeW - 7, cy + 7, badgeW, badgeH, 8, 8, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); setText(doc, COLOR.text);
+        doc.text(`× ${f.qty}`, cx + cardW - badgeW / 2 - 7, cy + 7 + badgeH / 2 + 3.2, { align: 'center' });
+
         let ty = cy + imgBoxH + 24;
         doc.setFont('helvetica', 'bold'); doc.setFontSize(9); setText(doc, COLOR.text);
         const nameLines = doc.splitTextToSize(f.name, cardW - 14).slice(0, 2);
@@ -444,8 +452,7 @@
         doc.text(specLine, cx + cardW / 2, ty, { align: 'center' });
         ty += 11;
 
-        const dimPart = f.diameter ? `${f.diameter} mm` : null;
-        doc.text([dimPart, `${f.qty}× · ${f.eqEach.toFixed(2)} m² Aeq each`].filter(Boolean).join('  ·  '),
+        doc.text([f.dimension, `${f.eqEach.toFixed(2)} m² Aeq each`].filter(Boolean).join('  ·  '),
           cx + cardW / 2, ty, { align: 'center' });
       }
       cur.y += cardH + 12;

@@ -145,7 +145,7 @@ function App() {
         return {
           name: window.displayName(p.n), qty: p.q, aw: p.aw,
           eqEach: p.eq, eqTotal: p.q * p.eq,
-          diameter: p.d, img: specs.img, watt: specs.watt, lm: specs.lm,
+          dimension: window.getProductDimension(p), img: specs.img, watt: specs.watt, lm: specs.lm,
         };
       }),
     });
