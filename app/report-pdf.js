@@ -8,7 +8,8 @@
   const MARGIN = 42;
   const CONTENT_W = PAGE_W - MARGIN * 2;
   const HEADER_BOTTOM = MARGIN + 34;
-  const TOP_Y = HEADER_BOTTOM + 24;
+  const TOP_Y = HEADER_BOTTOM + 24; // page 1 — below the logo header
+  const CONTINUATION_TOP = MARGIN + 14; // page 2+ — no repeated header
   const FOOTER_TOP = PAGE_H - MARGIN - 34;
   const BOTTOM_LIMIT = FOOTER_TOP - 6;
 
@@ -39,15 +40,27 @@
     return s.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ').trim();
   }
 
-  /* ── Header / Footer ── */
-  function drawHeader(doc, data) {
-    setFill(doc, [255, 255, 255]);
-    doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
+  function loadImage(src) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
 
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); setText(doc, COLOR.text);
-    doc.text('LUMENEAR', MARGIN, MARGIN + 12);
+  /* ── Header (page 1 only) / Footer ── */
+  function drawHeader(doc, data, logoImg) {
+    if (logoImg) {
+      const logoH = 22;
+      const logoW = logoH * (logoImg.naturalWidth / logoImg.naturalHeight);
+      doc.addImage(logoImg, 'PNG', MARGIN, MARGIN - 6, logoW, logoH);
+    } else {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(18); setText(doc, COLOR.text);
+      doc.text('LUMENEAR', MARGIN, MARGIN + 12);
+    }
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); setText(doc, COLOR.accentDim);
-    doc.text('ACOUSTIC ADVISORY REPORT', MARGIN, MARGIN + 24, { charSpace: 1.2 });
+    doc.text('ACOUSTIC REPORT', MARGIN, MARGIN + 24, { charSpace: 1.2 });
 
     const metaLines = [];
     if (data.projectName) metaLines.push({ text: data.projectName, bold: true });
@@ -65,18 +78,23 @@
     doc.line(MARGIN, HEADER_BOTTOM, PAGE_W - MARGIN, HEADER_BOTTOM);
   }
 
-  function drawFooter(doc, pageNum, totalPages) {
+  function drawFooter(doc, pageNum, totalPages, isLastPage) {
     setDraw(doc, COLOR.border); doc.setLineWidth(0.6);
     doc.line(MARGIN, FOOTER_TOP, PAGE_W - MARGIN, FOOTER_TOP);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); setText(doc, COLOR.textSec);
-    doc.text('lumenear.com  ·  info@lumenear.com  ·  In-Zee BV  ·  VAT NL8652.93.909.B01', PAGE_W / 2, FOOTER_TOP + 13, { align: 'center' });
-    doc.setFontSize(6.6);
-    const legal = doc.splitTextToSize(
-      'Indicative calculation — Sabine formula, target bands per DIN 18041. Absorption coefficients per ISO 11654 / EN-ISO 354. ' +
-      'Lumenear absorption assumes placement according to Lumenear guidance (near the sound source).',
-      CONTENT_W - 90
-    );
-    doc.text(legal, PAGE_W / 2, FOOTER_TOP + 22, { align: 'center' });
+
+    if (isLastPage) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); setText(doc, COLOR.textSec);
+      doc.text('lumenear.com  ·  info@lumenear.com  ·  In-Zee BV  ·  VAT NL8652.93.909.B01', PAGE_W / 2, FOOTER_TOP + 13, { align: 'center' });
+      doc.setFontSize(6.6);
+      const legal = doc.splitTextToSize(
+        'Indicative calculation, not a guaranteed result — Sabine formula, target bands per DIN 18041, absorption coefficients per ISO 11654 / EN-ISO 354. ' +
+        'Lumenear accepts no liability for deviations between this estimate and the measured result. ' +
+        'Lumenear absorption assumes ideal placement of the fixtures per Lumenear guidance (near the sound source).',
+        CONTENT_W - 40
+      );
+      doc.text(legal, PAGE_W / 2, FOOTER_TOP + 22, { align: 'center' });
+    }
+
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); setText(doc, COLOR.textSec);
     doc.text(`${pageNum} / ${totalPages}`, PAGE_W - MARGIN, FOOTER_TOP + 13, { align: 'right' });
   }
@@ -84,8 +102,8 @@
   function ensureSpace(doc, cur, data, needed) {
     if (cur.y + needed > BOTTOM_LIMIT) {
       doc.addPage();
-      drawHeader(doc, data);
-      cur.y = TOP_Y;
+      setFill(doc, [255, 255, 255]); doc.rect(0, 0, PAGE_W, PAGE_H, 'F');
+      cur.y = CONTINUATION_TOP;
     }
   }
 
@@ -271,12 +289,16 @@
     ensureSpace(doc, cur, data, rows.length * rowH + 10);
     rows.forEach((row, i) => {
       const ry = cur.y + i * rowH;
+      // Divider sits 8pt below the previous row's baseline and 12pt above
+      // this row's text — enough clearance so the line never cuts through
+      // either row's ascenders.
+      const dividerY = ry - rowH + 8;
       if (row.total) {
         setDraw(doc, COLOR.text); doc.setLineWidth(1);
-        doc.line(MARGIN, ry - rowH + 15, PAGE_W - MARGIN, ry - rowH + 15);
+        doc.line(MARGIN, dividerY, PAGE_W - MARGIN, dividerY);
       } else if (i > 0) {
         setDraw(doc, COLOR.border); doc.setLineWidth(0.5);
-        doc.line(MARGIN, ry - rowH + 15, PAGE_W - MARGIN, ry - rowH + 15);
+        doc.line(MARGIN, dividerY, PAGE_W - MARGIN, dividerY);
       }
       doc.setFont('helvetica', row.total ? 'bold' : 'normal'); doc.setFontSize(9.5);
       setText(doc, row.total ? COLOR.text : COLOR.textSec);
@@ -359,12 +381,13 @@
   }
 
   /* ── Main entry point ── */
-  function generateReportPDF(data) {
+  async function generateReportPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const cur = { y: TOP_Y };
+    const logoImg = await loadImage('img/lumenear-logo.png');
 
-    drawHeader(doc, data);
+    drawHeader(doc, data, logoImg);
     drawSummary(doc, cur, data);
     drawResultsHero(doc, cur, data);
 
@@ -395,7 +418,7 @@
     const totalPages = doc.internal.getNumberOfPages();
     for (let p = 1; p <= totalPages; p++) {
       doc.setPage(p);
-      drawFooter(doc, p, totalPages);
+      drawFooter(doc, p, totalPages, p === totalPages);
     }
 
     const label = data.projectName || data.roomType;
