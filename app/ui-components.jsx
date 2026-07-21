@@ -168,8 +168,17 @@ function ProductCard({ product, qty, onSetQty }) {
       <div className="product-info">
         <div className="product-name" title={product.n}>{product.n}</div>
         <div className="product-specs">
-          <span title="Weighted absorption coefficient (ISO 11654)">αw {product.aw}</span>
-          <span title="Acoustic surface area">{product.a} m²</span>
+          {specs.watt != null && specs.lm != null ? (
+            <>
+              <span title="Wattage">{specs.watt} W</span>
+              <span title="Light output">{specs.lm} lm</span>
+            </>
+          ) : (
+            <>
+              <span title="Weighted absorption coefficient (ISO 11654)">αw {product.aw}</span>
+              <span title="Acoustic surface area">{product.a} m²</span>
+            </>
+          )}
           <span className="product-aeq" title="Equivalent absorption area per fixture (EN-ISO 354)">Aeq {product.eq} m²</span>
         </div>
         <div className="product-row">
