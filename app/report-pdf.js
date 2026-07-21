@@ -406,11 +406,11 @@
   /* ── Fixture photo grid — 3 cards per row, photo + key specs ── */
   function drawFixtureGrid(doc, cur, data) {
     if (!data.fixtures.length) return;
-    sectionTitle(doc, cur, data, 'Product details', 190);
+    sectionTitle(doc, cur, data, 'Product details', 201);
 
     const cols = 3, gap = 14;
     const cardW = (CONTENT_W - gap * (cols - 1)) / cols;
-    const imgBoxH = 82, cardH = 178;
+    const imgBoxH = 82, cardH = 189;
 
     const rowsCount = Math.ceil(data.fixtures.length / cols);
     for (let row = 0; row < rowsCount; row++) {
@@ -448,12 +448,16 @@
         ty += nameLines.length * 11 + 6;
 
         doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); setText(doc, COLOR.textSec);
-        const specLine = f.watt != null && f.lm != null ? `${f.watt} W · ${f.lm} lm` : `aw ${f.aw}`;
+        const specLine = f.watt != null && f.lm != null ? `${f.lm} lm · ${f.watt} W` : `aw ${f.aw}`;
         doc.text(specLine, cx + cardW / 2, ty, { align: 'center' });
         ty += 11;
 
-        doc.text([f.dimension, `${f.eqEach.toFixed(2)} m² Aeq each`].filter(Boolean).join('  ·  '),
-          cx + cardW / 2, ty, { align: 'center' });
+        if (f.dimension) {
+          doc.text(f.dimension, cx + cardW / 2, ty, { align: 'center' });
+          ty += 11;
+        }
+
+        doc.text(`${f.eqEach.toFixed(2)} m² Aeq each`, cx + cardW / 2, ty, { align: 'center' });
       }
       cur.y += cardH + 12;
     }
