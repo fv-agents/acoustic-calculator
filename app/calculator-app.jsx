@@ -401,13 +401,18 @@ function App() {
                 <button type="button" className="filter-panel-toggle"
                   onClick={() => setFiltersOpen(o => !o)}
                   aria-expanded={filtersOpen} aria-controls="step3-filter-body">
+                  <svg className="filter-funnel-icon" width="15" height="15"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 4h18l-7 8v6l-4 2v-8z" />
+                  </svg>
+                  <span className="filter-panel-label">Filter</span>
+                  {activeFilterCount > 0 && <span className="filter-count-badge">{activeFilterCount}</span>}
                   <svg className={`filter-chevron ${filtersOpen ? 'open' : ''}`} width="12" height="12"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                     strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M9 6l6 6-6 6" />
                   </svg>
-                  <span className="t-section-label" style={{ margin:0 }}>Filter fixtures</span>
-                  {activeFilterCount > 0 && <span className="filter-count-badge">{activeFilterCount}</span>}
                 </button>
                 {filtersActive && (
                   <button className="filter-reset-btn"

@@ -5,6 +5,8 @@ _Bijgewerkt: 2026-07-21_
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
 
 ### Nieuw sinds 21-07
+- **Dimming/cct-data gecorrigeerd tegen RRP 2026**: Twist XL + Cloud kregen DALI (Cloud op Falco's directe bevestiging, wijkt af van RRP/catalogus — zie session-log 21-07 (5)). 7 Float/Twist Floor/Wing-afwijkingen ook gecorrigeerd (te veel of te weinig cct/dim-opties t.o.v. de prijslijst).
+- **Stap 3 — filterheader prominenter**: funnel-icoon + "Filter" (was "Filter fixtures") in accent-kleur, paneelrand accent-getint. Collapse-animatie omgezet van grid-0fr (bleek niet volledig te collapsen) naar max-height.
 - **Stap 3 — filterpaneel inklapbaar**: dicht bij openen van stap 3, klikbare header met roterend chevron-icoon + badge (aantal actieve filters, ook zichtbaar als dicht). Zie decisions/session-log 21-07 (3).
 - **Stap 3 — Unified filterpaneel** (`.filter-panel`): family-chips + light output (lm) + colour temperature (2700/3000/4000/TW/E27/Other) + dimming (TE/DALI/NON-DIM) + equivalent absorption (Aeq, m²) — alles in 1 blok, 1 "Reset filters"-knop voor alles. Lm en Aeq zijn echte dual-thumb sliders (1 track, 2 schuifjes, zelfgebouwd via 2 overlappende `<input type=range>`, geen library). Sort-select (catalogus/Aeq ↑/Aeq ↓/A-Z) staat los naast de zoekbalk. Acoustic-only producten (geen lamp/specs) blijven zichtbaar tenzij een light-filter wordt aangescherpt.
 
