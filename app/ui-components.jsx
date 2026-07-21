@@ -1,6 +1,11 @@
 /* Lumenear — Shared UI Components */
 const { useState, useEffect, useRef } = React;
 
+/* ── Display name — strips trailing "standard" from product names ── */
+function displayName(name) {
+  return name.replace(/\s+standard$/i, '').trim();
+}
+
 /* ── Animated number that counts up/down ── */
 function AnimatedNumber({ value, decimals = 1, suffix = '', prefix = '', className = '' }) {
   const [display, setDisplay] = useState(value);
@@ -129,7 +134,7 @@ function ProductDetailModal({ product, specs, onClose }) {
         <button ref={closeRef} className="kit-modal-close" onClick={onClose} aria-label="Close">×</button>
         <div className="kit-modal-body">
           <div className="t-section-label" style={{ marginBottom: 2 }}>{product.f}</div>
-          <h3 id="pdm-title" className="kit-modal-title">{product.n}</h3>
+          <h3 id="pdm-title" className="kit-modal-title">{displayName(product.n)}</h3>
           {product.note && <p className="kit-modal-note">{product.note}</p>}
           <dl className="kit-spec-list">
             {rows.map(([k, v]) => (
@@ -166,19 +171,16 @@ function ProductCard({ product, qty, onSetQty }) {
         />
       </div>
       <div className="product-info">
-        <div className="product-name" title={product.n}>{product.n}</div>
+        <div className="product-name" title={displayName(product.n)}>{displayName(product.n)}</div>
         <div className="product-specs">
           {specs.watt != null && specs.lm != null ? (
             <>
               <span title="Wattage">{specs.watt} W</span>
               <span title="Light output">{specs.lm} lm</span>
             </>
-          ) : (
-            <>
-              <span title="Weighted absorption coefficient (ISO 11654)">αw {product.aw}</span>
-              <span title="Acoustic surface area">{product.a} m²</span>
-            </>
-          )}
+          ) : specs.cct && specs.cct.includes('E27') ? (
+            <span title="E27 bulb socket — bring your own bulb">E27</span>
+          ) : null}
           <span className="product-aeq" title="Equivalent absorption area per fixture (EN-ISO 354)">Aeq {product.eq} m²</span>
         </div>
         <div className="product-row">
@@ -294,5 +296,5 @@ function getRatingColor(rt, target) {
 /* ── Export to window ── */
 Object.assign(window, {
   AnimatedNumber, IsoRoom, RT60Meter, ProductCard, DualRangeSlider,
-  SimpleBarChart, getRating, getRatingColor,
+  SimpleBarChart, getRating, getRatingColor, displayName,
 });

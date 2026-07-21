@@ -534,7 +534,7 @@ function App() {
                 {sp.map(p => (
                   <div key={p.n} style={{ padding:'6px 0', borderBottom:'1px solid var(--border)' }}>
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
-                      <span style={{ color:'var(--text-sec)', fontSize:11, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginRight:6 }}>{p.n}</span>
+                      <span style={{ color:'var(--text-sec)', fontSize:11, flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginRight:6 }}>{window.displayName(p.n)}</span>
                       <button onClick={() => setQtyFor(p.n, 0)}
                         style={{ background:'none', border:'none', color:'var(--text-sec)', cursor:'pointer', fontSize:14, lineHeight:1, padding:'0 2px', flexShrink:0 }}
                         title="Remove">×</button>
@@ -681,7 +681,7 @@ function App() {
                   <tbody>
                     {sp.map(p => (
                       <tr key={p.n}>
-                        <td style={{ color:'var(--text)' }}>{p.n}</td>
+                        <td style={{ color:'var(--text)' }}>{window.displayName(p.n)}</td>
                         <td className="row-value">{p.q}×</td>
                         <td className="row-value">{p.aw}</td>
                         <td className="row-value">{p.eq} m²</td>
@@ -747,7 +747,7 @@ function App() {
                     reductionPct: Math.round(calc.imp),
                     rating: rating.text,
                   },
-                  products: sp.map(p => ({ name: p.n, qty: p.q, aeqEach: p.eq })),
+                  products: sp.map(p => ({ name: window.displayName(p.n), qty: p.q, aeqEach: p.eq })),
                 })}
               />
             </div>

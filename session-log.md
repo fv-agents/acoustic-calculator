@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-07-21 (7) — Productkaarten: αw/m² helemaal weg, E27-tak, "standard" gestript
+**Gedaan:** Verdere verfijning op verzoek: (1) αw + m² verdwijnt nu volledig van de kaart (stond nog als fallback voor acoustic-only) — die tonen nu alleen `Aeq X m²`. (2) Nieuwe derde tak voor E27-producten (Blooom, Cage, Drop, Podge, Pyknic, Spott — herkend via `specs.cct.includes('E27')` zonder vaste watt/lm): tonen `E27` + Aeq i.p.v. watt/lm of αw/m². Sliced 800 heeft wél vaste watt/lm dáta (naast een E27-optie) en valt dus terecht in de eerste tak (Watt+lm), niet in de E27-tak. (3) Nieuwe gedeelde `displayName()`-helper (`ui-components.jsx`, geëxporteerd naar `window`) strip een trailing " standard" uit productnamen voor weergave — toegepast op ProductCard, ProductDetailModal-titel, de sidebar-fixturelijst, de PDF-reporttabel én de offerteaanvraag-payload. De onderliggende data (`data.js` `n`-veld, `product-specs.js`-keys, qty-state-keys) blijft ongewijzigd — puur een presentatielaag, dus geen risico voor CSV-sync of quote-logica.
+**Getest:** Babel-syntaxcheck, `check_sync.py`, `test_calc.py` (11/11) groen. Browser: "Blooom"/"Drop"/"Podge"/"Spott" tonen zonder "standard" + `E27 Aeq X m²`; "Nova acoustic 1200" toont alleen `Aeq 1.26 m²`; "Nova light 1200" ongewijzigd `20 W 1485 lm Aeq 1.26 m²`. Geen enkele kaart toont nog "standard" in de naam.
+**Besloten:** report-tabel (stap 4 PDF) behoudt wél een aparte αw-kolom — dat is een formeel technisch rapport, geen catalogus-kaart, dus niet hetzelfde "te veel ruis"-probleem.
+**Openstaand:** geen.
+
 ## 2026-07-21 (6) — Productkaarten: Watt + lm i.p.v. αw + m² voor lampen
 **Gedaan:** Op verzoek toont elke productkaart in stap 3 (`ui-components.jsx` `ProductCard`) nu **Watt + lm + Aeq** voor producten met een lamp (specs.watt/lm aanwezig in `product-specs.js`), i.p.v. de vorige αw + m² + Aeq. Acoustic-only varianten (geen lamp, dus geen watt/lm-data) vallen automatisch terug op de oude αw + m² + Aeq-weergave — geen losse databron nodig, puur een conditionele render op basis van bestaande specs.
 **Getest:** Babel-syntaxcheck, `check_sync.py`, `test_calc.py` (11/11) groen. Browser: Nova light 1200 toont "20 W 1485 lm Aeq 1.26 m²", Nova acoustic 1200 toont ongewijzigd "αw 0.45 2.15 m² Aeq 1.26 m²".
