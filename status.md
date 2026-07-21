@@ -1,8 +1,11 @@
 # Status — Acoustic Calculator
-_Bijgewerkt: 2026-07-17_
+_Bijgewerkt: 2026-07-21_
 
 ## Huidige staat
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
+
+### Nieuw sinds 21-07
+- **Stap 3 — Light specs filter**: onder de family-tabs een filterpaneel met dual-range slider op lichtoutput (lm), multi-select chips voor kleurtemperatuur (2700/3000/4000/TW/E27/Other) en dimming (TE/DALI/NON-DIM), plus een sort-select (catalogus/Aeq ↑/Aeq ↓/A-Z) naast de zoekbalk. Data komt uit de al aanwezige `app/product-specs.js`; acoustic-only producten (geen lamp) blijven zichtbaar tenzij een light-filter actief wordt aangescherpt.
 
 ### Nieuw sinds 17-07
 - **Eigen inlogscherm op Supabase Auth** vervangt de tijdelijke Basic Auth Edge Function: login, wachtwoord vergeten, toegang aanvragen, onthoud-mij. Zie decisions.md 2026-07-17 (2).

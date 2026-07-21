@@ -34,6 +34,10 @@ function App() {
   const [qty, setQty] = useState(saved.qty || {});
   const [fam, setFam]       = useState('All');
   const [search, setSearch] = useState('');
+  const [lmRange, setLmRange] = useState(window.LM_BOUNDS);
+  const [cctSel, setCctSel] = useState([]);
+  const [dimSel, setDimSel] = useState([]);
+  const [sortBy, setSortBy] = useState('catalog');
   const [announce, setAnnounce] = useState('');
 
   window._upgradeQty = qty;
@@ -129,7 +133,35 @@ function App() {
   const goTo = (s) => setStep(s);
 
   const q = search.trim().toLowerCase();
-  const filtered = PP.filter(x => !x.hidden && (fam === 'All' || x.f === fam) && (!q || x.n.toLowerCase().includes(q)));
+  const [LM_MIN, LM_MAX] = window.LM_BOUNDS;
+  const specOf = p => (window.PRODUCT_SPECS || {})[p.n] || {};
+  const matchesLm = p => {
+    const lm = specOf(p).lm;
+    if (lm == null) return lmRange[0] === LM_MIN && lmRange[1] === LM_MAX;
+    return lm >= lmRange[0] && lm <= lmRange[1];
+  };
+  const matchesCct = p => {
+    if (!cctSel.length) return true;
+    const buckets = window.cctBucketsFor(specOf(p).cct);
+    return cctSel.some(c => buckets.has(c));
+  };
+  const matchesDim = p => {
+    if (!dimSel.length) return true;
+    const buckets = window.dimBucketsFor(specOf(p).dim);
+    return dimSel.some(d => buckets.has(d));
+  };
+  const filtered = PP
+    .filter(x => !x.hidden && (fam === 'All' || x.f === fam) && (!q || x.n.toLowerCase().includes(q))
+      && matchesLm(x) && matchesCct(x) && matchesDim(x))
+    .sort((a, b) => {
+      if (sortBy === 'eq-asc')  return a.eq - b.eq;
+      if (sortBy === 'eq-desc') return b.eq - a.eq;
+      if (sortBy === 'alpha')   return a.n.localeCompare(b.n);
+      return 0;
+    });
+  const toggleSel = (sel, setSel, v) => setSel(sel.includes(v) ? sel.filter(x => x !== v) : [...sel, v]);
+  const filtersActive = lmRange[0] !== LM_MIN || lmRange[1] !== LM_MAX || cctSel.length > 0 || dimSel.length > 0;
+  const resetSpecFilters = () => { setLmRange(window.LM_BOUNDS); setCctSel([]); setDimSel([]); };
 
   const printDate = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
 
@@ -333,9 +365,18 @@ function App() {
                 <div className="t-section-label">Step 3</div>
                 <h2 style={{ fontSize:20, fontWeight:500, color:'var(--text)' }}>Add Lumenear fixtures</h2>
               </div>
-              <input className="field-input" type="search" placeholder="Search products…"
-                value={search} onChange={e => setSearch(e.target.value)}
-                style={{ maxWidth:200, fontSize:12 }} />
+              <div style={{ display:'flex', gap:8 }}>
+                <select className="field-select" value={sortBy} onChange={e => setSortBy(e.target.value)}
+                  style={{ maxWidth:150, fontSize:12 }} aria-label="Sort products">
+                  <option value="catalog">Sort: catalog</option>
+                  <option value="eq-asc">Absorption ↑</option>
+                  <option value="eq-desc">Absorption ↓</option>
+                  <option value="alpha">A–Z</option>
+                </select>
+                <input className="field-input" type="search" placeholder="Search products…"
+                  value={search} onChange={e => setSearch(e.target.value)}
+                  style={{ maxWidth:200, fontSize:12 }} />
+              </div>
             </div>
 
             <div className="filter-tabs">
@@ -343,6 +384,53 @@ function App() {
                 <button key={f} className={`filter-tab ${fam === f ? 'active' : ''}`}
                   onClick={() => setFam(f)}>{f}</button>
               ))}
+            </div>
+
+            <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--radius)', padding:'10px 12px', marginBottom:16 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+                <div className="t-section-label" style={{ margin:0 }}>Light specs filter</div>
+                {filtersActive && (
+                  <button onClick={resetSpecFilters}
+                    style={{ background:'none', border:'none', color:'var(--text-sec)', cursor:'pointer', fontSize:10, padding:0 }}>
+                    Reset filters
+                  </button>
+                )}
+              </div>
+
+              <div style={{ marginBottom:10 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'var(--text-sec)', marginBottom:4 }}>
+                  <span>Light output</span>
+                  <span style={{ fontFamily:'var(--font-mono)', color:'var(--accent)' }}>{lmRange[0]}–{lmRange[1]} lm</span>
+                </div>
+                <input type="range" min={LM_MIN} max={LM_MAX} value={lmRange[0]}
+                  onChange={e => setLmRange([Math.min(Number(e.target.value), lmRange[1]), lmRange[1]])}
+                  aria-label="Minimum light output (lm)" style={{ accentColor:'var(--accent)', width:'100%', display:'block' }} />
+                <input type="range" min={LM_MIN} max={LM_MAX} value={lmRange[1]}
+                  onChange={e => setLmRange([lmRange[0], Math.max(Number(e.target.value), lmRange[0])])}
+                  aria-label="Maximum light output (lm)" style={{ accentColor:'var(--accent)', width:'100%', display:'block' }} />
+              </div>
+
+              <div style={{ marginBottom:10 }}>
+                <div style={{ fontSize:11, color:'var(--text-sec)', marginBottom:4 }}>Colour temperature</div>
+                <div className="filter-tabs" style={{ marginBottom:0 }}>
+                  {window.CCT_BUCKETS.map(c => (
+                    <button key={c} className={`filter-tab ${cctSel.includes(c) ? 'active' : ''}`}
+                      onClick={() => toggleSel(cctSel, setCctSel, c)}>
+                      {(c === 'TW' || c === 'E27' || c === 'Other') ? c : `${c}K`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize:11, color:'var(--text-sec)', marginBottom:4 }}>Dimming</div>
+                <div className="filter-tabs" style={{ marginBottom:0 }}>
+                  {window.DIM_BUCKETS.map(d => (
+                    <button key={d} className={`filter-tab ${dimSel.includes(d) ? 'active' : ''}`}
+                      onClick={() => toggleSel(dimSel, setDimSel, d)}>{d}</button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="product-grid">
@@ -353,7 +441,7 @@ function App() {
             </div>
             {filtered.length === 0 && (
               <div style={{ textAlign:'center', padding:40, color:'var(--text-sec)', fontSize:13 }}>
-                No products found for "{search}"{fam !== 'All' ? ` in ${fam}` : ''}.
+                No products found for "{search}"{fam !== 'All' ? ` in ${fam}` : ''}{filtersActive ? ' with these light specs' : ''}.
               </div>
             )}
           </div>

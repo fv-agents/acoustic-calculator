@@ -2,6 +2,11 @@
 
 ---
 
+## 2026-07-21 — Stap 3: light-specs filter (lumen/cct/dimming) + absorptie-sort
+**Gedaan:** `app/product-specs.js` (bevat al `lm`/`watt`/`cct`/`dim` per product, scraped van lumenear.com) uitgebreid met afgeleide filterhelpers: `LM_BOUNDS`, `CCT_BUCKETS` (2700/3000/4000/TW/E27/Other, waarbij `2700-6500`→TW), `DIM_BUCKETS` (TE/DALI/NON-DIM, waarbij `TW DALI T8`→DALI en `Non-Dimmable`+`Non-dim`→NON-DIM). `app/calculator-app.jsx` stap 3: nieuw "Light specs filter"-paneel onder de family-tabs — dual-range slider op lumen-output, multi-select chips voor cct en dimming — plus een sort-select naast het zoekveld (catalogus-volgorde / Aeq ↑ / Aeq ↓ / A-Z). Pure acoustic-only producten (geen lamp, dus geen specs) blijven zichtbaar zolang de light-filters op hun default staan; zodra je ze aanscherpt vallen ze vanzelf weg. Getest in browser (lokale server + Playwright, ingelogd met falco@in-zee.nl): cct/dimming-chips filteren correct (Nova-familie valt weg bij 2700K, Toad/Float blijven), reset-knop herstelt volledige lijst, Aeq ↑ sorteert correct oplopend. Babel-syntaxcheck, `check_sync.py` en `test_calc.py` (11/11) groen.
+**Besloten:** filterlogica leunt op de bestaande naamgeving in de data (geen nieuw databronbestand); "acoustic"-only producten hebben simpelweg geen specs en vallen dus automatisch buiten elk lm/cct/dim-filter zodra dat actief is.
+**Openstaand:** geen — feature compleet en getest. Falco's eerdere openstaande acties (domein, Netlify forms-notificatie, rooktest mobiel) staan nog steeds los hiervan.
+
 ## 2026-07-17 (3) — Calculator-auth verhuisd naar geïsoleerd Supabase-project
 **Gedaan:** Nieuw, apart Supabase-project `lumenear-calculator-auth` aangemaakt (bevat geen AIF-data), `calculator_access_log`-tabel + policy daar opnieuw gezet, 4 accounts overgezet (2 via signup-API, 2 rechtstreeks via SQL na een e-mail-rate-limit), `app/auth.js` omgezet naar het nieuwe project. Keep-alive GitHub Actions workflow toegevoegd (dagelijkse ping) tegen het gratis-tier pauzeer-risico na inactiviteit. Oude `calculator_access_log`-tabel op het AIF-project verwijderd. Volledige login-flow opnieuw getest tegen het nieuwe project — werkt.
 **Besloten:** zie decisions.md 2026-07-17 (3).
