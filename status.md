@@ -5,6 +5,7 @@ _Bijgewerkt: 2026-07-21_
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
 
 ### Nieuw sinds 21-07
+- **Stap 3 — filterpaneel inklapbaar**: dicht bij openen van stap 3, klikbare header met roterend chevron-icoon + badge (aantal actieve filters, ook zichtbaar als dicht). Zie decisions/session-log 21-07 (3).
 - **Stap 3 — Unified filterpaneel** (`.filter-panel`): family-chips + light output (lm) + colour temperature (2700/3000/4000/TW/E27/Other) + dimming (TE/DALI/NON-DIM) + equivalent absorption (Aeq, m²) — alles in 1 blok, 1 "Reset filters"-knop voor alles. Lm en Aeq zijn echte dual-thumb sliders (1 track, 2 schuifjes, zelfgebouwd via 2 overlappende `<input type=range>`, geen library). Sort-select (catalogus/Aeq ↑/Aeq ↓/A-Z) staat los naast de zoekbalk. Acoustic-only producten (geen lamp/specs) blijven zichtbaar tenzij een light-filter wordt aangescherpt.
 
 ### Nieuw sinds 17-07
