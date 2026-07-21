@@ -7,7 +7,7 @@
   const PAGE_W = 595.28, PAGE_H = 841.89; // A4, pt
   const MARGIN = 42;
   const CONTENT_W = PAGE_W - MARGIN * 2;
-  const HEADER_BOTTOM = MARGIN + 34;
+  const HEADER_BOTTOM = MARGIN + 54; // fixed height regardless of how many meta lines render
   const TOP_Y = HEADER_BOTTOM + 24; // page 1 — below the logo header
   const CONTINUATION_TOP = MARGIN + 14; // page 2+ — no repeated header
   const FOOTER_TOP = PAGE_H - MARGIN - 34;
@@ -43,36 +43,59 @@
   function loadImage(src) {
     return new Promise(resolve => {
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
       img.src = src;
     });
   }
 
+  // Fixture photos live on lumenear.com, which sends no CORS headers — a
+  // direct <img> load taints the canvas jsPDF needs to read pixels from.
+  // Route those (and only those; the logo is same-origin) through our own
+  // Netlify function, which re-serves the image with an open CORS header.
+  function proxiedUrl(url) {
+    return `/.netlify/functions/image-proxy?url=${encodeURIComponent(url)}`;
+  }
+
+  // Cross-origin images (fixture photos) throw at addImage() time if the
+  // host doesn't send CORS headers, even though they loaded fine as an
+  // <img>. Never let a missing/blocked photo break the whole PDF.
+  function safeAddImage(doc, img, ...args) {
+    if (!img) return false;
+    try { doc.addImage(img, ...args); return true; }
+    catch (e) { return false; }
+  }
+
   /* ── Header (page 1 only) / Footer ── */
   function drawHeader(doc, data, logoImg) {
+    // Left: project + client + date, then the tagline
+    let leftY = MARGIN + 9;
+    if (data.projectName) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); setText(doc, COLOR.text);
+      doc.text(`Project: ${data.projectName}`, MARGIN, leftY);
+      leftY += 12;
+    }
+    if (data.client) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); setText(doc, COLOR.textSec);
+      doc.text(data.client, MARGIN, leftY);
+      leftY += 11;
+    }
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); setText(doc, COLOR.textSec);
+    doc.text(data.dateStr, MARGIN, leftY);
+    leftY += 13;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); setText(doc, COLOR.accentDim);
+    doc.text('ACOUSTIC REPORT', MARGIN, leftY, { charSpace: 1.2 });
+
+    // Right: logo only (bigger)
     if (logoImg) {
-      const logoH = 22;
+      const logoH = 30;
       const logoW = logoH * (logoImg.naturalWidth / logoImg.naturalHeight);
-      doc.addImage(logoImg, 'PNG', MARGIN, MARGIN - 6, logoW, logoH);
+      safeAddImage(doc, logoImg, 'PNG', PAGE_W - MARGIN - logoW, MARGIN - 2, logoW, logoH);
     } else {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(18); setText(doc, COLOR.text);
-      doc.text('LUMENEAR', MARGIN, MARGIN + 12);
+      doc.text('LUMENEAR', PAGE_W - MARGIN, MARGIN + 14, { align: 'right' });
     }
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); setText(doc, COLOR.accentDim);
-    doc.text('ACOUSTIC REPORT', MARGIN, MARGIN + 24, { charSpace: 1.2 });
-
-    const metaLines = [];
-    if (data.projectName) metaLines.push({ text: data.projectName, bold: true });
-    if (data.client) metaLines.push({ text: data.client, bold: false });
-    metaLines.push({ text: data.dateStr, bold: false });
-    let metaY = MARGIN + 12 - (metaLines.length - 1) * 11;
-    metaLines.forEach(m => {
-      doc.setFont('helvetica', m.bold ? 'bold' : 'normal'); doc.setFontSize(9.5);
-      setText(doc, m.bold ? COLOR.text : COLOR.textSec);
-      doc.text(m.text, PAGE_W - MARGIN, metaY, { align: 'right' });
-      metaY += 12;
-    });
 
     setDraw(doc, COLOR.text); doc.setLineWidth(1.1);
     doc.line(MARGIN, HEADER_BOTTOM, PAGE_W - MARGIN, HEADER_BOTTOM);
@@ -380,12 +403,65 @@
     }
   }
 
+  /* ── Fixture photo grid — 3 cards per row, photo + key specs ── */
+  function drawFixtureGrid(doc, cur, data) {
+    if (!data.fixtures.length) return;
+    sectionTitle(doc, cur, data, 'Product details', 190);
+
+    const cols = 3, gap = 14;
+    const cardW = (CONTENT_W - gap * (cols - 1)) / cols;
+    const imgBoxH = 82, cardH = 178;
+
+    const rowsCount = Math.ceil(data.fixtures.length / cols);
+    for (let row = 0; row < rowsCount; row++) {
+      ensureSpace(doc, cur, data, cardH + 10);
+      for (let c = 0; c < cols; c++) {
+        const idx = row * cols + c;
+        if (idx >= data.fixtures.length) break;
+        const f = data.fixtures[idx];
+        const cx = MARGIN + c * (cardW + gap);
+        const cy = cur.y;
+
+        setDraw(doc, COLOR.border); doc.setLineWidth(0.7);
+        doc.roundedRect(cx, cy, cardW, cardH, 3, 3, 'S');
+
+        if (f._img) {
+          const iw = f._img.naturalWidth, ih = f._img.naturalHeight;
+          const boxW = cardW - 16, boxH = imgBoxH;
+          const scale = Math.min(boxW / iw, boxH / ih);
+          const dw = iw * scale, dh = ih * scale;
+          safeAddImage(doc, f._img, 'PNG', cx + (cardW - dw) / 2, cy + 8 + (boxH - dh) / 2, dw, dh);
+        }
+
+        let ty = cy + imgBoxH + 24;
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); setText(doc, COLOR.text);
+        const nameLines = doc.splitTextToSize(f.name, cardW - 14).slice(0, 2);
+        doc.text(nameLines, cx + cardW / 2, ty, { align: 'center' });
+        ty += nameLines.length * 11 + 6;
+
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); setText(doc, COLOR.textSec);
+        const specLine = f.watt != null && f.lm != null ? `${f.watt} W · ${f.lm} lm` : `aw ${f.aw}`;
+        doc.text(specLine, cx + cardW / 2, ty, { align: 'center' });
+        ty += 11;
+
+        const dimPart = f.diameter ? `${f.diameter} mm` : null;
+        doc.text([dimPart, `${f.qty}× · ${f.eqEach.toFixed(2)} m² Aeq each`].filter(Boolean).join('  ·  '),
+          cx + cardW / 2, ty, { align: 'center' });
+      }
+      cur.y += cardH + 12;
+    }
+  }
+
   /* ── Main entry point ── */
   async function generateReportPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const cur = { y: TOP_Y };
-    const logoImg = await loadImage('img/lumenear-logo.png');
+    const [logoImg, fixtureImgs] = await Promise.all([
+      loadImage('img/lumenear-logo.png'),
+      Promise.all(data.fixtures.map(f => (f.img ? loadImage(proxiedUrl(f.img)) : Promise.resolve(null)))),
+    ]);
+    data.fixtures.forEach((f, i) => { f._img = fixtureImgs[i]; });
 
     drawHeader(doc, data, logoImg);
     drawSummary(doc, cur, data);
@@ -414,6 +490,7 @@
 
     sectionTitle(doc, cur, data, 'Fixtures specified', 44);
     drawFixturesTable(doc, cur, data);
+    drawFixtureGrid(doc, cur, data);
 
     const totalPages = doc.internal.getNumberOfPages();
     for (let p = 1; p <= totalPages; p++) {

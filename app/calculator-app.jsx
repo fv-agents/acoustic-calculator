@@ -140,10 +140,14 @@ function App() {
       optLow, optHigh, coveragePct,
       parts: calc.parts, lumenearAb: calc.lAb,
       fixturesCount: sp.reduce((s, p) => s + p.q, 0),
-      fixtures: sp.map(p => ({
-        name: window.displayName(p.n), qty: p.q, aw: p.aw,
-        eqEach: p.eq, eqTotal: p.q * p.eq,
-      })),
+      fixtures: sp.map(p => {
+        const specs = (window.PRODUCT_SPECS || {})[p.n] || {};
+        return {
+          name: window.displayName(p.n), qty: p.q, aw: p.aw,
+          eqEach: p.eq, eqTotal: p.q * p.eq,
+          diameter: p.d, img: specs.img, watt: specs.watt, lm: specs.lm,
+        };
+      }),
     });
   };
 

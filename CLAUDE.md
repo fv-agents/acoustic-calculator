@@ -18,7 +18,8 @@ Lumenear akoestisch advies-dashboard: RT60-berekening (Sabine) + effect van Lume
 | `app/vendor/`, `app/fonts/` | Gevendorde libraries + Inter-font (offline) |
 | `data/lumenear_2026_acoustic_data.csv` | **Bron van waarheid** productdata (89 producten, octaafbanden, Peutz) |
 | `tools/check_sync.py` | Verifieert app ↔ CSV (CI faalt bij drift) + `--emit` voor regeneratie |
-| `netlify.toml` | Publish dir `app`, CSP frame-ancestors (embed alleen lumenear.com) |
+| `netlify.toml` | Publish dir `app`, CSP frame-ancestors (embed alleen lumenear.com), functions dir |
+| `netlify/functions/image-proxy.js` | Enige server-side code — proxyt fixture-foto's (CORS-fix voor het PDF-rapport), whitelisted op lumenear.com |
 | `docs/` | Documentatie, deployment, rekenvoorbeeld, roadmap |
 | `backup/` | Oude versies (v1 web, v2-export, Excel-buildscript) — niet bewerken |
 | `status.md` / `session-log.md` / `decisions.md` | Projectmemory |

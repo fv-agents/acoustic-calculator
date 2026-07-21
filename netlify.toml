@@ -5,6 +5,9 @@
   publish = "app"
   command = "echo 'static site - no build step'"
 
+[functions]
+  directory = "netlify/functions"
+
 # Login-gate: eigen inlogscherm op Supabase Auth (app/auth.js + auth-components.jsx),
 # vervangt de tijdelijke Basic Auth Edge Function van 2026-07-17.
 # Verwijderen bij publieke lancering (dan mag iedereen zonder inlog bij de calculator).
