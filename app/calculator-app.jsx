@@ -35,6 +35,7 @@ function App() {
   const [fam, setFam]       = useState('All');
   const [search, setSearch] = useState('');
   const [lmRange, setLmRange] = useState(window.LM_BOUNDS);
+  const [eqRange, setEqRange] = useState(window.EQ_BOUNDS);
   const [cctSel, setCctSel] = useState([]);
   const [dimSel, setDimSel] = useState([]);
   const [sortBy, setSortBy] = useState('catalog');
@@ -134,12 +135,14 @@ function App() {
 
   const q = search.trim().toLowerCase();
   const [LM_MIN, LM_MAX] = window.LM_BOUNDS;
+  const [EQ_MIN, EQ_MAX] = window.EQ_BOUNDS;
   const specOf = p => (window.PRODUCT_SPECS || {})[p.n] || {};
   const matchesLm = p => {
     const lm = specOf(p).lm;
     if (lm == null) return lmRange[0] === LM_MIN && lmRange[1] === LM_MAX;
     return lm >= lmRange[0] && lm <= lmRange[1];
   };
+  const matchesEq = p => p.eq >= eqRange[0] && p.eq <= eqRange[1];
   const matchesCct = p => {
     if (!cctSel.length) return true;
     const buckets = window.cctBucketsFor(specOf(p).cct);
@@ -152,7 +155,7 @@ function App() {
   };
   const filtered = PP
     .filter(x => !x.hidden && (fam === 'All' || x.f === fam) && (!q || x.n.toLowerCase().includes(q))
-      && matchesLm(x) && matchesCct(x) && matchesDim(x))
+      && matchesLm(x) && matchesEq(x) && matchesCct(x) && matchesDim(x))
     .sort((a, b) => {
       if (sortBy === 'eq-asc')  return a.eq - b.eq;
       if (sortBy === 'eq-desc') return b.eq - a.eq;
@@ -160,8 +163,14 @@ function App() {
       return 0;
     });
   const toggleSel = (sel, setSel, v) => setSel(sel.includes(v) ? sel.filter(x => x !== v) : [...sel, v]);
-  const filtersActive = lmRange[0] !== LM_MIN || lmRange[1] !== LM_MAX || cctSel.length > 0 || dimSel.length > 0;
-  const resetSpecFilters = () => { setLmRange(window.LM_BOUNDS); setCctSel([]); setDimSel([]); };
+  const filtersActive = fam !== 'All'
+    || lmRange[0] !== LM_MIN || lmRange[1] !== LM_MAX
+    || eqRange[0] !== EQ_MIN || eqRange[1] !== EQ_MAX
+    || cctSel.length > 0 || dimSel.length > 0;
+  const resetSpecFilters = () => {
+    setFam('All'); setLmRange(window.LM_BOUNDS); setEqRange(window.EQ_BOUNDS);
+    setCctSel([]); setDimSel([]);
+  };
 
   const printDate = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
 
@@ -379,39 +388,34 @@ function App() {
               </div>
             </div>
 
-            <div className="filter-tabs">
-              {window.FAMILIES.map(f => (
-                <button key={f} className={`filter-tab ${fam === f ? 'active' : ''}`}
-                  onClick={() => setFam(f)}>{f}</button>
-              ))}
-            </div>
-
-            <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:'var(--radius)', padding:'10px 12px', marginBottom:16 }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
-                <div className="t-section-label" style={{ margin:0 }}>Light specs filter</div>
+            <div className="filter-panel">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+                <div className="t-section-label" style={{ margin:0 }}>Filter fixtures</div>
                 {filtersActive && (
-                  <button onClick={resetSpecFilters}
-                    style={{ background:'none', border:'none', color:'var(--text-sec)', cursor:'pointer', fontSize:10, padding:0 }}>
-                    Reset filters
-                  </button>
+                  <button className="filter-reset-btn" onClick={resetSpecFilters}>Reset filters</button>
                 )}
               </div>
 
-              <div style={{ marginBottom:10 }}>
-                <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'var(--text-sec)', marginBottom:4 }}>
-                  <span>Light output</span>
-                  <span style={{ fontFamily:'var(--font-mono)', color:'var(--accent)' }}>{lmRange[0]}–{lmRange[1]} lm</span>
+              <div className="filter-row">
+                <div className="filter-tabs" style={{ marginBottom:0 }}>
+                  {window.FAMILIES.map(f => (
+                    <button key={f} className={`filter-tab ${fam === f ? 'active' : ''}`}
+                      onClick={() => setFam(f)}>{f}</button>
+                  ))}
                 </div>
-                <input type="range" min={LM_MIN} max={LM_MAX} value={lmRange[0]}
-                  onChange={e => setLmRange([Math.min(Number(e.target.value), lmRange[1]), lmRange[1]])}
-                  aria-label="Minimum light output (lm)" style={{ accentColor:'var(--accent)', width:'100%', display:'block' }} />
-                <input type="range" min={LM_MIN} max={LM_MAX} value={lmRange[1]}
-                  onChange={e => setLmRange([lmRange[0], Math.max(Number(e.target.value), lmRange[0])])}
-                  aria-label="Maximum light output (lm)" style={{ accentColor:'var(--accent)', width:'100%', display:'block' }} />
               </div>
 
-              <div style={{ marginBottom:10 }}>
-                <div style={{ fontSize:11, color:'var(--text-sec)', marginBottom:4 }}>Colour temperature</div>
+              <div className="filter-row">
+                <div className="filter-row-label">
+                  <span>Light output</span>
+                  <span className="filter-row-value">{lmRange[0]}–{lmRange[1]} lm</span>
+                </div>
+                <DualRangeSlider min={LM_MIN} max={LM_MAX} value={lmRange} onChange={setLmRange}
+                  labelMin="Minimum light output (lm)" labelMax="Maximum light output (lm)" />
+              </div>
+
+              <div className="filter-row">
+                <div className="filter-row-label"><span>Colour temperature</span></div>
                 <div className="filter-tabs" style={{ marginBottom:0 }}>
                   {window.CCT_BUCKETS.map(c => (
                     <button key={c} className={`filter-tab ${cctSel.includes(c) ? 'active' : ''}`}
@@ -422,14 +426,23 @@ function App() {
                 </div>
               </div>
 
-              <div>
-                <div style={{ fontSize:11, color:'var(--text-sec)', marginBottom:4 }}>Dimming</div>
+              <div className="filter-row">
+                <div className="filter-row-label"><span>Dimming</span></div>
                 <div className="filter-tabs" style={{ marginBottom:0 }}>
                   {window.DIM_BUCKETS.map(d => (
                     <button key={d} className={`filter-tab ${dimSel.includes(d) ? 'active' : ''}`}
                       onClick={() => toggleSel(dimSel, setDimSel, d)}>{d}</button>
                   ))}
                 </div>
+              </div>
+
+              <div className="filter-row">
+                <div className="filter-row-label">
+                  <span>Equivalent absorption</span>
+                  <span className="filter-row-value">{eqRange[0].toFixed(2)}–{eqRange[1].toFixed(2)} m²</span>
+                </div>
+                <DualRangeSlider min={EQ_MIN} max={EQ_MAX} step={0.01} value={eqRange} onChange={setEqRange}
+                  labelMin="Minimum equivalent absorption (m²)" labelMax="Maximum equivalent absorption (m²)" />
               </div>
             </div>
 

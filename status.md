@@ -5,7 +5,7 @@ _Bijgewerkt: 2026-07-21_
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
 
 ### Nieuw sinds 21-07
-- **Stap 3 — Light specs filter**: onder de family-tabs een filterpaneel met dual-range slider op lichtoutput (lm), multi-select chips voor kleurtemperatuur (2700/3000/4000/TW/E27/Other) en dimming (TE/DALI/NON-DIM), plus een sort-select (catalogus/Aeq ↑/Aeq ↓/A-Z) naast de zoekbalk. Data komt uit de al aanwezige `app/product-specs.js`; acoustic-only producten (geen lamp) blijven zichtbaar tenzij een light-filter actief wordt aangescherpt.
+- **Stap 3 — Unified filterpaneel** (`.filter-panel`): family-chips + light output (lm) + colour temperature (2700/3000/4000/TW/E27/Other) + dimming (TE/DALI/NON-DIM) + equivalent absorption (Aeq, m²) — alles in 1 blok, 1 "Reset filters"-knop voor alles. Lm en Aeq zijn echte dual-thumb sliders (1 track, 2 schuifjes, zelfgebouwd via 2 overlappende `<input type=range>`, geen library). Sort-select (catalogus/Aeq ↑/Aeq ↓/A-Z) staat los naast de zoekbalk. Acoustic-only producten (geen lamp/specs) blijven zichtbaar tenzij een light-filter wordt aangescherpt.
 
 ### Nieuw sinds 17-07
 - **Eigen inlogscherm op Supabase Auth** vervangt de tijdelijke Basic Auth Edge Function: login, wachtwoord vergeten, toegang aanvragen, onthoud-mij. Zie decisions.md 2026-07-17 (2).

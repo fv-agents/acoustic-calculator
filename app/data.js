@@ -101,6 +101,11 @@ window.PRODUCTS = [
 
 window.FAMILIES = ["All", ...[...new Set(window.PRODUCTS.filter(p => !p.hidden).map(p => p.f))]];
 
+window.EQ_BOUNDS = (() => {
+  const vals = window.PRODUCTS.filter(p => !p.hidden).map(p => p.eq);
+  return [Math.min(...vals), Math.max(...vals)];
+})();
+
 window.FLOOR_MATERIALS = {
   "Unknown / not sure": .02,
   "Hard floor (concrete / tiles / poured)": .02,

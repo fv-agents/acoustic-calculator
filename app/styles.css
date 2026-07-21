@@ -261,6 +261,53 @@ input[type="number"] { -moz-appearance: textfield; }
 .filter-tab:hover { border-color: var(--accent-dim); color: var(--accent); }
 .filter-tab.active { background: var(--accent); color: #111; border-color: var(--accent); }
 
+/* Filter panel (Step 3 — family + light specs) */
+.filter-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; margin-bottom: 16px;
+}
+.filter-row { margin-bottom: 14px; }
+.filter-row:last-child { margin-bottom: 0; }
+.filter-row-label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 11px; color: var(--text-sec); margin-bottom: 8px;
+}
+.filter-row-value { font-family: var(--font-mono); color: var(--accent); font-weight: 600; }
+.filter-reset-btn {
+  background: none; border: none; color: var(--text-sec); cursor: pointer;
+  font-size: 10px; padding: 0; font-family: var(--font-ui);
+}
+.filter-reset-btn:hover { color: var(--accent); }
+
+/* Dual-thumb range slider: two overlaid <input type=range>, one visible track */
+.range-slider { position: relative; height: 20px; display: flex; align-items: center; }
+.range-slider-track {
+  position: absolute; left: 0; right: 0; height: 3px;
+  background: var(--border); border-radius: 2px;
+}
+.range-slider-fill {
+  position: absolute; height: 3px; background: var(--accent); border-radius: 2px;
+}
+.range-slider-input {
+  position: absolute; left: 0; right: 0; width: 100%; margin: 0;
+  background: transparent; -webkit-appearance: none; appearance: none;
+  pointer-events: none; height: 20px;
+}
+.range-slider-input:focus { outline: none; z-index: 3; }
+.range-slider-input::-webkit-slider-runnable-track { background: transparent; }
+.range-slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none; pointer-events: auto; cursor: pointer;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 2px solid #111; margin-top: -5.5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.range-slider-input::-moz-range-track { background: transparent; border: none; }
+.range-slider-input::-moz-range-thumb {
+  pointer-events: auto; cursor: pointer; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--accent); border: 2px solid #111;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+
 /* ── RT60 Meter (sticky footer) ── */
 .rt60-meter {
   background: #0C0C0C; border-top: 1px solid var(--border);

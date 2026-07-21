@@ -194,6 +194,24 @@ function ProductCard({ product, qty, onSetQty }) {
   );
 }
 
+/* ── Dual-thumb Range Slider (single track, two handles) ── */
+function DualRangeSlider({ min, max, step = 1, value, onChange, labelMin, labelMax }) {
+  const [lo, hi] = value;
+  const pct = v => (max > min ? ((v - min) / (max - min)) * 100 : 0);
+  return (
+    <div className="range-slider">
+      <div className="range-slider-track"></div>
+      <div className="range-slider-fill" style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }}></div>
+      <input type="range" className="range-slider-input" min={min} max={max} step={step} value={lo}
+        onChange={e => onChange([Math.min(Number(e.target.value), hi), hi])}
+        aria-label={labelMin} />
+      <input type="range" className="range-slider-input" min={min} max={max} step={step} value={hi}
+        onChange={e => onChange([lo, Math.max(Number(e.target.value), lo)])}
+        aria-label={labelMax} />
+    </div>
+  );
+}
+
 /* ── Bar Chart ── */
 function SimpleBarChart({ before, after, target }) {
   const max = Math.max(before, after, target, 0.5) * 1.2;
@@ -266,6 +284,6 @@ function getRatingColor(rt, target) {
 
 /* ── Export to window ── */
 Object.assign(window, {
-  AnimatedNumber, IsoRoom, RT60Meter, ProductCard,
+  AnimatedNumber, IsoRoom, RT60Meter, ProductCard, DualRangeSlider,
   SimpleBarChart, getRating, getRatingColor,
 });
