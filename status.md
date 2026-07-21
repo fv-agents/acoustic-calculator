@@ -5,6 +5,7 @@ _Bijgewerkt: 2026-07-21_
 **Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
 
 ### Nieuw sinds 21-07
+- **Stap 4 — rapport volledig herbouwd**: "Download report"/"Download PDF" genereert nu een échte `.pdf`-download (jsPDF, native vector-tekening, `app/report-pdf.js`) i.p.v. de browser-printdialoog. Sound Decay-grafiek weg (scherm + rapport). Projectnaam niet meer verplicht. Volgorde: Summary → Result → Acoustic result detail (staafdiagram + donut) → Room overview → Fixtures specified. Zie session-log 21-07 (8) voor de volledige structuur en gevonden/gefixte bugs (font-encoding, weesregels).
 - **Dimming/cct-data gecorrigeerd tegen RRP 2026**: Twist XL + Cloud kregen DALI (Cloud op Falco's directe bevestiging, wijkt af van RRP/catalogus — zie session-log 21-07 (5)). 7 Float/Twist Floor/Wing-afwijkingen ook gecorrigeerd (te veel of te weinig cct/dim-opties t.o.v. de prijslijst).
 - **Stap 3 — filterheader prominenter**: funnel-icoon + "Filter" (was "Filter fixtures") in accent-kleur, paneelrand accent-getint. Collapse-animatie omgezet van grid-0fr (bleek niet volledig te collapsen) naar max-height.
 - **Stap 3 — filterpaneel inklapbaar**: dicht bij openen van stap 3, klikbare header met roterend chevron-icoon + badge (aantal actieve filters, ook zichtbaar als dicht). Zie decisions/session-log 21-07 (3).

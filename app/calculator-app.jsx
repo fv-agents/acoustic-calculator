@@ -122,6 +122,31 @@ function App() {
     });
   };
 
+  const handleDownloadReport = () => {
+    const norm = window.RT60_NORMS && window.RT60_NORMS[rt];
+    const optLow = norm ? norm.optimal[0] : Math.max(calc.tgt - 0.2, 0.2);
+    const optHigh = norm ? norm.optimal[1] : calc.tgt;
+    const totalAb = calc.rAb + calc.lAb;
+    const neededForTarget = 0.161 * calc.vol / Math.max(calc.tgt, 0.1);
+    const coveragePct = neededForTarget > 0 ? (totalAb / neededForTarget) * 100 : 0;
+
+    window.generateReportPDF({
+      projectName: pn.trim(), client: client.trim(), dateStr: printDate,
+      roomType: rt, l, w, h, volume: calc.vol, target: calc.tgt,
+      floorMaterial: fm, wallMaterial: wm, ceilingMaterial: cm,
+      occupancy: pe, extras: ex, roomAb: calc.rAb,
+      rt0: Math.min(calc.r0, 6), rt1: Math.min(calc.r1, 6),
+      reductionPct: calc.imp, ratingText: rating.text, aNeed: calc.aNeed,
+      optLow, optHigh, coveragePct,
+      parts: calc.parts, lumenearAb: calc.lAb,
+      fixturesCount: sp.reduce((s, p) => s + p.q, 0),
+      fixtures: sp.map(p => ({
+        name: window.displayName(p.n), qty: p.q, aw: p.aw,
+        eqEach: p.eq, eqTotal: p.q * p.eq,
+      })),
+    });
+  };
+
   const parseDim = v => parseFloat(String(v).replace(',', '.')) || 0;
   const clampDim = v => { const n = parseDim(v); return n > 0 ? Math.min(n, 100) : 1; };
   const dimField = (val, setStr, setNum) => ({
@@ -199,9 +224,9 @@ function App() {
             New
           </button>
           <button className="btn btn-primary btn-sm"
-            disabled={step < 4 || !pn.trim()}
-            style={(step < 4 || !pn.trim()) ? { opacity:.4, cursor:'default' } : {}}
-            onClick={() => window.print()}>
+            disabled={step < 4}
+            style={step < 4 ? { opacity:.4, cursor:'default' } : {}}
+            onClick={handleDownloadReport}>
             Download PDF
           </button>
           <button className="btn btn-ghost btn-sm auth-logout no-print"
@@ -594,8 +619,6 @@ function App() {
         <div className="step-container">
           <div className="step-content" key="s3" style={{ maxWidth:720 }}>
 
-            <PrintHeader projectName={pn} clientName={client} />
-
             <div className="t-section-label">Result</div>
             <h1 className="t-step-title">Acoustic result</h1>
             <p className="t-step-subtitle">RT60 before and after — with a recommendation.</p>
@@ -626,7 +649,6 @@ function App() {
             </div>
 
             <MetricCards calc={calc} hasProducts={hasProducts} />
-            <DecayCurve rt0={Math.min(calc.r0, 6)} rt1={Math.min(calc.r1, 6)} target={calc.tgt} />
             <ComparisonChart before={Math.min(calc.r0, 6)} after={Math.min(calc.r1, 6)} target={calc.tgt} roomType={rt} />
             <AbsorptionDonut parts={calc.parts} lumenearAb={calc.lAb} />
 
@@ -643,9 +665,6 @@ function App() {
                 ? ' — your specification meets this target.'
                 : `. Adding around ${calc.aNeed.toFixed(1)} m² more absorption would bring it to the ${calc.tgt.toFixed(1)}s target.`}
             </div>
-
-            <PrintPageBreak />
-            <PrintHeader projectName={pn} clientName={client} />
 
             {/* Room details */}
             <div style={{ marginBottom:20, marginTop:20 }}>
@@ -700,8 +719,6 @@ function App() {
               </div>
             )}
 
-            <PrintFooter />
-
             {/* Report form — hidden in print */}
             <div className="no-print" style={{ marginTop:32, paddingTop:24, borderTop:'1px solid var(--border)' }}>
               <div className="t-section-label">Report</div>
@@ -710,8 +727,7 @@ function App() {
                 Download a PDF you can share directly with your client.
               </p>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-                <Field label="Project name" required
-                  error={!pn.trim() ? 'Required for the report header.' : ''}>
+                <Field label="Project name" hint="Optional — appears on the report header.">
                   <input className="field-input" value={pn} onChange={e => setPn(e.target.value)}
                     placeholder="e.g. Office renovation, Building A" />
                 </Field>
@@ -727,8 +743,7 @@ function App() {
                 <Button variant="ghost" onClick={prev}>← Adjust fixtures</Button>
                 {resetBtn}
               </div>
-              <Button variant="primary" size="lg" disabled={!pn.trim()}
-                onClick={() => window.print()}>
+              <Button variant="primary" size="lg" onClick={handleDownloadReport}>
                 Download report
               </Button>
             </div>

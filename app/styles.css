@@ -455,8 +455,6 @@ input[type="number"] { -moz-appearance: textfield; }
   border-top: 1px solid var(--border);
 }
 
-/* Print elements hidden on screen — handled by result-styles.css (.print-only) */
-
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }
