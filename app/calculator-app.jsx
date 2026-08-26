@@ -234,8 +234,8 @@ function App() {
             Download PDF
           </button>
           <button className="btn btn-ghost btn-sm auth-logout no-print"
-            onClick={async () => { await window.LumenearAuth.signOut(); location.reload(); }}>
-            Log out
+            onClick={() => { window.LumenearAuth.lockGate(); location.reload(); }}>
+            Lock
           </button>
         </div>
       </div>

@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-08-26 (1) — Supabase login vervangen door 1 gedeeld wachtwoord
+**Aanleiding:** Falco testte "wachtwoord vergeten" als klant — link ging naar `http://localhost:3000`. Root cause: Site URL/Redirect URLs van Supabase-project `lumenear-calculator-auth` nooit ingesteld (bekende blocker sinds 07-17). Falco heeft geen mailbox- of DNS-toegang tot `lumenear.com` om dit met custom SMTP echt op te lossen (loopt via de websitebouwer) — besloten dat spoor via een WordPress-inlogpagina + iframe-embed te regelen (extern, Falco pakt dit op). Zie decisions.md 2026-08-26 (4).
+**Gedaan (voor nu):** hele Supabase Auth-login vervangen door 1 gedeeld wachtwoord, geen accounts meer.
+- `app/auth.js` herschreven: geen Supabase-calls meer, alleen `checkGatePassword`/`isGateUnlocked`/`lockGate` tegen `localStorage` (`lumenear_calc_unlocked`). Wachtwoord: `Acoustics26!` (leesbaar in bronbestand, bewust — geen echte beveiliging, calculator toont geen prijzen).
+- `app/auth-components.jsx` teruggebracht van 335 naar ~65 regels: login/forgot-password/request-access/set-new-password-forms weg, 1 `PasswordGateForm` + `AuthGate` (zelfde `auth-shell`/`auth-card`-stijl, geen CSS-wijziging nodig).
+- `calculator-app.jsx`: header-knop "Log out" → "Lock", roept nu `lockGate()` i.p.v. Supabase `signOut()`.
+- `index.html`: dode "access-request" Netlify-formulier verwijderd (hoorde bij de weggehaalde "Request access"-flow).
+- `auth-styles.css`: ongebruikte `.auth-remember`/`.auth-links`/`.auth-link`-regels verwijderd.
+- `netlify.toml`: comment bijgewerkt naar de nieuwe situatie + aantekening om de gate te verwijderen zodra de WP-gate live is.
+**Getest:** lokaal via `python -m http.server` + Playwright — fout wachtwoord toont foutmelding, juist wachtwoord (`Acoustics26!`) toont de app + "Lock"-knop, `localStorage`-flag gezet, blijft unlocked na reload, "Lock" verwijdert de flag en toont de gate weer. Geen console-errors.
+**Openstaand:** Supabase-project `lumenear-calculator-auth` (accounts + keep-alive workflow) draait nog maar wordt niet meer gebruikt — niet opgeruimd tot de WP-gate echt live is. WP-inlogpagina + iframe-embed regelen met de websitebouwer (Falco).
+
 ## 2026-07-21 (15) — Float Rect 600×2400 watt/lm aangevuld + labelfout gecorrigeerd
 **Gedaan:** Falco stuurde de in-zee.nl-specstabel voor Float Rect 600×2400 (2 LED-opties): Cubic reflector = 34W/4140lm, Prismatic difusor = 30W/3846lm. `"Float Rect light 600×2400"` in `product-specs.js` kreeg de Cubic-cijfers (34W/4140lm) als representatieve waarde — zelfde cijfers als al bij `"Float Rect light 1200×2400"` stonden. **Labelfout uit (14) gecorrigeerd:** die entry noemde 34W/4140lm daar per ongeluk "Prismatic" en 30W/3846lm "Cubic" — precies andersom volgens deze nieuwe, expliciete tabel. Waarschijnlijke verklaring: Float Rect is een lineair lichtprofiel waarbij de LED-specs schalen met de lengte (2400mm), niet de breedte (600 vs 1200mm) — vandaar dat beide breedtes dezelfde tabel geven.
 **Getest:** node-check op CRLF-behoud (31, ongewijzigd) + waarde. `check_sync.py` (92/92) en `test_calc.py` (11/11) groen.

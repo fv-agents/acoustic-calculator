@@ -4,6 +4,18 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-08-26 (4) — Supabase per-user login vervangen door 1 gedeeld wachtwoord
+
+**Aanleiding:** Falco testte de "wachtwoord vergeten"-flow als klant. De reset-link ging naar `http://localhost:3000` (onbereikbaar) — root cause: de Site URL van het Supabase-project `lumenear-calculator-auth` stond nog op de default `localhost:3000` en de productie-URL stond niet op de Redirect URLs allowlist (bekende blocker uit 2026-07-17, nooit afgerond). Een echte fix (custom SMTP met een `@lumenear.com`-afzender) bleek te vastlopen op ontbrekende toegang: Falco heeft geen mailbox- én geen DNS-toegang tot `lumenear.com` (dat loopt via de websitebouwer).
+
+**Besloten:** de per-user Supabase Auth-login (login/wachtwoord-vergeten/toegang-aanvragen/nieuw-wachtwoord, `app/auth.js` + `app/auth-components.jsx`) volledig vervangen door één gedeeld wachtwoord (`Acoustics26!`, client-side check, geen backend, geen Supabase-calls meer voor auth). Bewust géén echte beveiliging — wachtwoord staat leesbaar in `auth.js` — maar acceptabel omdat de calculator zelf geen prijzen/marges toont. Unlock-status blijft via `localStorage` (`lumenear_calc_unlocked`), "Lock"-knop in de header logt uit.
+
+**Vervolgstap (Falco, extern):** echte toegangscontrole komt via een WordPress-inlogpagina op lumenear.com die deze calculator via `<iframe>` embedt (CSP `frame-ancestors` op Netlify staat dit al toe, geen wijziging nodig). Voordeel: de websitebouwer heeft al wél DNS/mail-toegang tot lumenear.com, dus daar kan wél een werkende wachtwoord-vergeten-flow (WP native) draaien. Zodra dat live is: wachtwoord-gate uit de calculator halen (zie comment in `netlify.toml`).
+
+**Wat hierdoor achterblijft:** het Supabase-project `lumenear-calculator-auth` (4 accounts, `calculator_access_log`-tabel, keep-alive workflow) wordt niet meer gebruikt door de app. Nog niet opgeruimd/gepauzeerd — bewuste keuze om niets te verwijderen tot de WP-gate daadwerkelijk live is, voor het geval dit spoor alsnog nodig blijkt.
+
+---
+
 ## 2026-07-17 (3) — Calculator-auth verhuisd naar eigen, geïsoleerd Supabase-project
 
 **Reden:** Falco's terechte vraag — "mensen met inlog horen geen enkele info uit het Supabase-project te kunnen lezen". Op het gedeelde AIF-project ("Agent") was dat *op dat moment* met de juiste policies wel zo, maar structureel niet gegarandeerd: AIF wordt actief doorontwikkeld met tientallen tabellen, en tijdens deze sessie vonden we al 4 tabellen (`events`, `error_logs`, `system_log`, `telegram_state`) die per ongeluk open stonden voor iedereen — inclusief `events` met echte lead-contactdata (naam/e-mail/bedrijf). Een calculator-account had daar met een projectbrede Supabase-sessie potentieel bij gekund als er ooit weer zo'n policy-fout gemaakt wordt.

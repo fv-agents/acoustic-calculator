@@ -8,9 +8,12 @@
 [functions]
   directory = "netlify/functions"
 
-# Login-gate: eigen inlogscherm op Supabase Auth (app/auth.js + auth-components.jsx),
-# vervangt de tijdelijke Basic Auth Edge Function van 2026-07-17.
-# Verwijderen bij publieke lancering (dan mag iedereen zonder inlog bij de calculator).
+# Login-gate: 1 gedeeld wachtwoord (app/auth.js + auth-components.jsx), geen accounts meer.
+# Vervangt de Supabase Auth per-user login (verwijderd 2026-08-26, bleek onbetrouwbaar
+# door ontbrekende SMTP/DNS-toegang tot lumenear.com). Bewust géén echte beveiliging —
+# wachtwoord staat leesbaar in auth.js. Echte toegangscontrole komt via een WordPress-
+# inlogpagina op lumenear.com die deze calculator embedt (zie decisions.md 2026-08-26).
+# Verwijderen zodra die WP-gate live is (dan mag iedereen zonder wachtwoord bij de calculator).
 
 # Security headers. Bewust GEEN X-Frame-Options: die kent geen allowlist;
 # embedding wordt geregeld via CSP frame-ancestors (lumenear.com + self).

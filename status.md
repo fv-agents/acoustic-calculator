@@ -1,8 +1,13 @@
 # Status — Acoustic Calculator
-_Bijgewerkt: 2026-07-21_
+_Bijgewerkt: 2026-08-26_
 
 ## Huidige staat
-**Production-ready** — 4-staps wizard + verkoop-/specfeatures. Domeinkoppeling `calculator.lumenear.com` loopt (DNS via mademarketing).
+**Production-ready**, live op `calculator.lumenear.com`. 4-staps wizard + verkoop-/specfeatures.
+
+### Nieuw sinds 26-08
+- **Login vervangen door 1 gedeeld wachtwoord** (`Acoustics26!`). De Supabase per-user login (login/wachtwoord-vergeten/toegang-aanvragen) is eruit — de reset-mail bleek onbetrouwbaar (Site URL/Redirect URLs nooit ingesteld, en een echte fix met custom SMTP loopt vast op ontbrekende mailbox-/DNS-toegang tot lumenear.com). Zie decisions.md 2026-08-26 (4) + session-log 2026-08-26 (1).
+- **Vervolgstap loopt bij Falco (extern):** WordPress-inlogpagina op lumenear.com die de calculator via `<iframe>` embedt — de websitebouwer heeft wél de DNS/mail-toegang die nodig is voor een werkende wachtwoord-vergeten-flow. Zodra dat live is, gaat het gedeelde wachtwoord er weer uit (zie comment in `netlify.toml`).
+- Supabase-project `lumenear-calculator-auth` (4 accounts, keep-alive workflow) draait nog maar wordt niet meer gebruikt — bewust nog niet opgeruimd.
 
 ### Nieuw sinds 21-07
 - **Float watt/lm aangevuld + fixturekaart 3-regelig**: 5 Float-varianten (Oval 1200/2000, Rect 1200×1200, Rect 1200×2400, Rect 600×2400) toonden "aw" op de PDF-fixturekaart i.p.v. lichtoutput omdat `product-specs.js` nog `watt:null`/`lm:null` had — nu allemaal ingevuld met in-zee.nl-waarden (Rect 600×2400 = 34W/4140lm Cubic-reflector, zelfde tabel als 1200×2400 — lineair profiel, specs schalen met lengte niet breedte). Elke fixturekaart toont nu strikt 3 losse regels: lm+W → afmeting → Aeq. Zie session-log 21-07 (14)+(15).
@@ -56,11 +61,8 @@ _Bijgewerkt: 2026-07-21_
 - `app/styles.css` — `.step-nav` transparant, `.step-nav-solid` voor step 4, `.sidebar-actions` sticky
 - CI groen: 89/89 in sync, 11/11 unit tests pass
 
-## Blocker
-Inloggen werkt pas nadat Falco in Supabase (project "Agent") de 4 accounts heeft aangemaakt + Site URL/Redirect URLs heeft ingesteld. Zie decisions.md 2026-07-17 (2), sectie "Nog te doen".
-
 ## Volgende stap (vereisen actie van Falco)
-1. **Online zetten**: Netlify → Domain management → add `calculator.lumenear.com` → CNAME bij DNS-provider naar de netlify-site. SSL gaat automatisch.
+1. **WordPress-inlogpagina regelen met de websitebouwer** — pagina op lumenear.com achter WP-login, iframe naar `https://calculator.lumenear.com` (embed is al toegestaan via CSP). Zodra live: gedeeld wachtwoord uit de calculator halen.
 2. **Leads aanzetten**: Netlify → Forms → bij form "quote" notificatie-mail instellen (bijv. falco@lumenear.com), anders staan inzendingen alleen in het dashboard.
 3. **Rooktest na live**: mobiel-gate op telefoon + één echte test-lead via het offerteformulier.
 
