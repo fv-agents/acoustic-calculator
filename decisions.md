@@ -4,6 +4,9 @@ Gemaakte keuzes met redenering. Alleen echte keuzes — geen obvious dingen.
 
 ---
 
+## 2026-09-29 — Supabase-project lumenear-calculator-auth opgeheven, keep-alive weg
+**Aanleiding:** 5e pauzeer-waarschuwing van Supabase, ondanks dat de keep-alive sinds 2026-09-02 dagelijks slaagt én aantoonbaar een rij in `calculator_access_log` inserteert (gecheckt: 1 rij/dag t/m 09-29). Supabase telt 1 INSERT/dag kennelijk niet als "voldoende activiteit"; hun criterium is niet gedocumenteerd, dus verder tweaken = gokken.
+**Besloten:** project niet langer in leven houden. De app gebruikt het sinds 2026-08-26 niet meer (gedeeld wachtwoord, geen Supabase-calls in `app/`), en de geplande WP-login op lumenear.com heeft het ook niet nodig. `.github/workflows/keep-alive.yml` verwijderd. Project verwijderen via dashboard (Falco). Export van 4 accounts + loginlog-samenvatting in `_restore-2026-09-29/calculator-auth-export.json` (gitignored).
 ## 2026-08-26 (4) — Supabase per-user login vervangen door 1 gedeeld wachtwoord
 
 **Aanleiding:** Falco testte de "wachtwoord vergeten"-flow als klant. De reset-link ging naar `http://localhost:3000` (onbereikbaar) — root cause: de Site URL van het Supabase-project `lumenear-calculator-auth` stond nog op de default `localhost:3000` en de productie-URL stond niet op de Redirect URLs allowlist (bekende blocker uit 2026-07-17, nooit afgerond). Een echte fix (custom SMTP met een `@lumenear.com`-afzender) bleek te vastlopen op ontbrekende toegang: Falco heeft geen mailbox- én geen DNS-toegang tot `lumenear.com` (dat loopt via de websitebouwer).

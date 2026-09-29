@@ -2,6 +2,10 @@
 
 ---
 
+## 2026-09-29 (1) — Keep-alive verwijderd, calculator-auth-project opgeheven
+**Aanleiding:** nieuwe Supabase-pauzeerwaarschuwing (5e keer). Keep-alive draaide dagelijks groen en inserts kwamen aan — toch gemarkeerd.
+**Gedaan:** bevestigd dat `app/` geen Supabase meer gebruikt. Export accounts + loginlog → `_restore-2026-09-29/calculator-auth-export.json`. `keep-alive.yml` verwijderd + gepusht. Zie decisions.md 2026-09-29.
+**Openstaand:** Falco verwijdert project `yclomlaxufhnfsqwougx` via Supabase-dashboard.
 ## 2026-08-26 (1) — Supabase login vervangen door 1 gedeeld wachtwoord
 **Aanleiding:** Falco testte "wachtwoord vergeten" als klant — link ging naar `http://localhost:3000`. Root cause: Site URL/Redirect URLs van Supabase-project `lumenear-calculator-auth` nooit ingesteld (bekende blocker sinds 07-17). Falco heeft geen mailbox- of DNS-toegang tot `lumenear.com` om dit met custom SMTP echt op te lossen (loopt via de websitebouwer) — besloten dat spoor via een WordPress-inlogpagina + iframe-embed te regelen (extern, Falco pakt dit op). Zie decisions.md 2026-08-26 (4).
 **Gedaan (voor nu):** hele Supabase Auth-login vervangen door 1 gedeeld wachtwoord, geen accounts meer.

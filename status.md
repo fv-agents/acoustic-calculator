@@ -1,5 +1,5 @@
 # Status — Acoustic Calculator
-_Bijgewerkt: 2026-08-26_
+_Bijgewerkt: 2026-09-29_
 
 ## Huidige staat
 **Production-ready**, live op `calculator.lumenear.com`. 4-staps wizard + verkoop-/specfeatures.
@@ -7,7 +7,7 @@ _Bijgewerkt: 2026-08-26_
 ### Nieuw sinds 26-08
 - **Login vervangen door 1 gedeeld wachtwoord** (`Acoustics26!`). De Supabase per-user login (login/wachtwoord-vergeten/toegang-aanvragen) is eruit — de reset-mail bleek onbetrouwbaar (Site URL/Redirect URLs nooit ingesteld, en een echte fix met custom SMTP loopt vast op ontbrekende mailbox-/DNS-toegang tot lumenear.com). Zie decisions.md 2026-08-26 (4) + session-log 2026-08-26 (1).
 - **Vervolgstap loopt bij Falco (extern):** WordPress-inlogpagina op lumenear.com die de calculator via `<iframe>` embedt — de websitebouwer heeft wél de DNS/mail-toegang die nodig is voor een werkende wachtwoord-vergeten-flow. Zodra dat live is, gaat het gedeelde wachtwoord er weer uit (zie comment in `netlify.toml`).
-- Supabase-project `lumenear-calculator-auth` (4 accounts, keep-alive workflow) draait nog maar wordt niet meer gebruikt — bewust nog niet opgeruimd.
+- **2026-09-29:** keep-alive workflow verwijderd; Supabase-project `lumenear-calculator-auth` wordt opgeheven (verwijderen via dashboard = Falco). Export accounts/log in `_restore-2026-09-29/`. Zie decisions.md 2026-09-29.
 
 ### Nieuw sinds 21-07
 - **Float watt/lm aangevuld + fixturekaart 3-regelig**: 5 Float-varianten (Oval 1200/2000, Rect 1200×1200, Rect 1200×2400, Rect 600×2400) toonden "aw" op de PDF-fixturekaart i.p.v. lichtoutput omdat `product-specs.js` nog `watt:null`/`lm:null` had — nu allemaal ingevuld met in-zee.nl-waarden (Rect 600×2400 = 34W/4140lm Cubic-reflector, zelfde tabel als 1200×2400 — lineair profiel, specs schalen met lengte niet breedte). Elke fixturekaart toont nu strikt 3 losse regels: lm+W → afmeting → Aeq. Zie session-log 21-07 (14)+(15).
